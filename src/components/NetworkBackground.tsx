@@ -1,0 +1,176 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import { useTheme } from "next-themes";
+
+export default function NetworkBackground() {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const { theme, systemTheme } = useTheme();
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        let particlesArray: Particle[] = [];
+        let animationFrameId: number;
+
+        const mouse = {
+            x: -1000,
+            y: -1000,
+            radius: 180,
+        };
+
+        const handleMouseMove = (event: MouseEvent) => {
+            mouse.x = event.clientX;
+            mouse.y = event.clientY;
+        };
+
+        const handleMouseLeave = () => {
+            mouse.x = -1000;
+            mouse.y = -1000;
+        };
+
+        window.addEventListener("mousemove", handleMouseMove);
+        window.addEventListener("mouseout", handleMouseLeave);
+
+        const resize = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            init();
+        };
+
+        window.addEventListener("resize", resize);
+
+        // Determine current theme
+        const currentTheme = theme === "system" ? systemTheme : theme;
+        const isDark = currentTheme === "dark";
+
+        class Particle {
+            x: number;
+            y: number;
+            directionX: number;
+            directionY: number;
+            size: number;
+            color: string;
+
+            constructor(x: number, y: number, directionX: number, directionY: number, size: number, color: string) {
+                this.x = x;
+                this.y = y;
+                this.directionX = directionX;
+                this.directionY = directionY;
+                this.size = size;
+                this.color = color;
+            }
+
+            draw() {
+                if (!ctx) return;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+
+            update() {
+                if (this.x > canvas!.width || this.x < 0) {
+                    this.directionX = -this.directionX;
+                }
+                if (this.y > canvas!.height || this.y < 0) {
+                    this.directionY = -this.directionY;
+                }
+                this.x += this.directionX;
+                this.y += this.directionY;
+                this.draw();
+            }
+        }
+
+        function init() {
+            particlesArray = [];
+            let numberOfParticles = (canvas!.height * canvas!.width) / 12000;
+            for (let i = 0; i < numberOfParticles; i++) {
+                let size = (Math.random() * 2) + 1;
+                let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
+                let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
+                let directionX = (Math.random() * 1.5) - 0.75;
+                let directionY = (Math.random() * 1.5) - 0.75;
+
+                let isPurple = Math.random() > 0.5;
+                let color = isDark ?
+                    (isPurple ? 'rgba(139, 92, 246, 0.8)' : 'rgba(56, 189, 248, 0.8)') :
+                    (isPurple ? 'rgba(124, 58, 237, 0.8)' : 'rgba(2, 132, 199, 0.8)'); // Darker for light mode
+                particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
+            }
+        }
+
+        function connect() {
+            if (!ctx) return;
+            let opacityValue = 1;
+
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) +
+                        ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+
+                    if (distance < (canvas!.width / 10) * (canvas!.height / 10)) {
+                        opacityValue = 1 - (distance / 15000);
+                        if (opacityValue > 0) {
+                            ctx.strokeStyle = isDark ? `rgba(100, 116, 139, ${opacityValue * 0.2})` : `rgba(148, 163, 184, ${opacityValue * 0.4})`;
+                            ctx.lineWidth = 1;
+                            ctx.beginPath();
+                            ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                            ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            for (let a = 0; a < particlesArray.length; a++) {
+                let distanceToMouse = ((particlesArray[a].x - mouse.x) * (particlesArray[a].x - mouse.x)) +
+                    ((particlesArray[a].y - mouse.y) * (particlesArray[a].y - mouse.y));
+
+                if (distanceToMouse < mouse.radius * mouse.radius) {
+                    opacityValue = 1 - (distanceToMouse / (mouse.radius * mouse.radius));
+                    ctx.strokeStyle = isDark ? `rgba(56, 189, 248, ${opacityValue})` : `rgba(2, 132, 199, ${opacityValue})`;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                    ctx.lineTo(mouse.x, mouse.y);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        function animate() {
+            animationFrameId = requestAnimationFrame(animate);
+            if (!ctx) return;
+            ctx.clearRect(0, 0, innerWidth, innerHeight);
+
+            ctx.fillStyle = isDark ? "#020617" : "#f8fafc";
+            ctx.fillRect(0, 0, innerWidth, innerHeight);
+
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+            }
+            connect();
+        }
+
+        resize();
+        animate();
+
+        return () => {
+            window.removeEventListener("resize", resize);
+            window.removeEventListener("mousemove", handleMouseMove);
+            window.removeEventListener("mouseout", handleMouseLeave);
+            cancelAnimationFrame(animationFrameId);
+        };
+    }, [theme, systemTheme]); // Re-run effect when theme changes
+
+    return (
+        <canvas
+            ref={canvasRef}
+            className="fixed inset-0 z-[-1] pointer-events-none transition-colors duration-500"
+        />
+    );
+}
