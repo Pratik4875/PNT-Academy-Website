@@ -1,6 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
-import Hero3D from "@/components/Hero3D";
+import HeroSection from "@/components/HeroSection";
 import NetworkBackground from "@/components/NetworkBackground";
 import ClientLogos from "@/components/ClientLogos";
 import InternshipLogos from "@/components/InternshipLogos";
@@ -57,7 +57,7 @@ export default async function Home() {
 
           {/* 3D Canvas Area (Pointer events auto to allow OrbitControls & Clicks) */}
           <div className="h-[60vh] md:h-full relative pointer-events-auto">
-            <Hero3D />
+            <HeroSection />
           </div>
         </div>
 
