@@ -2,8 +2,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Plus, Trash2, Briefcase } from "lucide-react";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { storage } from "@/lib/firebase/config";
 
 export default function AdminInternships() {
     const [items, setItems] = useState<any[]>([]);
@@ -30,42 +28,40 @@ export default function AdminInternships() {
         }
     };
 
+    const getBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = error => reject(error);
+        });
+    };
+
     const handleUpload = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!file || !name) return;
         setIsUploading(true);
 
         try {
-            const storageRef = ref(storage, `internships/${Date.now()}_${file.name}`);
-            const uploadTask = uploadBytesResumable(storageRef, file);
+            const base64Image = await getBase64(file);
 
-            uploadTask.on(
-                "state_changed",
-                () => { },
-                (error) => {
-                    console.error("Storage Error:", error);
-                    setIsUploading(false);
-                },
-                async () => {
-                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            const res = await fetch("/api/admin/internships", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                body: JSON.stringify({
+                    name,
+                    imageUrl: base64Image,
+                }),
+            });
 
-                    const res = await fetch("/api/admin/internships", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            name,
-                            imageUrl: downloadURL,
-                        }),
-                    });
-
-                    if (res.ok) {
-                        setFile(null);
-                        setName("");
-                        await fetchInternships();
-                    }
-                    setIsUploading(false);
-                }
-            );
+            if (res.ok) {
+                setFile(null);
+                setName("");
+                await fetchInternships();
+            } else {
+                console.error("Failed to upload internship logo.");
+            }
+            setIsUploading(false);
         } catch (error) {
             console.error("Upload Error", error);
             setIsUploading(false);

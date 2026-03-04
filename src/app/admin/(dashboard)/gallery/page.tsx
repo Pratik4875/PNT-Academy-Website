@@ -2,8 +2,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Plus, Trash2, Image as ImageIcon } from "lucide-react";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { storage } from "@/lib/firebase/config";
 
 const CATEGORIES = ["Projects", "Workshop", "Industrial Visit", "Schools", "Lab Setup"];
 
@@ -33,48 +31,43 @@ export default function AdminGallery() {
         }
     };
 
+    const getBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = error => reject(error);
+        });
+    };
+
     const handleUpload = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!file || !title) return;
         setIsUploading(true);
 
         try {
-            // 1. Upload to Firebase Storage
-            const storageRef = ref(storage, `gallery/${Date.now()}_${file.name}`);
-            const uploadTask = uploadBytesResumable(storageRef, file);
+            // 1. Convert Image to Base64 String locally
+            const base64Image = await getBase64(file);
 
-            uploadTask.on(
-                "state_changed",
-                (snapshot) => {
-                    // Progress can be tracked here
-                },
-                (error) => {
-                    console.error("Storage Error:", error);
-                    setIsUploading(false);
-                },
-                async () => {
-                    // 2. Get the permanent URL
-                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            // 2. Save directly to MongoDB API
+            const res = await fetch("/api/admin/gallery", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                body: JSON.stringify({
+                    title,
+                    category,
+                    imageUrl: base64Image,
+                }),
+            });
 
-                    // 3. Save to MongoDB
-                    const res = await fetch("/api/admin/gallery", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            title,
-                            category,
-                            imageUrl: downloadURL,
-                        }),
-                    });
-
-                    if (res.ok) {
-                        setFile(null);
-                        setTitle("");
-                        await fetchGallery();
-                    }
-                    setIsUploading(false);
-                }
-            );
+            if (res.ok) {
+                setFile(null);
+                setTitle("");
+                await fetchGallery();
+            } else {
+                console.error("Failed to upload image to MongoDB layer.");
+            }
+            setIsUploading(false);
         } catch (error) {
             console.error("Upload Error", error);
             setIsUploading(false);
