@@ -3,6 +3,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import NetworkBackground from "@/components/NetworkBackground";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 
@@ -11,6 +12,7 @@ export default function AdminLogin() {
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+    const router = useRouter();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -19,8 +21,7 @@ export default function AdminLogin() {
 
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            alert("Successfully authenticated! (Redirect to dashboard coming soon)");
-            // Router push to dashboard will go here
+            router.push("/admin");
         } catch (err: any) {
             console.error("Firebase Login Error", err);
             setError("Invalid credentials or Firebase is not configured properly yet.");
