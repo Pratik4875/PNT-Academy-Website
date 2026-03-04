@@ -177,6 +177,7 @@ export default function NetworkBackground() {
         <canvas
             ref={canvasRef}
             className="fixed inset-0 z-[-1] pointer-events-none transition-colors duration-500"
+            suppressHydrationWarning
         />
     );
 }
