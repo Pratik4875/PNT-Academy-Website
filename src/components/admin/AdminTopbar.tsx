@@ -1,14 +1,29 @@
 "use client";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, User } from "lucide-react";
+import Image from "next/image";
 
 export default function AdminTopbar() {
     const { theme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
+    const [adminData, setAdminData] = useState<{ name?: string, profileImage?: string | null } | null>(null);
 
     useEffect(() => {
         setMounted(true);
+        // Fetch admin settings for profile pic and name
+        const fetchSettings = async () => {
+            try {
+                const res = await fetch("/api/admin/settings");
+                if (res.ok) {
+                    const data = await res.json();
+                    setAdminData(data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch admin data", err);
+            }
+        };
+        fetchSettings();
     }, []);
 
     return (
@@ -33,9 +48,23 @@ export default function AdminTopbar() {
                 <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
                 <span className="text-sm font-medium text-slate-600 dark:text-slate-300 hidden sm:inline-block">System Online</span>
 
-                {/* Admin Avatar */}
-                <div className="h-8 w-8 ml-2 sm:ml-4 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-md border border-white/20">
-                    A
+                {/* Admin Avatar & Name */}
+                <div className="flex items-center gap-3 ml-4">
+                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 hidden md:block">
+                        {adminData?.name || "Admin"}
+                    </span>
+                    <div className="h-9 w-9 rounded-full relative overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-md border border-white/20">
+                        {adminData?.profileImage ? (
+                            <Image
+                                src={adminData.profileImage}
+                                alt="Admin Avatar"
+                                fill
+                                className="object-cover"
+                            />
+                        ) : (
+                            <span>{adminData?.name?.[0]?.toUpperCase() || "A"}</span>
+                        )}
+                    </div>
                 </div>
             </div>
         </header>
