@@ -10,19 +10,21 @@ export default function Hero3D() {
         <div className="absolute inset-0 z-0 h-full w-full">
             <Canvas
                 shadows
-                camera={{ position: [0, 2, 8], fov: 45 }}
-                gl={{ alpha: true, antialias: true }}
+                camera={{ position: [0, 2, 10], fov: 45 }}
+                gl={{ alpha: true, antialias: true, toneMappingExposure: 0.9 }}
             >
                 <Suspense fallback={null}>
-                    {/* Lighting setup for a "cyber" or clean aesthetic */}
-                    <ambientLight intensity={0.5} />
-                    <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
-                    <pointLight position={[-10, -10, -10]} intensity={0.5} />
+                    {/* Lighting setup for a dark, high-contrast aesthetic */}
+                    <ambientLight intensity={0.4} />
+                    <directionalLight position={[10, 10, 10]} castShadow intensity={1.2} />
+                    <spotLight position={[-10, 10, 10]} angle={0.2} penumbra={1} intensity={0.8} />
+                    <pointLight position={[-10, -10, -10]} intensity={0.3} />
 
                     {/* Environment map adds realistic reflections onto the GLB (like metal parts) */}
-                    <Environment preset="city" />
+                    <Environment preset="night" />
 
-                    <AGV scale={4} position={[0, -1, 1]} />
+                    {/* Adjusted scale strictly to fit within borders while maintaining prominent size */}
+                    <AGV scale={5} position={[0, 0, 0]} />
 
                     {/* Let the user rotate the camera slightly, but restrict dramatic zooms/pans */}
                     <OrbitControls
