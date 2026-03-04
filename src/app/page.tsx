@@ -7,6 +7,8 @@ import Hero3D from "@/components/Hero3D";
 import NetworkBackground from "@/components/NetworkBackground";
 import ClientLogos from "@/components/ClientLogos";
 import InternshipLogos from "@/components/InternshipLogos";
+import Gallery from "@/components/Gallery";
+import NewsletterTeaser from "@/components/NewsletterTeaser";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"students" | "schools">("students");
@@ -252,28 +254,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Projects Gallery Section */}
-      <section id="gallery" className="py-24 relative border-t border-slate-900/10 dark:border-white/5 bg-slate-100/50 dark:bg-slate-900/20 backdrop-blur-sm transition-colors duration-500">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 text-slate-900 dark:text-white transition-colors duration-500">Student Projects Gallery</h2>
-            <p className="text-slate-800 dark:text-slate-400 text-lg text-center max-w-2xl mx-auto transition-colors duration-500">A glimpse into the real-world prototypes our innovators are building in the labs.</p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <div key={i} className="aspect-square bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-white/5 overflow-hidden relative group shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
-                <div className="absolute inset-0 flex items-center justify-center bg-slate-100/50 dark:bg-slate-700/50 transition-colors duration-500">
-                  <span className="text-5xl opacity-40 dark:opacity-20">⚙️</span>
-                </div>
-                <div className="absolute inset-0 bg-blue-600/90 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-4 text-center backdrop-blur-sm">
-                  <span className="text-white font-bold text-lg mb-2">Project Name {i}</span>
-                  <p className="text-blue-100 text-sm">Built by 8th Grade Cohort</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Projects Gallery Section (Dynamic) */}
+      <Gallery />
+
+      {/* Newsletter / Blog Teaser Section */}
+      <NewsletterTeaser />
 
       {/* Internships Section */}
       <section id="internships" className="py-24 relative border-t border-slate-900/10 dark:border-white/5 transition-colors duration-500">
