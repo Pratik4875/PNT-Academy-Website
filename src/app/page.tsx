@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Hero3D from "@/components/Hero3D";
 import NetworkBackground from "@/components/NetworkBackground";
 import ClientLogos from "@/components/ClientLogos";
+import InternshipLogos from "@/components/InternshipLogos";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"students" | "schools">("students");
@@ -271,6 +272,14 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Internships Section */}
+      <section id="internships" className="py-24 relative border-t border-slate-900/10 dark:border-white/5 transition-colors duration-500">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold mb-16 text-slate-800 dark:text-white/90 transition-colors duration-500">We provide internships on</h2>
+          <InternshipLogos />
         </div>
       </section>
 
