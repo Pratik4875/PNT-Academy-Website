@@ -3,6 +3,7 @@ import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { Sun, Moon, User } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function AdminTopbar() {
     const { theme, setTheme } = useTheme();
@@ -49,11 +50,11 @@ export default function AdminTopbar() {
                 <span className="text-sm font-medium text-slate-600 dark:text-slate-300 hidden sm:inline-block">System Online</span>
 
                 {/* Admin Avatar & Name */}
-                <div className="flex items-center gap-3 ml-4">
-                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 hidden md:block">
+                <Link href="/admin/settings" className="flex items-center gap-3 ml-4 group">
+                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 hidden md:block group-hover:text-blue-600 transition-colors">
                         {adminData?.name || "Admin"}
                     </span>
-                    <div className="h-9 w-9 rounded-full relative overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-md border border-white/20">
+                    <div className="h-9 w-9 rounded-full relative overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-md border border-white/20 group-hover:ring-2 ring-blue-500 transition-all">
                         {adminData?.profileImage ? (
                             <Image
                                 src={adminData.profileImage}
@@ -65,7 +66,7 @@ export default function AdminTopbar() {
                             <span>{adminData?.name?.[0]?.toUpperCase() || "A"}</span>
                         )}
                     </div>
-                </div>
+                </Link>
             </div>
         </header>
     );

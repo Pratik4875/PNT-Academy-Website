@@ -17,6 +17,18 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "PNT Academy | Robotics Training",
   description: "Shape the Future of Robotics. Training programs for students 4th to 12th grade.",
+  openGraph: {
+    title: "PNT Academy",
+    description: "Shape the Future of Robotics. Training programs for students 4th to 12th grade.",
+    url: "https://pnt-academy.vercel.app",
+    siteName: "PNT Academy",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PNT Academy",
+    description: "Shape the Future of Robotics.",
+  },
 };
 
 export default function RootLayout({
