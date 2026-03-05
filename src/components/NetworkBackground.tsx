@@ -98,8 +98,9 @@ export default function NetworkBackground() {
                     const distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) +
                         ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
 
-                    if (distance < (canvas!.width / 10) * (canvas!.height / 10)) {
-                        opacityValue = 1 - (distance / 15000);
+                    // Reduce connection distance to optimize performance and reduce clutter
+                    if (distance < (canvas!.width / 15) * (canvas!.height / 15)) {
+                        opacityValue = 1 - (distance / 20000);
                         if (opacityValue > 0) {
                             ctx.strokeStyle = isDark ? `rgba(100, 116, 139, ${opacityValue * 0.2})` : `rgba(148, 163, 184, ${opacityValue * 0.4})`;
                             ctx.lineWidth = 1;
@@ -130,7 +131,8 @@ export default function NetworkBackground() {
 
         const init = () => {
             particlesArray = [];
-            let numberOfParticles = (canvas!.height * canvas!.width) / 12000;
+            // Cut particle count by half for performance optimization
+            let numberOfParticles = (canvas!.height * canvas!.width) / 25000;
             for (let i = 0; i < numberOfParticles; i++) {
                 const size = (Math.random() * 2) + 1;
                 const x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
