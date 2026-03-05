@@ -3,13 +3,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { LayoutDashboard, Image as ImageIcon, Briefcase, GraduationCap, FileText, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Image as ImageIcon, Briefcase, GraduationCap, FileText, Settings, LogOut, Users } from "lucide-react";
 import { auth } from "@/lib/firebase/config";
 import { signOut } from "firebase/auth";
 
 const MENU_ITEMS = [
     { name: "Overview", href: "/admin", icon: LayoutDashboard },
     { name: "Gallery", href: "/admin/gallery", icon: ImageIcon },
+    { name: "About Photos", href: "/admin/about", icon: Users },
     { name: "Partner Schools", href: "/admin/schools", icon: GraduationCap },
     { name: "Internships", href: "/admin/internships", icon: Briefcase },
     { name: "News & Blog", href: "/admin/blog", icon: FileText },
