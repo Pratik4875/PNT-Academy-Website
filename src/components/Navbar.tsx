@@ -23,7 +23,7 @@ export default function Navbar() {
                             src="/logo.png"
                             alt="PNT Academy Logo"
                             fill
-                            className="object-contain object-left dark:invert-0 invert transition-all duration-500"
+                            className="object-contain object-left dark:brightness-200 brightness-0 transition-all duration-500"
                             priority
                         />
                     </div>

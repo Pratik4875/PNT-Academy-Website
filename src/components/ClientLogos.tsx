@@ -25,9 +25,12 @@ export default function ClientLogos({ logos }: ClientLogosProps) {
                 </div>
 
                 {/* Fallback Static Logic so the layout doesn't look empty when developing */}
-                <div className="flex flex-wrap justify-center gap-x-16 gap-y-12 opacity-80 dark:opacity-60 grayscale hover:grayscale-0 transition-all duration-700 mt-12 mb-8 pointer-events-none">
-                    <div className="text-2xl font-bold tracking-widest text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors cursor-pointer">SCHOOL ALPHA</div>
-                    <div className="text-2xl font-bold tracking-widest text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors cursor-pointer">TECH ACADEMY</div>
+                <div className="flex flex-wrap justify-center gap-x-8 gap-y-6 opacity-80 dark:opacity-60 transition-all duration-700 mt-12 mb-8 pointer-events-none text-center">
+                    {['THE RAJAS INTERNATIONAL SCHOOL', 'ORION ICSE', 'DSK SCHOOL', 'MRIS', 'BIRLA INSTITUTE OF TECHNOLOGY & SCIENCE, PILANI', 'Vishwashanti Gurukul School', 'sloka International School', 'NES International School Dombivli', 'C.B.M. HIGH SCHOOL', 'TCIS The Cambria International School', 'JIJAMATA CONVENT SCHOOL'].map((school) => (
+                        <div key={school} className="px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-full text-sm font-bold tracking-wider text-slate-700 dark:text-slate-300 bg-white shadow-sm dark:bg-slate-900">
+                            {school}
+                        </div>
+                    ))}
                 </div>
             </div>
         );
