@@ -3,6 +3,7 @@ import connectMongo from "@/lib/mongodb";
 import Gallery from "@/lib/models/Gallery";
 import School from "@/lib/models/School";
 import Internship from "@/lib/models/Internship";
+import AboutPhoto from "@/lib/models/AboutPhoto";
 
 // Using Lean() for plain JSON objects to pass safely to Client Components
 import SiteMetric from "@/lib/models/SiteMetric";
@@ -51,6 +52,17 @@ export async function getLiveInternships() {
         return JSON.parse(JSON.stringify(items));
     } catch (error) {
         console.error("Failed to fetch internships:", error);
+        return [];
+    }
+}
+
+export async function getLiveAboutPhotos() {
+    try {
+        await connectMongo();
+        const items = await AboutPhoto.find({}).sort({ createdAt: -1 }).lean();
+        return JSON.parse(JSON.stringify(items));
+    } catch (error) {
+        console.error("Failed to fetch about photos:", error);
         return [];
     }
 }

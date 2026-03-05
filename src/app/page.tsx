@@ -1,6 +1,5 @@
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
-import Image from "next/image";
 import HeroSection from "@/components/HeroSection";
 import NetworkBackground from "@/components/NetworkBackground";
 import ClientLogos from "@/components/ClientLogos";
@@ -9,7 +8,8 @@ import Gallery from "@/components/Gallery";
 import NewsletterTeaser from "@/components/NewsletterTeaser";
 import ProgramsTabs from "@/components/ProgramsTabs";
 import Footer from "@/components/Footer";
-import { getLiveGallery, getLiveSchools, getLiveInternships, incrementLiveVisits } from "@/lib/actions/db";
+import AboutSlider from "@/components/AboutSlider";
+import { getLiveGallery, getLiveSchools, getLiveInternships, incrementLiveVisits, getLiveAboutPhotos } from "@/lib/actions/db";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +17,7 @@ export default async function Home() {
   const galleryItems = await getLiveGallery();
   const schools = await getLiveSchools();
   const internships = await getLiveInternships();
+  const aboutPhotos = await getLiveAboutPhotos();
 
   // Track page view
   await incrementLiveVisits();
@@ -76,59 +77,25 @@ export default async function Home() {
 
       {/* About Us Section */}
       <section id="about" className="py-32 relative border-t border-slate-900/10 dark:border-white/5 bg-slate-100/50 dark:bg-slate-900/20 backdrop-blur-sm transition-colors duration-500">
-        <div className="container mx-auto px-4 max-w-5xl">
+        <div className="container mx-auto px-4 max-w-6xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-8 text-slate-900 dark:text-white transition-colors duration-500">About PNT Academy</h2>
           </div>
           <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="text-lg leading-relaxed dark:prose-invert text-left text-slate-700 dark:text-slate-300">
+            <div className="text-lg leading-relaxed text-left text-slate-700 dark:text-slate-300">
               <p className="mb-6">
-                Founded in 2016, PNT Academy is a nationally recognized educational organization committed to delivering hands-on training and curriculum in Robotics, Automation, Coding, AI, and IoT to school and college students across India. With a strong emphasis on practical, project-based learning, PNT Academy bridges the gap between academic learning and industry requirements. Our programs are aligned with NEP 2020 standards and designed to build 21st-century skills in students, empowering them to become future-ready innovators and entrepreneurs. We are backed by our sister company – <strong>PNT Robotics</strong>, a pioneer in real-time industrial robotic solutions, known for developing India’s first internet-controlled autonomous robot.
+                Founded in 2016, PNT Academy is a nationally recognized educational organization committed to delivering hands-on training and curriculum in Robotics, Automation, Coding, AI, and IoT to school and college students across India. With a strong emphasis on practical, project-based learning, PNT Academy bridges the gap between academic learning and industry requirements.
               </p>
-              <p className="font-bold text-xl text-slate-900 dark:text-white mt-10 mb-4">PNT Robotics has gained nationwide attention for its innovation, including:</p>
-              <ul className="list-disc pl-6 space-y-3 mb-10">
-                <li>Appreciation from Hon. PM Shri Narendra Modi</li>
-                <li>Featured on Shark Tank India & received funding from Shark Peyush Bansal.</li>
-                <li>Prestigious partnerships with the Indian Army, DRDO, BARC, TATA Power, and more.</li>
-                <li>Alumni of Deakin University of Australia</li>
-                <li>IIT Bombay Jury</li>
+              <p className="font-bold text-xl text-slate-900 dark:text-white mt-6 mb-4">Our programs are:</p>
+              <ul className="list-disc pl-6 space-y-3">
+                <li>Aligned with NEP 2020 standards</li>
+                <li>Backed by PNT Robotics — India&apos;s first internet-controlled autonomous robot pioneer</li>
+                <li>Featured on <strong>Shark Tank India</strong> (funded by Peyush Bansal)</li>
+                <li>Appreciated by <strong>PM Shri Narendra Modi</strong></li>
+                <li>Partnered with Indian Army, DRDO, BARC &amp; TATA Power</li>
               </ul>
-              <p>
-                Through our CSR-backed and government-supported initiatives, we are impacting thousands of students by setting up robotics labs, organizing national-level startup competitions, and deploying industrial-grade robotic systems in colleges.
-              </p>
             </div>
-            <div className="relative aspect-[16/9] md:aspect-auto md:h-full w-full rounded-3xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 transition-transform hover:scale-[1.02]">
-              <Image src="/images/about-pnt.png" alt="PNT Academy Overview" fill className="object-cover" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Recognitions Section */}
-      <section id="recognitions" className="py-24 relative bg-slate-50 dark:bg-slate-900 transition-colors duration-500">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-16 text-slate-900 dark:text-white transition-colors duration-500">We are recognised nationally</h2>
-
-          <div className="max-w-5xl mx-auto mb-16 relative aspect-[16/9] w-full rounded-3xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 transition-transform hover:scale-[1.01]">
-            <Image src="/images/recognitions.png" alt="PNT Academy National Recognitions including Shark Tank and PM Modi" fill className="object-cover" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-center max-w-6xl mx-auto">
-            <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl flex flex-col items-center justify-center border border-slate-100 dark:border-slate-700 h-full transition-transform hover:-translate-y-2">
-              <div className="text-4xl mb-4">🦈</div>
-              <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-4">Shark Tank India</h3>
-              <p className="text-slate-600 dark:text-slate-400">Featured on Shark Tank India & received funding from Shark Peyush Bansal.</p>
-            </div>
-            <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl flex flex-col items-center justify-center border border-slate-100 dark:border-slate-700 h-full transition-transform hover:-translate-y-2">
-              <div className="text-4xl mb-4">🇮🇳</div>
-              <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-4">Appreciation by PM</h3>
-              <p className="text-slate-600 dark:text-slate-400">Hon. PM Shri Narendra Modi Sir's vision of 'Make in India' recognized our Coro-bot.</p>
-            </div>
-            <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl flex flex-col items-center justify-center border border-slate-100 dark:border-slate-700 h-full lg:col-span-1 md:col-span-2 transition-transform hover:-translate-y-2">
-              <div className="text-4xl mb-4">📰</div>
-              <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-4">Leading National Media</h3>
-              <p className="text-slate-600 dark:text-slate-400">Covered by Times of India, Mumbai Mirror, DH, and Lokmat Times for our frontline robotic innovations.</p>
-            </div>
+            <AboutSlider photos={aboutPhotos} />
           </div>
         </div>
       </section>
