@@ -18,7 +18,7 @@ export default function IntroAnimation({ onComplete }: { onComplete: () => void 
             {!exit ? (
                 <motion.div
                     key="intro-in"
-                    className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950 overflow-hidden"
+                    className="fixed inset-0 z-[9999] flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-slate-950 overflow-hidden"
                     initial={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                 >
@@ -28,9 +28,14 @@ export default function IntroAnimation({ onComplete }: { onComplete: () => void 
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-purple-600/10 blur-[80px]" />
                     </div>
 
-                    {/* Grid lines — identical to the site's NetworkBackground style */}
-                    <div
-                        className="absolute inset-0 pointer-events-none opacity-30"
+                    {/* Grid lines — adaptive to light/dark mode */}
+                    <div className="absolute inset-0 pointer-events-none opacity-30 dark:hidden"
+                        style={{
+                            backgroundImage: `linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px)`,
+                            backgroundSize: "60px 60px",
+                        }}
+                    />
+                    <div className="absolute inset-0 pointer-events-none opacity-30 hidden dark:block"
                         style={{
                             backgroundImage: `linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)`,
                             backgroundSize: "60px 60px",
@@ -60,7 +65,7 @@ export default function IntroAnimation({ onComplete }: { onComplete: () => void 
                             {["P", "N", "T"].map((letter, i) => (
                                 <motion.span
                                     key={letter}
-                                    className="text-[80px] md:text-[120px] font-black text-white leading-none tracking-widest"
+                                    className="text-[80px] md:text-[120px] font-black text-slate-900 dark:text-white leading-none tracking-widest"
                                     style={{ textShadow: "0 0 60px rgba(99,102,241,0.4)" }}
                                     initial={{ y: "110%", opacity: 0 }}
                                     animate={{ y: "0%", opacity: 1 }}
@@ -101,7 +106,7 @@ export default function IntroAnimation({ onComplete }: { onComplete: () => void 
                     </div>
 
                     {/* Loading bar */}
-                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-slate-800/80">
+                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-slate-200 dark:bg-slate-800/80">
                         <motion.div
                             className="h-full bg-gradient-to-r from-blue-600 to-purple-600"
                             initial={{ width: "0%" }}
@@ -114,7 +119,7 @@ export default function IntroAnimation({ onComplete }: { onComplete: () => void 
                 /* Blend-out: fade to the site's exact background colour, then vanish */
                 <motion.div
                     key="intro-out"
-                    className="fixed inset-0 z-[9999] bg-slate-950"
+                    className="fixed inset-0 z-[9999] bg-slate-50 dark:bg-slate-950"
                     initial={{ opacity: 1 }}
                     animate={{ opacity: 0 }}
                     transition={{ duration: 0.9, ease: "easeInOut" }}

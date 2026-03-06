@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import NetworkBackground from "@/components/NetworkBackground";
-import { Send, MapPin, Mail, Phone, CheckCircle, Loader2 } from "lucide-react";
+import { Send, MapPin, Mail, Phone, CheckCircle, Loader2, MessageCircle, Briefcase, ExternalLink, Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
 
 const SUBJECTS = [
     "Robotics Lab Setup",
@@ -19,22 +19,30 @@ const DETAILS = [
     {
         icon: MapPin,
         label: "Address",
-        value: "Mumbai, Maharashtra, India",
+        value: "Plot no. A115, Infinity Business Park, MIDC, Dombivli East, Dombivli, Maharashtra 421203",
         color: "text-blue-500",
+        href: "https://www.google.com/maps?q=Plot+no.+A115,+Infinity+Business+Park,+MIDC,+Dombivli+East,+Dombivli,+Maharashtra+421203",
     },
     {
         icon: Mail,
         label: "Email",
         value: "info@pntacademy.com",
         color: "text-purple-500",
-        href: "mailto:info@pntacademy.com",
+        href: "mailto:info@pntacademy.com?subject=Website%20Enquiry&body=Hi%20PNT%20Academy,%0A%0AI%20am%20interested%20in%20learning%20more%20about...",
     },
     {
         icon: Phone,
         label: "Phone",
         value: "+91 00000 00000",
-        color: "text-green-500",
+        color: "text-teal-500",
         href: "tel:+910000000000",
+    },
+    {
+        icon: MessageCircle,
+        label: "WhatsApp",
+        value: "Chat with Sales / Support",
+        color: "text-green-500",
+        href: "https://wa.me/910000000000?text=Hi%20PNT%20Academy,%20I%20have%20an%20enquiry",
     },
 ];
 
@@ -139,7 +147,9 @@ export default function ContactPage() {
                                     <div>
                                         <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">{label}</p>
                                         {href ? (
-                                            <a href={href} className={`text-sm font-semibold text-slate-700 dark:text-slate-200 hover:${color} transition-colors`}>{value}</a>
+                                            <a href={href} target="_blank" rel="noopener noreferrer" className={`text-sm font-semibold text-slate-700 dark:text-slate-200 hover:${color} transition-colors flex items-center gap-1.5`}>
+                                                {value}
+                                            </a>
                                         ) : (
                                             <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">{value}</p>
                                         )}
@@ -149,10 +159,37 @@ export default function ContactPage() {
                         </div>
 
                         {/* Social / Response time */}
-                        <div className="bg-gradient-to-br from-blue-600 to-purple-700 rounded-3xl p-6 text-white">
+                        <div className="bg-gradient-to-br from-blue-600 to-purple-700 rounded-3xl p-6 text-white shadow-md">
                             <p className="text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Average Response</p>
                             <p className="text-4xl font-black">&lt; 24h</p>
-                            <p className="text-sm opacity-70 mt-2">Business days. We get back to every genuine enquiry.</p>
+                            <p className="text-sm opacity-70 mt-2 mb-6">Business days. We get back to every genuine enquiry.</p>
+
+                            {/* Social Media Links */}
+                            <div className="pt-4 border-t border-white/20">
+                                <p className="text-xs font-bold uppercase tracking-widest opacity-60 mb-3">Follow Us</p>
+                                <div className="flex items-center gap-3">
+                                    <a href="#" className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors"><Instagram className="w-4 h-4" /></a>
+                                    <a href="#" className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors"><Linkedin className="w-4 h-4" /></a>
+                                    <a href="#" className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors"><Twitter className="w-4 h-4" /></a>
+                                    <a href="#" className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors"><Youtube className="w-4 h-4" /></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Careers / Openings */}
+                        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 shadow-sm group hover:border-blue-500/30 transition-colors">
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                                    <Briefcase className="w-5 h-5" />
+                                </div>
+                                <h3 className="font-black text-lg text-slate-800 dark:text-white">Careers & Openings</h3>
+                            </div>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
+                                Join our mission to build the future of robotics education. We are always looking for passionate educators, engineers, and sales rockstars.
+                            </p>
+                            <a href="mailto:careers@pntacademy.com?subject=Job%20Application&body=Hi%20Team,%0A%0AI%20am%20interested%20in%20applying%20for%20a%20role%20at%20PNT%20Academy.%" className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
+                                Apply Now <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
                         </div>
                     </motion.div>
 
