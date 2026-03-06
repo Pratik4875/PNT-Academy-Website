@@ -1,5 +1,7 @@
+"use client";
 import { motion } from "framer-motion";
 import NetworkBackground from "./NetworkBackground";
+import ClientOnly from "./ClientOnly";
 
 interface PageHeaderProps {
     title: string;
@@ -16,7 +18,9 @@ export default function PageHeader({ title, subtitle, description, actionText, a
         <section className="relative pt-32 pb-20 overflow-hidden min-h-[50vh] flex flex-col justify-center">
             {/* Background Animation */}
             <div className="absolute inset-0 z-0">
-                <NetworkBackground />
+                <ClientOnly>
+                    <NetworkBackground />
+                </ClientOnly>
             </div>
 
             {/* Gradient Overlays for Readability */}
