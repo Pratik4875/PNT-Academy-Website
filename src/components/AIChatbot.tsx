@@ -79,11 +79,14 @@ export default function AIChatbot() {
                         initial={{ opacity: 0, scale: 0.8, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.8, y: 20 }}
+                        whileHover={{ scale: 1.1, rotate: 5 }}
+                        whileTap={{ scale: 0.9 }}
                         onClick={toggleChat}
-                        className="absolute bottom-6 right-6 w-16 h-16 bg-gradient-to-br from-slate-700 to-slate-900 text-white rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.3)] flex items-center justify-center pointer-events-auto transition-all group overflow-hidden border border-white/10"
+                        className="absolute bottom-6 right-6 w-16 h-16 bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 text-white rounded-2xl shadow-[0_20px_50px_rgba(59,130,246,0.5)] flex items-center justify-center pointer-events-auto transition-all group overflow-hidden border border-white/20 backdrop-blur-xl"
                     >
-                        <Bot className="w-7 h-7 relative z-10 group-hover:scale-110 transition-transform text-slate-300" />
-                        <span className="absolute top-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-900 animate-pulse" />
+                        <Bot className="w-8 h-8 relative z-10 group-hover:scale-110 transition-transform text-white drop-shadow-md" />
+                        <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                        <span className="absolute top-2 right-2 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-white dark:border-slate-900 animate-pulse shadow-lg" />
                     </motion.button>
                 )}
             </AnimatePresence>
@@ -92,111 +95,128 @@ export default function AIChatbot() {
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                        className="absolute bottom-4 right-4 w-[calc(100vw-32px)] h-[calc(100dvh-32px)] md:bottom-6 md:right-6 md:w-[400px] md:h-[600px] pointer-events-auto flex flex-col z-20"
+                        initial={{ opacity: 0, y: 40, scale: 0.9, filter: "blur(10px)" }}
+                        animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+                        exit={{ opacity: 0, y: 40, scale: 0.9, filter: "blur(10px)" }}
+                        className="absolute bottom-4 right-4 w-[calc(100vw-32px)] h-[calc(100dvh-32px)] md:bottom-6 md:right-6 md:w-[420px] md:h-[650px] pointer-events-auto flex flex-col z-20"
                     >
-                        <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2rem] shadow-2xl overflow-hidden flex flex-col relative">
+                        <div className="flex-1 bg-white/80 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-[2.5rem] shadow-[0_30px_100px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col relative ring-1 ring-black/5">
                             {/* Header */}
-                            <div className="bg-gradient-to-r from-slate-700 to-slate-800 p-4 flex items-center justify-between text-white shrink-0">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm">
-                                        <Bot className="w-5 h-5 text-slate-300" />
+                            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 p-6 flex items-center justify-between text-white shrink-0 shadow-lg relative overflow-hidden">
+                                <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 20% 30%, white 1px, transparent 1px)', backgroundSize: '15px 15px' }}></div>
+                                <div className="flex items-center gap-4 relative z-10">
+                                    <div className="relative">
+                                        <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center backdrop-blur-md border border-white/30 shadow-inner">
+                                            <Bot className="w-6 h-6 text-white" />
+                                        </div>
+                                        <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-indigo-600 animate-pulse shadow-md"></span>
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-sm text-slate-100">PNT Assistant</h3>
-                                        <div className="flex items-center gap-1.5">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                            <span className="text-[10px] text-emerald-400 uppercase font-bold tracking-wider">Online</span>
+                                        <h3 className="font-black text-base tracking-tight text-white drop-shadow-sm">PNT AI Assistant</h3>
+                                        <div className="flex items-center gap-1.5 mt-0.5">
+                                            <span className="text-[10px] text-blue-100 uppercase font-black tracking-[0.1em] opacity-90">Systems Active</span>
                                         </div>
                                     </div>
                                 </div>
-                                <button onClick={toggleChat} className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors">
-                                    <X className="w-4 h-4" />
-                                </button>
+                                <div className="flex items-center gap-2 relative z-10">
+                                    <button onClick={toggleChat} className="p-2.5 bg-white/10 hover:bg-white/20 rounded-xl transition-all hover:rotate-90">
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Chat History */}
-                            <div className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth bg-slate-50/50 dark:bg-slate-900/50">
+                            <div className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth bg-gradient-to-b from-slate-50/50 to-white dark:from-slate-900/50 dark:to-slate-950/50">
                                 {messages.map((msg, i) => (
                                     <motion.div
                                         key={i}
-                                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                                        className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : "justify-start"}`}
+                                        initial={{ opacity: 0, x: msg.role === "user" ? 20 : -20, y: 10 }}
+                                        animate={{ opacity: 1, x: 0, y: 0 }}
+                                        transition={{ duration: 0.4, ease: "easeOut" }}
+                                        className={`flex gap-4 ${msg.role === "user" ? "flex-row-reverse" : "justify-start"}`}
                                     >
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === "user" ? "bg-slate-700 text-white" : "bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700"
+                                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm border ${msg.role === "user"
+                                            ? "bg-gradient-to-br from-blue-600 to-indigo-700 text-white border-blue-500/30"
+                                            : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
                                             }`}>
-                                            {msg.role === "user" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4 text-slate-500" />}
+                                            {msg.role === "user" ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />}
                                         </div>
-                                        <div className={`max-w-[85%] rounded-2xl p-4 text-sm leading-relaxed ${msg.role === "user"
-                                                ? "bg-slate-700 text-white rounded-tr-sm"
-                                                : "bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-sm border border-slate-200 dark:border-slate-700 shadow-sm"
+                                        <div className={`max-w-[85%] rounded-[1.5rem] p-4 text-sm leading-relaxed shadow-sm ring-1 ${msg.role === "user"
+                                            ? "bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-tr-none ring-blue-500/20"
+                                            : "bg-white/80 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 rounded-tl-none ring-black/5 dark:ring-white/5 backdrop-blur-md"
                                             }`}>
-                                            <div className="prose prose-sm dark:prose-invert prose-p:my-0.5 max-w-none">
+                                            <div className="prose prose-sm dark:prose-invert prose-p:my-0.5 max-w-none font-medium">
                                                 <ReactMarkdown>{msg.content}</ReactMarkdown>
                                             </div>
 
                                             {/* Contact Sales Fallback UI */}
                                             {isError && i === messages.length - 1 && (
-                                                <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700 flex flex-col gap-2">
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 10 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    className="mt-5 pt-5 border-t border-white/20 dark:border-slate-700 flex flex-col gap-2.5"
+                                                >
                                                     <a
                                                         href="https://wa.me/919326014648"
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-center font-bold transition-colors flex items-center justify-center gap-2"
+                                                        className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl text-center font-black transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 text-xs uppercase tracking-wider"
                                                     >
-                                                        Contact via WhatsApp
+                                                        Quick WhatsApp Help
                                                     </a>
                                                     <a
                                                         href="/contact"
-                                                        className="w-full py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-100 rounded-xl text-center font-bold transition-colors"
+                                                        className="w-full py-3 bg-white/10 hover:bg-white/20 text-white dark:text-white rounded-xl text-center font-black transition-all border border-white/20 text-xs uppercase tracking-wider"
                                                     >
                                                         Talk to Sales Team
                                                     </a>
-                                                </div>
+                                                </motion.div>
                                             )}
                                         </div>
                                     </motion.div>
                                 ))}
                                 {isLoading && (
-                                    <div className="flex gap-3 justify-start">
-                                        <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center border border-slate-200 dark:border-slate-700">
-                                            <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        className="flex gap-4 justify-start"
+                                    >
+                                        <div className="w-9 h-9 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center border border-slate-200 dark:border-slate-700 shadow-sm animate-pulse">
+                                            <Loader2 className="w-5 h-5 text-indigo-400 animate-spin" />
                                         </div>
-                                        <div className="bg-white dark:bg-slate-800 rounded-2xl rounded-tl-sm p-4 border border-slate-200 dark:border-slate-700 shadow-sm">
-                                            <div className="flex gap-1">
-                                                <span className="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                                                <span className="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                                                <span className="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce"></span>
+                                        <div className="bg-white/50 dark:bg-slate-800/50 backdrop-blur-md rounded-[1.5rem] rounded-tl-none p-5 border border-white/20 dark:border-slate-700 shadow-sm ring-1 ring-black/5">
+                                            <div className="flex gap-1.5">
+                                                <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                                                <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                                                <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"></span>
                                             </div>
                                         </div>
-                                    </div>
+                                    </motion.div>
                                 )}
                                 <div ref={messagesEndRef} />
                             </div>
 
                             {/* Input Area */}
-                            <form onSubmit={handleSendMessage} className="p-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 shrink-0">
-                                <div className="relative flex items-center">
+                            <div className="p-6 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-white/5 shrink-0 relative">
+                                <form onSubmit={handleSendMessage} className="relative group">
                                     <input
                                         type="text"
                                         value={input}
                                         onChange={(e) => setInput(e.target.value)}
                                         placeholder="Ask about PNT Academy..."
-                                        className="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl py-3 pl-4 pr-12 text-sm focus:ring-2 focus:ring-slate-500 transition-all dark:text-white"
+                                        className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/10 rounded-2xl py-4 pl-5 pr-14 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-white dark:focus:bg-slate-800 transition-all dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                         disabled={isLoading}
                                     />
                                     <button
                                         type="submit"
                                         disabled={!input.trim() || isLoading}
-                                        className="absolute right-2 p-2 bg-slate-700 text-white rounded-xl hover:bg-slate-800 disabled:opacity-50 disabled:hover:bg-slate-700 transition-all"
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 p-3 bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/30 disabled:opacity-0 disabled:scale-90 transition-all active:scale-95"
                                     >
                                         <Send className="w-4 h-4" />
                                     </button>
-                                </div>
-                            </form>
+                                </form>
+                                <p className="text-[10px] text-center mt-3 text-slate-400 font-medium">Powered by PNT AI Core v2.5</p>
+                            </div>
                         </div>
                     </motion.div>
                 )}

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
-import { Settings as SettingsIcon, Shield, Bell, Key, User, Camera, Check, AlertCircle } from "lucide-react";
+import { Settings as SettingsIcon, Shield, Bell, Key, User, Camera, Check, AlertCircle, Instagram, Linkedin, Twitter, Youtube, Briefcase, ExternalLink, Globe } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { fileToBase64 } from "@/lib/utils/fileToBase64";
 import Image from "next/image";
@@ -12,10 +12,27 @@ interface SettingsForm {
     name: string;
     email: string;
     profileImage?: FileList;
+    socialLinks: {
+        instagram: string;
+        linkedin: string;
+        twitter: string;
+        youtube: string;
+    };
+    careersLink: string;
 }
 
 export default function AdminSettings() {
-    const { register, handleSubmit, setValue, watch } = useForm<SettingsForm>();
+    const { register, handleSubmit, setValue, watch } = useForm<SettingsForm>({
+        defaultValues: {
+            socialLinks: {
+                instagram: "",
+                linkedin: "",
+                twitter: "",
+                youtube: ""
+            },
+            careersLink: ""
+        }
+    });
     const [loading, setLoading] = useState(false);
     const [initialLoading, setInitialLoading] = useState(true);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -44,6 +61,13 @@ export default function AdminSettings() {
                     if (data?.name) setValue("name", data.name);
                     if (data?.email) setValue("email", data.email);
                     if (data?.profileImage) setPreviewImage(data.profileImage);
+                    if (data?.socialLinks) {
+                        setValue("socialLinks.instagram", data.socialLinks.instagram || "");
+                        setValue("socialLinks.linkedin", data.socialLinks.linkedin || "");
+                        setValue("socialLinks.twitter", data.socialLinks.twitter || "");
+                        setValue("socialLinks.youtube", data.socialLinks.youtube || "");
+                    }
+                    if (data?.careersLink) setValue("careersLink", data.careersLink);
                 }
             } catch (e) {
                 console.error("Failed to fetch settings", e);
@@ -69,6 +93,8 @@ export default function AdminSettings() {
                 name: formData.name,
                 email: formData.email,
                 profileImage: profileImageBase64,
+                socialLinks: formData.socialLinks,
+                careersLink: formData.careersLink,
             };
 
             const res = await fetch("/api/admin/settings", {
@@ -100,7 +126,7 @@ export default function AdminSettings() {
                 <div>
                     <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-600 to-slate-900 dark:from-slate-200 dark:to-white tracking-tight">Portal Settings</h1>
                     <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm max-w-lg">
-                        Manage your director account, security preferences, and dashboard configurations here.
+                        Manage your director account, social media handles, and careers portal links here.
                     </p>
                 </div>
             </header>
@@ -110,10 +136,9 @@ export default function AdminSettings() {
                 <div className="space-y-2">
                     {[
                         { name: "My Account", icon: User, active: true },
-                        { name: "Security & Passwords", icon: Shield, active: false, badge: "Coming Soon" },
-                        { name: "Email Notifications", icon: Bell, active: false, badge: "Coming Soon" },
-                        { name: "API Keys (Firebase)", icon: Key, active: false, badge: "Beta" },
-                        { name: "System Preferences", icon: SettingsIcon, active: false },
+                        { name: "Public Links", icon: Globe, active: false, badge: "Social & Careers" },
+                        { name: "Security", icon: Shield, active: false },
+                        { name: "Notifications", icon: Bell, active: false },
                     ].map((tab) => (
                         <button
                             key={tab.name}
@@ -154,102 +179,114 @@ export default function AdminSettings() {
                             </motion.div>
                         )}
 
-                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Director Profile</h3>
-
-                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-                            {/* Profile Header with Upload */}
-                            <div className="flex items-center gap-6 pb-8 border-b border-slate-200 dark:border-slate-800">
-                                <div className="relative group">
-                                    <div className="h-24 w-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-black text-3xl shadow-lg border-4 border-white dark:border-slate-900 overflow-hidden relative">
-                                        {previewImage ? (
-                                            <Image
-                                                src={previewImage}
-                                                alt="Profile Preview"
-                                                fill
-                                                className="object-cover"
-                                            />
-                                        ) : (
-                                            <span>{watch("name")?.[0]?.toUpperCase() || "A"}</span>
-                                        )}
-
-                                        {/* Overlay */}
-                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
-                                            <Camera size={24} className="text-white" />
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
+                            {/* Section: Director Profile */}
+                            <section className="space-y-6">
+                                <div className="flex items-center gap-4 text-slate-900 dark:text-white">
+                                    <User className="w-5 h-5 text-blue-500" />
+                                    <h3 className="text-xl font-bold">Director Profile</h3>
+                                </div>
+                                <div className="flex items-center gap-6 pb-6 border-b border-slate-100 dark:border-slate-800">
+                                    <div className="relative group">
+                                        <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-black text-2xl shadow-lg border-2 border-white dark:border-slate-900 overflow-hidden relative">
+                                            {previewImage ? (
+                                                <Image src={previewImage} alt="Profile" fill className="object-cover" />
+                                            ) : (
+                                                <span>{watch("name")?.[0]?.toUpperCase() || "A"}</span>
+                                            )}
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+                                                <Camera size={20} className="text-white" />
+                                            </div>
+                                            <input type="file" accept="image/*" id="profileImage" {...register("profileImage")} className="absolute inset-0 opacity-0 cursor-pointer" />
                                         </div>
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            id="profileImage"
-                                            {...register("profileImage")}
-                                            className="absolute inset-0 opacity-0 cursor-pointer"
-                                        />
                                     </div>
-                                    <div className="absolute -bottom-1 -right-1 bg-blue-600 text-white p-1.5 rounded-full shadow-lg border-2 border-white dark:border-slate-900 invisible group-hover:visible transition-all">
-                                        <Camera size={14} />
+                                    <div>
+                                        <h4 className="font-bold text-slate-900 dark:text-white">{watch("name") || "Admin"}</h4>
+                                        <p className="text-slate-500 text-xs">{watch("email") || "director@pntacademy.com"}</p>
                                     </div>
                                 </div>
 
-                                <div>
-                                    <h4 className="font-bold text-lg text-slate-900 dark:text-white">{watch("name") || "Admin / Director"}</h4>
-                                    <p className="text-slate-500 dark:text-slate-400 text-sm">{watch("email") || "director@pntacademy.com"}</p>
-                                    <label htmlFor="profileImage" className="mt-2 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer block">
-                                        Update Photo
-                                    </label>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Full Name</label>
+                                        <input type="text" {...register("name", { required: true })} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Email Address</label>
+                                        <input type="email" {...register("email", { required: true })} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all" />
+                                    </div>
                                 </div>
-                            </div>
+                            </section>
 
-                            <div className="space-y-5">
+                            {/* Section: Social Media Handles */}
+                            <section className="space-y-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+                                <div className="flex items-center gap-4 text-slate-900 dark:text-white">
+                                    <Globe className="w-5 h-5 text-purple-500" />
+                                    <h3 className="text-xl font-bold">Social Media Handles</h3>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2 ml-1">
+                                            <Instagram className="w-3 h-3 text-pink-500" /> Instagram URL
+                                        </label>
+                                        <input type="url" {...register("socialLinks.instagram")} placeholder="https://instagram.com/pntacademy" className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-500/50 transition-all" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2 ml-1">
+                                            <Linkedin className="w-3 h-3 text-blue-600" /> LinkedIn URL
+                                        </label>
+                                        <input type="url" {...register("socialLinks.linkedin")} placeholder="https://linkedin.com/company/pntacademy" className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-600/50 transition-all" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2 ml-1">
+                                            <Twitter className="w-3 h-3 text-black dark:text-white" /> X / Twitter URL
+                                        </label>
+                                        <input type="url" {...register("socialLinks.twitter")} placeholder="https://twitter.com/pntacademy" className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-slate-900/50 transition-all" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2 ml-1">
+                                            <Youtube className="w-3 h-3 text-red-600" /> YouTube URL
+                                        </label>
+                                        <input type="url" {...register("socialLinks.youtube")} placeholder="https://youtube.com/c/pntacademy" className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-600/50 transition-all" />
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* Section: Careers & Google Forms */}
+                            <section className="space-y-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4 text-slate-900 dark:text-white">
+                                        <Briefcase className="w-5 h-5 text-emerald-500" />
+                                        <h3 className="text-xl font-bold">Careers Portal</h3>
+                                    </div>
+                                    <a href="https://docs.google.com/forms" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 dark:bg-blue-500/10 px-3 py-2 rounded-lg">
+                                        Create Google Form <ExternalLink size={12} />
+                                    </a>
+                                </div>
                                 <div className="space-y-2">
-                                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">Full Name</label>
-                                    <input
-                                        type="text"
-                                        {...register("name", { required: true })}
-                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-                                        placeholder="Enter full name"
-                                    />
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Careers Form URL (Redirects from Careers Button)</label>
+                                    <input type="url" {...register("careersLink")} placeholder="https://forms.gle/your-careers-form" className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all" />
                                 </div>
+                            </section>
 
-                                <div className="space-y-2">
-                                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">Email Address</label>
-                                    <input
-                                        type="email"
-                                        {...register("email", { required: true })}
-                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-                                        placeholder="Enter email address"
-                                    />
-                                </div>
-
-                                <div className="pt-6 flex justify-end gap-3">
-                                    <button
-                                        type="button"
-                                        onClick={() => window.location.reload()}
-                                        className="px-6 py-3 rounded-xl font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-sm"
-                                    >
-                                        Discard
-                                    </button>
-                                    <motion.button
-                                        type="submit"
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}
-                                        disabled={loading}
-                                        className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 transition-all text-sm disabled:opacity-70 flex items-center gap-2"
-                                    >
-                                        {loading ? "Processing..." : "Secure Save"}
-                                    </motion.button>
-                                </div>
+                            <div className="pt-6 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-800">
+                                <button type="button" onClick={() => window.location.reload()} className="px-6 py-3 rounded-xl font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-sm">Discard</button>
+                                <motion.button type="submit" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} disabled={loading} className="px-10 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 transition-all text-sm disabled:opacity-70">
+                                    {loading ? "Saving Changes..." : "Save All Settings"}
+                                </motion.button>
                             </div>
                         </form>
                     </div>
 
-                    {/* Secondary Info Card */}
-                    <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-8 text-white shadow-xl">
-                        <div className="flex items-center gap-4 mb-4">
-                            <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-md">
-                                <Shield className="w-6 h-6" />
+                    {/* Security Tip Card */}
+                    <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 text-white shadow-xl border border-white/5">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-blue-500/20 rounded-2xl backdrop-blur-md">
+                                <SettingsIcon className="w-6 h-6 text-blue-400" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-lg">Security First</h3>
-                                <p className="text-blue-100 text-sm">Your profile data is encrypted using MongoDB standard clusters.</p>
+                                <h3 className="font-bold text-lg text-white">Public Settings Sync</h3>
+                                <p className="text-slate-400 text-sm">Updates to social links and careers URLs take effect instantly across the PNT Academy website footer and contact pages.</p>
                             </div>
                         </div>
                     </div>

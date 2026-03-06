@@ -4,12 +4,26 @@ export interface IAdminSettings extends Document {
     name: string;
     email: string;
     profileImage?: string; // Base64 data URL
+    socialLinks: {
+        instagram?: string;
+        linkedin?: string;
+        twitter?: string;
+        youtube?: string;
+    };
+    careersLink?: string;
 }
 
 const AdminSettingsSchema = new Schema<IAdminSettings>({
     name: { type: String, required: true },
     email: { type: String, required: true },
     profileImage: { type: String },
+    socialLinks: {
+        instagram: { type: String, default: "" },
+        linkedin: { type: String, default: "" },
+        twitter: { type: String, default: "" },
+        youtube: { type: String, default: "" },
+    },
+    careersLink: { type: String, default: "" },
 });
 
 export default mongoose.models.AdminSettings || mongoose.model<IAdminSettings>('AdminSettings', AdminSettingsSchema);

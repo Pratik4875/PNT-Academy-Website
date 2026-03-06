@@ -16,7 +16,7 @@ export async function incrementLiveVisits() {
         const metric = await SiteMetric.findOneAndUpdate(
             { key: "total_visits" },
             { $inc: { value: 1 } },
-            { new: true, upsert: true }
+            { returnDocument: "after", upsert: true }
         ).lean();
         return metric?.value || 0;
     } catch (error) {
@@ -76,5 +76,18 @@ export async function getLiveAboutPhotos() {
     } catch (error) {
         console.error("Failed to fetch about photos:", error);
         return [];
+    }
+}
+
+import AdminSettings from "@/lib/models/AdminSettings";
+
+export async function getAdminSettings() {
+    try {
+        await connectMongo();
+        const settings = await AdminSettings.findOne({}).lean();
+        return JSON.parse(JSON.stringify(settings));
+    } catch (error) {
+        console.error("Failed to fetch admin settings:", error);
+        return null;
     }
 }

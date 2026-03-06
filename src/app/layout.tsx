@@ -46,9 +46,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50 min-h-screen selection:bg-blue-600 selection:text-white transition-colors duration-500`}
       >
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+          {/* Client-only persistent layers */}
           <ClientAIChatbot />
           <ClientIntroWrapper />
           <PageLoader />
+
+          {/* Server-rendered page content */}
           {children}
         </ThemeProvider>
       </body>
