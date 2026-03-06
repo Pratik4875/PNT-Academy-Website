@@ -4,6 +4,7 @@ import Gallery from "@/lib/models/Gallery";
 import School from "@/lib/models/School";
 import Internship from "@/lib/models/Internship";
 import AboutPhoto from "@/lib/models/AboutPhoto";
+import Faq from "@/lib/models/Faq";
 
 // Using Lean() for plain JSON objects to pass safely to Client Components
 import SiteMetric from "@/lib/models/SiteMetric";
@@ -21,6 +22,17 @@ export async function incrementLiveVisits() {
     } catch (error) {
         console.error("Failed to increment visits:", error);
         return 0;
+    }
+}
+
+export async function getLiveFaqs() {
+    try {
+        await connectMongo();
+        const items = await Faq.find({}).sort({ order: 1, createdAt: -1 }).lean();
+        return JSON.parse(JSON.stringify(items));
+    } catch (error) {
+        console.error("Failed to fetch FAQs:", error);
+        return [];
     }
 }
 export async function getLiveGallery() {
