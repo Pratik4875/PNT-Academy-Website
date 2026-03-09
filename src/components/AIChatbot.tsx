@@ -287,7 +287,7 @@ export default function AIChatbot() {
                                         <Send className="w-4 h-4" />
                                     </button>
                                 </form>
-                                <p className="text-[10px] text-center mt-3 text-slate-400 font-medium">Powered by PNT AI Core v2.5</p>
+                                <p className="text-[10px] text-center mt-3 text-slate-400 font-medium tracking-wider">Powered by PNT AI Core v2.5 (Hybrid)</p>
                             </div>
                         </div>
                     </motion.div>
