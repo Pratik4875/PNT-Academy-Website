@@ -14,6 +14,7 @@ export interface IAdminSettings extends Document {
     sheetsWebhookUrl?: string; // For auto-syncing enquiries to Google Sheets
     paymentDetails?: {
         upiId?: string;
+        upiQrCodeBase64?: string;
         accountName?: string;
         accountNumber?: string;
         ifscCode?: string;
@@ -35,6 +36,7 @@ const AdminSettingsSchema = new Schema<IAdminSettings>({
     sheetsWebhookUrl: { type: String, default: "" },
     paymentDetails: {
         upiId: { type: String, default: "" },
+        upiQrCodeBase64: { type: String, default: "" },
         accountName: { type: String, default: "" },
         accountNumber: { type: String, default: "" },
         ifscCode: { type: String, default: "" },

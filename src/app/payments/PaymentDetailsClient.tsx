@@ -8,6 +8,7 @@ import Image from "next/image";
 interface PaymentDetailsClientProps {
     details: {
         upiId?: string;
+        upiQrCodeBase64?: string;
         accountName?: string;
         accountNumber?: string;
         ifscCode?: string;
@@ -55,24 +56,32 @@ export default function PaymentDetailsClient({ details }: PaymentDetailsClientPr
                         <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Scan & Pay</h2>
                         <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mb-8">Supports GPay, PhonePe, Paytm, and all UPI apps</p>
 
-                        {details.upiId ? (
+                        {details.upiQrCodeBase64 || details.upiId ? (
                             <div className="relative bg-white p-4 rounded-3xl shadow-lg border border-slate-100 mb-8 inline-block">
                                 <div className="absolute top-0 right-0 -m-3 bg-blue-600 text-white p-2 rounded-full shadow-lg shadow-blue-600/30">
                                     <ScanLine className="w-4 h-4" />
                                 </div>
-                                {/* Using next/image for the QR code API */}
                                 <div className="relative w-48 h-48 rounded-2xl overflow-hidden mx-auto">
-                                    <Image
-                                        src={qrCodeUrl}
-                                        alt="UPI QR Code"
-                                        fill
-                                        className="object-contain"
-                                    />
+                                    {details.upiQrCodeBase64 ? (
+                                        <Image
+                                            src={details.upiQrCodeBase64}
+                                            alt="Custom UPI QR Code"
+                                            fill
+                                            className="object-contain"
+                                        />
+                                    ) : (
+                                        <Image
+                                            src={qrCodeUrl}
+                                            alt="Auto-generated UPI QR Code"
+                                            fill
+                                            className="object-contain"
+                                        />
+                                    )}
                                 </div>
                             </div>
                         ) : (
                             <div className="w-48 h-48 bg-slate-100 dark:bg-slate-800 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center mb-8 mx-auto">
-                                <span className="text-slate-400 text-sm font-medium">No UPI ID Set</span>
+                                <span className="text-slate-400 text-sm font-medium">No QR Code Available</span>
                             </div>
                         )}
 

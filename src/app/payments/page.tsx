@@ -3,7 +3,7 @@ import { ArrowLeft, Copy, CheckCircle2, ShieldCheck, Building2, Landmark, Credit
 import connectMongo from "@/lib/mongodb";
 import AdminSettings from "@/lib/models/AdminSettings";
 import PageHeader from "@/components/PageHeader";
-import PaymentDetailsClient from "./PaymentDetailsClient";
+import PaymentDetailsClient from "@/app/payments/PaymentDetailsClient";
 
 export const metadata = {
     title: "Secure Payments | PNT Academy",

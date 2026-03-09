@@ -22,6 +22,7 @@ interface SettingsForm {
     sheetsWebhookUrl: string;
     paymentDetails: {
         upiId: string;
+        upiQrCodeImage?: FileList;
         accountName: string;
         accountNumber: string;
         ifscCode: string;
@@ -52,10 +53,12 @@ export default function AdminSettings() {
     const [loading, setLoading] = useState(false);
     const [initialLoading, setInitialLoading] = useState(true);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const [qrPreviewImage, setQrPreviewImage] = useState<string | null>(null);
     const [saveStatus, setSaveStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
     // Watch for image changes to update preview
     const profileImageFile = watch("profileImage");
+    const qrImageFile = watch("paymentDetails.upiQrCodeImage");
 
     useEffect(() => {
         if (profileImageFile && profileImageFile[0]) {
@@ -66,6 +69,16 @@ export default function AdminSettings() {
             reader.readAsDataURL(profileImageFile[0]);
         }
     }, [profileImageFile]);
+
+    useEffect(() => {
+        if (qrImageFile && qrImageFile[0]) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setQrPreviewImage(reader.result as string);
+            };
+            reader.readAsDataURL(qrImageFile[0]);
+        }
+    }, [qrImageFile]);
 
     // Fetch existing settings
     useEffect(() => {
@@ -91,6 +104,7 @@ export default function AdminSettings() {
                         setValue("paymentDetails.accountNumber", data.paymentDetails.accountNumber || "");
                         setValue("paymentDetails.ifscCode", data.paymentDetails.ifscCode || "");
                         setValue("paymentDetails.bankName", data.paymentDetails.bankName || "");
+                        if (data.paymentDetails.upiQrCodeBase64) setQrPreviewImage(data.paymentDetails.upiQrCodeBase64);
                     }
                 }
             } catch (e) {
@@ -107,10 +121,14 @@ export default function AdminSettings() {
         setSaveStatus(null);
         try {
             let profileImageBase64 = previewImage;
+            let qrCodeBase64 = qrPreviewImage;
 
             // If a new file was uploaded, convert it
             if (formData.profileImage && formData.profileImage[0]) {
                 profileImageBase64 = await fileToBase64(formData.profileImage[0]);
+            }
+            if (formData.paymentDetails?.upiQrCodeImage && formData.paymentDetails.upiQrCodeImage[0]) {
+                qrCodeBase64 = await fileToBase64(formData.paymentDetails.upiQrCodeImage[0]);
             }
 
             const payload = {
@@ -120,7 +138,10 @@ export default function AdminSettings() {
                 socialLinks: formData.socialLinks,
                 careersLink: formData.careersLink,
                 sheetsWebhookUrl: formData.sheetsWebhookUrl,
-                paymentDetails: formData.paymentDetails,
+                paymentDetails: {
+                    ...formData.paymentDetails,
+                    upiQrCodeBase64: qrCodeBase64
+                },
             };
 
             const res = await fetch("/api/admin/settings", {
@@ -316,9 +337,26 @@ export default function AdminSettings() {
                                     <h3 className="text-xl font-bold">Payment Details</h3>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">UPI ID (e.g., pratik@upi or phone number)</label>
-                                    <input type="text" {...register("paymentDetails.upiId")} placeholder="yourid@upi" className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all" />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">UPI ID (e.g., pratik@upi or phone number)</label>
+                                        <input type="text" {...register("paymentDetails.upiId")} placeholder="yourid@upi" className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all" />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 flex items-center justify-between">
+                                            <span>Custom UPI QR Code Image</span>
+                                            {qrPreviewImage && <span className="text-emerald-500 font-normal">Uploaded</span>}
+                                        </label>
+                                        <div className="flex items-center gap-4">
+                                            {qrPreviewImage && (
+                                                <div className="w-12 h-12 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden relative bg-white shrink-0">
+                                                    <Image src={qrPreviewImage} alt="QR Preview" fill className="object-contain p-1" />
+                                                </div>
+                                            )}
+                                            <input type="file" accept="image/*" {...register("paymentDetails.upiQrCodeImage")} className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 dark:file:bg-amber-500/10 dark:file:text-amber-400 dark:hover:file:bg-amber-500/20" />
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
