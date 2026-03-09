@@ -18,8 +18,25 @@ export default function AIChatbot() {
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isError, setIsError] = useState(false);
-
+    const [isLocalMode, setIsLocalMode] = useState(false);
+    const [localKnowledge, setLocalKnowledge] = useState<{ question: string, answer: string }[]>([]);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    // Fetch FAQs on mount for Local Agent indexing
+    useEffect(() => {
+        const fetchFaqs = async () => {
+            try {
+                const res = await fetch("/api/admin/faq");
+                if (res.ok) {
+                    const data = await res.ok ? await res.json() : [];
+                    setLocalKnowledge(data);
+                }
+            } catch (err) {
+                console.warn("Could not cache FAQs for Local Agent:", err);
+            }
+        };
+        fetchFaqs();
+    }, []);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -33,6 +50,34 @@ export default function AIChatbot() {
 
     const toggleChat = () => setIsOpen(!isOpen);
 
+    // Core Knowledge for Local Agent Matching
+    const CORE_FACTS = [
+        { keywords: ["pratik", "founder", "owner", "director", "tirodkar"], answer: "Pratik Tirodkar is the Founder & Owner of PNT Academy and PNT Robotics. He is an innovator recognized by PM Narendra Modi and featured on Shark Tank India." },
+        { keywords: ["location", "address", "where", "dombivli", "office"], answer: "We are located at Plot no. A115, Infinity Business Park, MIDC, Dombivli East, Maharashtra 421203." },
+        { keywords: ["contact", "phone", "call", "whatsapp", "mobile", "email"], answer: "Contact us at +91 93260 14648 or +91 81691 96916. Email: contact@pntacademy.com." },
+        { keywords: ["course", "program", "training", "learn", "robotics", "ai"], answer: "We offer Robotics, AI, and IoT training for 4th to 12th grade students, including lab setups for schools and elite internships." },
+        { keywords: ["internship", "navy", "army", "projects"], answer: "We provide specialized internships based on real-world projects with the Indian Army and Navy." }
+    ];
+
+    const processLocalQuery = (query: string) => {
+        const lowQuery = query.toLowerCase();
+
+        // 1. Check Dynamic FAQs
+        const faqMatch = localKnowledge.find(f =>
+            lowQuery.includes(f.question.toLowerCase()) ||
+            f.question.toLowerCase().split(' ').some(word => word.length > 3 && lowQuery.includes(word))
+        );
+        if (faqMatch) return faqMatch.answer;
+
+        // 2. Check Core Facts
+        const factMatch = CORE_FACTS.find(f =>
+            f.keywords.some(k => lowQuery.includes(k))
+        );
+        if (factMatch) return factMatch.answer;
+
+        return null;
+    };
+
     const handleSendMessage = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
         if (!input.trim() || isLoading) return;
@@ -40,6 +85,7 @@ export default function AIChatbot() {
         const userMessage = input.trim();
         setInput("");
         setIsError(false);
+        setIsLocalMode(false);
         setMessages(prev => [...prev, { role: "user", content: userMessage }]);
         setIsLoading(true);
 
@@ -52,19 +98,32 @@ export default function AIChatbot() {
                 }),
             });
 
-            if (!response.ok) throw new Error("Failed to get response");
-
             const data = await response.json();
-            if (data.error) throw new Error(data.error);
+
+            if (!response.ok || data.fallbackTrigger) {
+                throw new Error(data.error || "Server fallback requested");
+            }
 
             setMessages(prev => [...prev, { role: "model", content: data.reply }]);
         } catch (error) {
-            console.error("Chat Error:", error);
-            setIsError(true);
-            setMessages(prev => [...prev, {
-                role: "model",
-                content: "I'm having a bit of trouble connecting to my brain right now. 🧠✨\n\nFor immediate assistance with admissions, sales, or technical queries, please contact our team directly."
-            }]);
+            console.warn("Cloud AI unreachable, switching to Local Agent:", error);
+
+            // Trigger Local Agent Fallback
+            const localReply = processLocalQuery(userMessage);
+            setIsLocalMode(true);
+
+            if (localReply) {
+                setMessages(prev => [...prev, {
+                    role: "model",
+                    content: `(Local Knowledge Active) ${localReply}`
+                }]);
+            } else {
+                setIsError(true);
+                setMessages(prev => [...prev, {
+                    role: "model",
+                    content: "I'm currently in 'Local Shield Mode' to stay secure. I couldn't find a local answer for that specific question.\n\nPlease contact our team directly for advanced technical or pricing queries."
+                }]);
+            }
         } finally {
             setIsLoading(false);
         }
@@ -114,7 +173,9 @@ export default function AIChatbot() {
                                     <div>
                                         <h3 className="font-black text-base tracking-tight text-white drop-shadow-sm">PNT AI Assistant</h3>
                                         <div className="flex items-center gap-1.5 mt-0.5">
-                                            <span className="text-[10px] text-blue-100 uppercase font-black tracking-[0.1em] opacity-90">Systems Active</span>
+                                            <span className={`text-[10px] uppercase font-black tracking-[0.1em] transition-colors duration-300 ${isLocalMode ? "text-orange-300" : "text-blue-100 opacity-90"}`}>
+                                                {isLocalMode ? "Local Shield Active" : "Cloud Core Systems Active"}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -145,8 +206,19 @@ export default function AIChatbot() {
                                             ? "bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-tr-none ring-blue-500/20"
                                             : "bg-white/80 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 rounded-tl-none ring-black/5 dark:ring-white/5 backdrop-blur-md"
                                             }`}>
-                                            <div className="prose prose-sm dark:prose-invert prose-p:my-0.5 max-w-none font-medium">
-                                                <ReactMarkdown>{msg.content}</ReactMarkdown>
+
+                                            {msg.role === "model" && msg.content.startsWith("(Local Knowledge Active)") && (
+                                                <div className="mb-2">
+                                                    <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 rounded-full border border-orange-200 dark:border-orange-500/30">
+                                                        Local Fallback Agent
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            <div className="prose prose-sm dark:prose-invert prose-p:my-0.5 max-w-none font-medium text-inherit">
+                                                <ReactMarkdown>
+                                                    {msg.content.replace("(Local Knowledge Active) ", "")}
+                                                </ReactMarkdown>
                                             </div>
 
                                             {/* Contact Sales Fallback UI */}

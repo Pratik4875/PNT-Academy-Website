@@ -48,12 +48,12 @@ RULES OF ENGAGEMENT:
 4. TONE: Professional but energetic.
 `;
 
-        // 3. Initialize Gemini
+        // 3. Multi-Agent Routing Logic
+        const MODELS_TO_TRY = ["gemini-2.0-flash", "gemini-1.5-pro"];
+        let lastError = null;
+        let replyText = "";
+
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-        const model = genAI.getGenerativeModel({
-            model: "gemini-2.5-flash",
-            systemInstruction: DYNAMIC_SYSTEM_INSTRUCTION
-        });
 
         // 4. Format history
         const contents = messages
@@ -67,25 +67,48 @@ RULES OF ENGAGEMENT:
             return NextResponse.json({ reply: "How can I help you today?" });
         }
 
-        // 5. Generate content
-        const result = await model.generateContent({
-            contents: contents,
-            generationConfig: {
-                temperature: 0.3,
-                maxOutputTokens: 800,
+        // Try models in sequence (Multi-Agent Fallback)
+        for (const modelName of MODELS_TO_TRY) {
+            try {
+                const model = genAI.getGenerativeModel({
+                    model: modelName,
+                    systemInstruction: DYNAMIC_SYSTEM_INSTRUCTION
+                });
+
+                const result = await model.generateContent({
+                    contents: contents,
+                    generationConfig: {
+                        temperature: 0.3,
+                        maxOutputTokens: 800,
+                    }
+                });
+
+                const response = await result.response;
+                replyText = response.text();
+
+                if (replyText) {
+                    console.log(`Successfully generated using ${modelName}`);
+                    return NextResponse.json({
+                        reply: replyText,
+                        agent: modelName
+                    });
+                }
+            } catch (err: any) {
+                console.warn(`Model ${modelName} failed:`, err.message);
+                lastError = err;
+                continue; // Try next model
             }
-        });
+        }
 
-        const response = await result.response;
-        const replyText = response.text() || "I'm having trouble retrieving that. Please try again or contact us via WhatsApp.";
-
-        return NextResponse.json({ reply: replyText });
+        // 5. Final Fallback if all agents fail
+        throw lastError || new Error("All AI agents are currently unavailable.");
 
     } catch (error: any) {
-        console.error("Gemini API Error:", error);
+        console.error("Master Agent Routing Error:", error);
         return NextResponse.json({
-            error: "Could not generate response.",
+            error: "All primary agents are offline.",
+            fallbackTrigger: true, // Signal to client to use Local Agent
             details: error.message
-        }, { status: 500 });
+        }, { status: 503 });
     }
 }
