@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
-import { Settings as SettingsIcon, Shield, Bell, Key, User, Camera, Check, AlertCircle, Instagram, Linkedin, Twitter, Youtube, Briefcase, ExternalLink, Globe } from "lucide-react";
+import { Settings as SettingsIcon, Shield, Bell, Key, User, Camera, Check, AlertCircle, Instagram, Linkedin, Twitter, Youtube, Briefcase, ExternalLink, Globe, CreditCard, Link as LinkIcon } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { fileToBase64 } from "@/lib/utils/fileToBase64";
 import Image from "next/image";
@@ -19,6 +19,14 @@ interface SettingsForm {
         youtube: string;
     };
     careersLink: string;
+    sheetsWebhookUrl: string;
+    paymentDetails: {
+        upiId: string;
+        accountName: string;
+        accountNumber: string;
+        ifscCode: string;
+        bankName: string;
+    };
 }
 
 export default function AdminSettings() {
@@ -30,7 +38,15 @@ export default function AdminSettings() {
                 twitter: "",
                 youtube: ""
             },
-            careersLink: ""
+            careersLink: "",
+            sheetsWebhookUrl: "",
+            paymentDetails: {
+                upiId: "",
+                accountName: "",
+                accountNumber: "",
+                ifscCode: "",
+                bankName: "",
+            }
         }
     });
     const [loading, setLoading] = useState(false);
@@ -68,6 +84,14 @@ export default function AdminSettings() {
                         setValue("socialLinks.youtube", data.socialLinks.youtube || "");
                     }
                     if (data?.careersLink) setValue("careersLink", data.careersLink);
+                    if (data?.sheetsWebhookUrl) setValue("sheetsWebhookUrl", data.sheetsWebhookUrl);
+                    if (data?.paymentDetails) {
+                        setValue("paymentDetails.upiId", data.paymentDetails.upiId || "");
+                        setValue("paymentDetails.accountName", data.paymentDetails.accountName || "");
+                        setValue("paymentDetails.accountNumber", data.paymentDetails.accountNumber || "");
+                        setValue("paymentDetails.ifscCode", data.paymentDetails.ifscCode || "");
+                        setValue("paymentDetails.bankName", data.paymentDetails.bankName || "");
+                    }
                 }
             } catch (e) {
                 console.error("Failed to fetch settings", e);
@@ -95,6 +119,8 @@ export default function AdminSettings() {
                 profileImage: profileImageBase64,
                 socialLinks: formData.socialLinks,
                 careersLink: formData.careersLink,
+                sheetsWebhookUrl: formData.sheetsWebhookUrl,
+                paymentDetails: formData.paymentDetails,
             };
 
             const res = await fetch("/api/admin/settings", {
@@ -137,6 +163,7 @@ export default function AdminSettings() {
                     {[
                         { name: "My Account", icon: User, active: true },
                         { name: "Public Links", icon: Globe, active: false, badge: "Social & Careers" },
+                        { name: "Integrations & Payments", icon: CreditCard, active: false, badge: "New" },
                         { name: "Security", icon: Shield, active: false },
                         { name: "Notifications", icon: Bell, active: false },
                     ].map((tab) => (
@@ -266,6 +293,51 @@ export default function AdminSettings() {
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Careers Form URL (Redirects from Careers Button)</label>
                                     <input type="url" {...register("careersLink")} placeholder="https://forms.gle/your-careers-form" className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all" />
+                                </div>
+                            </section>
+
+                            {/* Section: Integrations & Webhooks */}
+                            <section className="space-y-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+                                <div className="flex items-center gap-4 text-slate-900 dark:text-white">
+                                    <LinkIcon className="w-5 h-5 text-indigo-500" />
+                                    <h3 className="text-xl font-bold">Integrations</h3>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Google Sheets Webhook URL (For Enquiries Auto-Sync)</label>
+                                    <input type="url" {...register("sheetsWebhookUrl")} placeholder="https://script.google.com/macros/s/..." className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-mono text-sm" />
+                                    <p className="text-xs text-slate-500 ml-1">Leave blank to disable auto-sync. Needs a Google Apps Script Web App URL.</p>
+                                </div>
+                            </section>
+
+                            {/* Section: Payment Details (UPI & Bank) */}
+                            <section className="space-y-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+                                <div className="flex items-center gap-4 text-slate-900 dark:text-white">
+                                    <CreditCard className="w-5 h-5 text-amber-500" />
+                                    <h3 className="text-xl font-bold">Payment Details</h3>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">UPI ID (e.g., pratik@upi or phone number)</label>
+                                    <input type="text" {...register("paymentDetails.upiId")} placeholder="yourid@upi" className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all" />
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Account Holder Name</label>
+                                        <input type="text" {...register("paymentDetails.accountName")} placeholder="e.g., PNT Academy" className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Bank Name</label>
+                                        <input type="text" {...register("paymentDetails.bankName")} placeholder="e.g., HDFC Bank" className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Account Number</label>
+                                        <input type="text" {...register("paymentDetails.accountNumber")} placeholder="e.g., 50100XXXXXXX" className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">IFSC Code</label>
+                                        <input type="text" {...register("paymentDetails.ifscCode")} placeholder="e.g., HDFC0001234" className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all uppercase" />
+                                    </div>
                                 </div>
                             </section>
 

@@ -11,6 +11,14 @@ export interface IAdminSettings extends Document {
         youtube?: string;
     };
     careersLink?: string;
+    sheetsWebhookUrl?: string; // For auto-syncing enquiries to Google Sheets
+    paymentDetails?: {
+        upiId?: string;
+        accountName?: string;
+        accountNumber?: string;
+        ifscCode?: string;
+        bankName?: string;
+    };
 }
 
 const AdminSettingsSchema = new Schema<IAdminSettings>({
@@ -24,6 +32,14 @@ const AdminSettingsSchema = new Schema<IAdminSettings>({
         youtube: { type: String, default: "" },
     },
     careersLink: { type: String, default: "" },
+    sheetsWebhookUrl: { type: String, default: "" },
+    paymentDetails: {
+        upiId: { type: String, default: "" },
+        accountName: { type: String, default: "" },
+        accountNumber: { type: String, default: "" },
+        ifscCode: { type: String, default: "" },
+        bankName: { type: String, default: "" },
+    },
 });
 
 export default mongoose.models.AdminSettings || mongoose.model<IAdminSettings>('AdminSettings', AdminSettingsSchema);
