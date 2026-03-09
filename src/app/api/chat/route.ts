@@ -56,7 +56,8 @@ If a query exceeds your logic buffer (e.g., deep pricing or proprietary tech), s
 `;
 
         // 3. Multi-Agent Routing Logic
-        const MODELS_TO_TRY = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
+        // Optimized for PNT WEB Key: Prioritizing Robotic-Specialized and confirmed stable models
+        const MODELS_TO_TRY = ["gemini-robotics-er-1.5-preview", "gemini-2.0-flash", "gemini-1.5-flash-latest"];
         let lastError = null;
         let replyText = "";
 
