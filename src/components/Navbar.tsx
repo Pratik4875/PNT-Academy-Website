@@ -92,6 +92,9 @@ export default function Navbar() {
                         </button>
                     )}
 
+                    <Link href="/payments" className="ml-2 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                        Payments
+                    </Link>
                     <Link href="/contact" className="ml-2 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                         Contact
                     </Link>
