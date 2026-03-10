@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
-import { Settings as SettingsIcon, Shield, Bell, Key, User, Camera, Check, AlertCircle, Instagram, Linkedin, Twitter, Youtube, Briefcase, ExternalLink, Globe, CreditCard, Link as LinkIcon } from "lucide-react";
+import { Settings as SettingsIcon, Shield, Bell, Key, User, Camera, Check, AlertCircle, Instagram, Linkedin, Twitter, Youtube, Briefcase, ExternalLink, Globe, CreditCard, Link as LinkIcon, Brain, Upload, Trash2, FileText } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { fileToBase64 } from "@/lib/utils/fileToBase64";
 import Image from "next/image";
@@ -55,6 +55,12 @@ export default function AdminSettings() {
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [qrPreviewImage, setQrPreviewImage] = useState<string | null>(null);
     const [saveStatus, setSaveStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
+
+    // Knowledge Base state
+    const [kbFileName, setKbFileName] = useState<string>('');
+    const [kbTextLength, setKbTextLength] = useState(0);
+    const [kbUploading, setKbUploading] = useState(false);
+    const [kbStatus, setKbStatus] = useState<string>('');
 
     // Watch for image changes to update preview
     const profileImageFile = watch("profileImage");
@@ -114,6 +120,12 @@ export default function AdminSettings() {
             }
         }
         fetchSettings();
+
+        // Also fetch knowledge base info
+        fetch('/api/admin/knowledge-base').then(r => r.json()).then(data => {
+            if (data.fileName) setKbFileName(data.fileName);
+            if (data.textLength) setKbTextLength(data.textLength);
+        }).catch(() => { });
     }, [setValue]);
 
     const onSubmit = async (formData: SettingsForm) => {
@@ -376,6 +388,88 @@ export default function AdminSettings() {
                                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">IFSC Code</label>
                                         <input type="text" {...register("paymentDetails.ifscCode")} placeholder="e.g., HDFC0001234" className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all uppercase" />
                                     </div>
+                                </div>
+                            </section>
+
+                            {/* Section: AI Knowledge Base */}
+                            <section className="space-y-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+                                <div className="flex items-center gap-4 text-slate-900 dark:text-white">
+                                    <Brain className="w-5 h-5 text-violet-500" />
+                                    <h3 className="text-xl font-bold">AI Knowledge Base</h3>
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 font-bold">NEW</span>
+                                </div>
+                                <p className="text-sm text-slate-500 dark:text-slate-400">
+                                    Upload a company document (.txt or .docx) to make the AI chatbot smarter. It will use this information to answer visitor questions about PNT Academy.
+                                </p>
+
+                                {kbFileName && (
+                                    <div className="flex items-center justify-between p-4 bg-violet-50 dark:bg-violet-500/10 rounded-xl border border-violet-100 dark:border-violet-500/20">
+                                        <div className="flex items-center gap-3">
+                                            <FileText className="w-5 h-5 text-violet-500" />
+                                            <div>
+                                                <p className="text-sm font-semibold text-slate-800 dark:text-white">{kbFileName}</p>
+                                                <p className="text-xs text-slate-500">{(kbTextLength / 1000).toFixed(1)}KB of knowledge loaded</p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={async () => {
+                                                if (!confirm('Remove the knowledge base? The AI will lose this context.')) return;
+                                                await fetch('/api/admin/knowledge-base', { method: 'DELETE' });
+                                                setKbFileName('');
+                                                setKbTextLength(0);
+                                                setKbStatus('Knowledge base removed.');
+                                            }}
+                                            className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                )}
+
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Upload Company Document (.txt)</label>
+                                    <div className="flex items-center gap-4">
+                                        <input
+                                            type="file"
+                                            accept=".txt,text/plain"
+                                            onChange={async (e) => {
+                                                const file = e.target.files?.[0];
+                                                if (!file) return;
+                                                setKbUploading(true);
+                                                setKbStatus('Reading file...');
+                                                try {
+                                                    const text = await file.text();
+                                                    if (!text.trim()) throw new Error('File is empty');
+
+                                                    setKbStatus('Uploading to knowledge base...');
+                                                    const res = await fetch('/api/admin/knowledge-base', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({ knowledgeBaseText: text, knowledgeBaseFileName: file.name }),
+                                                    });
+                                                    if (!res.ok) {
+                                                        const err = await res.json();
+                                                        throw new Error(err.error || 'Upload failed');
+                                                    }
+                                                    const result = await res.json();
+                                                    setKbFileName(result.fileName);
+                                                    setKbTextLength(result.textLength);
+                                                    setKbStatus('✅ Knowledge base updated successfully!');
+                                                } catch (err: any) {
+                                                    setKbStatus(`❌ Error: ${err.message}`);
+                                                } finally {
+                                                    setKbUploading(false);
+                                                }
+                                            }}
+                                            disabled={kbUploading}
+                                            className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 dark:file:bg-violet-500/10 dark:file:text-violet-400 dark:hover:file:bg-violet-500/20 disabled:opacity-50"
+                                        />
+                                    </div>
+                                    <p className="text-xs text-slate-400 ml-1">💡 Tip: If you have a .docx file, open it in Google Docs or Word and save as .txt first.</p>
+                                    {kbStatus && (
+                                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 ml-1">{kbUploading ? '⏳ ' : ''}{kbStatus}</p>
+                                    )}
                                 </div>
                             </section>
 

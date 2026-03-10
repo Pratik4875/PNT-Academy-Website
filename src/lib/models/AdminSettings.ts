@@ -20,6 +20,8 @@ export interface IAdminSettings extends Document {
         ifscCode?: string;
         bankName?: string;
     };
+    knowledgeBaseText?: string; // Extracted text from uploaded company docs
+    knowledgeBaseFileName?: string; // Name of the uploaded file
 }
 
 const AdminSettingsSchema = new Schema<IAdminSettings>({
@@ -42,6 +44,8 @@ const AdminSettingsSchema = new Schema<IAdminSettings>({
         ifscCode: { type: String, default: "" },
         bankName: { type: String, default: "" },
     },
+    knowledgeBaseText: { type: String, default: "" },
+    knowledgeBaseFileName: { type: String, default: "" },
 });
 
 export default mongoose.models.AdminSettings || mongoose.model<IAdminSettings>('AdminSettings', AdminSettingsSchema);
