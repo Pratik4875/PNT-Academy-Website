@@ -22,18 +22,26 @@ function RoboPNTModel() {
     const [hovered, setHovered] = useState(false);
     const waveTime = useRef(0);
 
-    // Apply metallic materials
-    useMemo(() => {
+    // Apply metallic materials and get refs to parts
+    const parts = useMemo(() => {
+        const p: Record<string, THREE.Object3D> = {};
         scene.traverse((child) => {
             if ((child as THREE.Mesh).isMesh) {
                 const mat = (child as THREE.Mesh).material as THREE.MeshStandardMaterial;
                 if (mat) {
-                    mat.metalness = 0.92;
-                    mat.roughness = 0.1;
-                    mat.envMapIntensity = 2.0;
+                    if (mat.name.includes("Body")) {
+                        mat.metalness = 0.92;
+                        mat.roughness = 0.1;
+                        mat.envMapIntensity = 2.0;
+                    } else if (mat.name.includes("Eye")) {
+                        mat.emissive = new THREE.Color("#4facfe");
+                        mat.emissiveIntensity = 2.0;
+                    }
                 }
             }
+            if (child.name) p[child.name] = child;
         });
+        return p;
     }, [scene]);
 
     const handleClick = useCallback(() => {
@@ -48,59 +56,61 @@ function RoboPNTModel() {
         const t = state.clock.getElapsedTime();
         const g = groupRef.current;
 
-        // ──── 1. SERVO MOUSE TRACKING ────
-        // Stiff, step-like movement — like a real robot servo
-        const targetRotY = state.pointer.x * 0.4;
-        const targetRotX = -state.pointer.y * 0.15;
+        // 1. Mouse Tracking - ONLY HEAD TILTS
+        if (parts["Head"]) {
+            const head = parts["Head"];
+            const targetRotY = state.pointer.x * 0.5;
+            const targetRotX = -state.pointer.y * 0.3;
+            // The head is modeled pointing up/forward, adjust rotation accordingly
+            head.rotation.y = THREE.MathUtils.lerp(head.rotation.y, targetRotY, 0.1);
+            head.rotation.x = THREE.MathUtils.lerp(head.rotation.x, targetRotX, 0.1);
+        }
 
-        // Stiffer lerp = more mechanical (0.08 vs 0.05 for smooth)
-        g.rotation.y = THREE.MathUtils.lerp(g.rotation.y, targetRotY + Math.PI, 0.08);
-        g.rotation.x = THREE.MathUtils.lerp(g.rotation.x, targetRotX, 0.08);
+        // 2. Breathing - Body pulses
+        const breathe = Math.sin(t * 2) * 0.02;
+        g.position.y = -0.3 + breathe;
 
-        // ──── 2. MECHANICAL BREATHING ────
-        // Small, piston-like vertical pulse — not smooth, slightly stepped
-        const breatheRaw = Math.sin(t * 2);
-        const breathe = Math.sign(breatheRaw) * Math.pow(Math.abs(breatheRaw), 0.5) * 0.008;
-        g.position.y = -0.6 + breathe;
+        // 3. Idle Arms
+        if (parts["Arm_Left"] && !waving) {
+            parts["Arm_Left"].rotation.x = Math.sin(t * 1.5) * 0.1;
+        }
+        if (parts["Arm_Right"] && !waving) {
+            parts["Arm_Right"].rotation.x = Math.sin(t * 1.5 + Math.PI) * 0.1;
+        }
 
-        // ──── 3. IDLE ROCKING ────
-        // Very subtle side-to-side tilt, like a robot balancing
-        g.rotation.z = Math.sin(t * 0.7) * 0.02;
-
-        // ──── 4. CLICK WAVE ANIMATION ────
-        // Instead of jelly squash, do a stiff forward lean → rock back → settle
-        if (waving) {
+        // 4. Wave Animation - Only Arm_Right moves
+        if (waving && parts["Arm_Right"]) {
             waveTime.current += delta;
             const wt = waveTime.current;
+            const arm = parts["Arm_Right"];
 
-            if (wt < 1.8) {
-                const decay = Math.max(0, 1 - wt / 1.8);
-                // Stiff forward nod (like a bow/greeting)
-                const nod = Math.sin(wt * Math.PI * 2.5) * 0.15 * decay;
-                g.rotation.x += nod;
-                // Slight side-to-side rock
-                g.rotation.z += Math.sin(wt * Math.PI * 3) * 0.08 * decay;
+            if (wt < 2.0) {
+                const decay = Math.max(0, 1 - wt / 2.0);
+                // Swing arm up and wave
+                arm.rotation.x = THREE.MathUtils.lerp(arm.rotation.x, -2.5, 0.2); // Lift arm
+                arm.rotation.z = Math.sin(wt * Math.PI * 4) * 0.5 * decay; // Wave hand
             } else {
                 setWaving(false);
+                arm.rotation.x = THREE.MathUtils.lerp(arm.rotation.x, 0, 0.1);
+                arm.rotation.z = THREE.MathUtils.lerp(arm.rotation.z, 0, 0.1);
             }
         }
 
-        // Keep scale constant — no jelly
-        const baseScale = hovered ? 1.2 : 1.15;
+        const baseScale = hovered ? 1.05 : 1.0;
         g.scale.setScalar(baseScale);
     });
 
     return (
         <group
             ref={groupRef}
-            position={[0, -0.6, 0]}
+            position={[0, -0.3, 0]}
             onClick={handleClick}
             onPointerOver={() => { setHovered(true); document.body.style.cursor = "pointer"; }}
             onPointerOut={() => { setHovered(false); document.body.style.cursor = "auto"; }}
         >
             <primitive object={scene} />
             {hovered && (
-                <pointLight position={[0, 1, 2]} intensity={3} color="#7c3aed" distance={5} />
+                <pointLight position={[0, 1.5, 2]} intensity={5} color="#4facfe" distance={5} />
             )}
         </group>
     );
