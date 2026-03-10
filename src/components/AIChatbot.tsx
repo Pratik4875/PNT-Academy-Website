@@ -2,12 +2,13 @@
 import { useState, useRef, useEffect } from "react";
 import Spline from "@splinetool/react-spline";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, Bot, User, Loader2, Maximize2, Minimize2 } from "lucide-react";
+import { X, Send, Bot, User, Loader2, ThumbsUp, ThumbsDown } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 interface Message {
     role: "user" | "model";
     content: string;
+    feedback?: "up" | "down";
 }
 
 export default function AIChatbot() {
@@ -76,6 +77,33 @@ export default function AIChatbot() {
         if (factMatch) return factMatch.answer;
 
         return null;
+    };
+
+    const handleFeedback = async (index: number, type: "up" | "down") => {
+        const aiMsg = messages[index];
+        const userMsg = messages[index - 1]; // Previous message is user's query
+        if (!aiMsg || !userMsg || aiMsg.feedback) return;
+
+        // Optimistically update UI
+        setMessages(prev => {
+            const newMsgs = [...prev];
+            newMsgs[index] = { ...newMsgs[index], feedback: type };
+            return newMsgs;
+        });
+
+        try {
+            await fetch("/api/chat/feedback", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    userMessage: userMsg.content,
+                    aiResponse: aiMsg.content,
+                    isThumbsUp: type === "up",
+                }),
+            });
+        } catch (error) {
+            console.error("Failed to submit feedback:", error);
+        }
     };
 
     const handleSendMessage = async (e?: React.FormEvent) => {
@@ -247,7 +275,7 @@ export default function AIChatbot() {
                                             }`}>
                                             {msg.role === "user" ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />}
                                         </div>
-                                        <div className={`max-w-[85%] rounded-[1.5rem] p-4 text-sm leading-relaxed shadow-sm ring-1 ${msg.role === "user"
+                                        <div className={`max-w-[85%] group rounded-[1.5rem] p-4 text-sm leading-relaxed shadow-sm ring-1 ${msg.role === "user"
                                             ? "bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-tr-none ring-blue-500/20"
                                             : "bg-white/80 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 rounded-tl-none ring-black/5 dark:ring-white/5 backdrop-blur-md"
                                             }`}>
@@ -265,6 +293,28 @@ export default function AIChatbot() {
                                                     {msg.content.replace("(Local Knowledge Active) ", "")}
                                                 </ReactMarkdown>
                                             </div>
+
+                                            {/* Feedback Buttons for AI */}
+                                            {msg.role === "model" && i > 0 && !msg.content.includes("CRITICAL ERROR") && (
+                                                <div className="flex items-center justify-end gap-1.5 mt-2 pt-2 border-t border-slate-200/50 dark:border-slate-700/50 opacity-0 group-hover:opacity-100 hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                                                    <button
+                                                        onClick={() => handleFeedback(i, "up")}
+                                                        disabled={!!msg.feedback}
+                                                        className={`p-1.5 rounded-md transition-colors ${msg.feedback === "up" ? "text-green-500 bg-green-50 dark:bg-green-500/10 opacity-100" : "text-slate-400 hover:text-green-600 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50"}`}
+                                                        title="Good response"
+                                                    >
+                                                        <ThumbsUp className="w-3.5 h-3.5" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleFeedback(i, "down")}
+                                                        disabled={!!msg.feedback}
+                                                        className={`p-1.5 rounded-md transition-colors ${msg.feedback === "down" ? "text-red-500 bg-red-50 dark:bg-red-500/10 opacity-100" : "text-slate-400 hover:text-red-600 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50"}`}
+                                                        title="Bad response"
+                                                    >
+                                                        <ThumbsDown className="w-3.5 h-3.5" />
+                                                    </button>
+                                                </div>
+                                            )}
 
                                             {/* Contact Sales Fallback UI */}
                                             {isError && i === messages.length - 1 && (
