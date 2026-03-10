@@ -13,7 +13,7 @@ const ContactBaymax3D = dynamic(() => import("./ContactBaymax3DScene"), {
 
 export default function ContactBaymaxWrapper() {
     return (
-        <div className="h-[400px] w-full max-w-[500px] mx-auto mt-4">
+        <div className="h-[450px] w-full max-w-[500px] mx-auto mt-4">
             <ContactBaymax3D />
         </div>
     );

@@ -1,35 +1,33 @@
 "use client";
 
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Environment, OrbitControls, Float, useGLTF } from "@react-three/drei";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Environment, OrbitControls, useGLTF } from "@react-three/drei";
 import { Suspense, useRef, useState, useCallback, useMemo } from "react";
 import * as THREE from "three";
 
 /**
- * Robo-PNT — A curious little robot with personality.
+ * Robo-PNT — Interactive robot with rigid mechanical motion.
  * 
- * Personality traits:
- * - Curious: follows your mouse like it's watching you
- * - Playful: bounces and wobbles when you click it
- * - Alive: breathes, sways, and occasionally looks around on its own
- * - Shy: slightly recoils then perks up on hover
- * - Chatty: shows different messages each time you click
+ * Behaviors:
+ * - Tracks cursor with stiff, servo-like head tilt
+ * - Gentle mechanical breathing (piston-like)
+ * - Click → sharp wave (whole-body rock) + speech bubble
+ * - Hover → eyes light up (rim glow)
+ * - Subtle idle rocking like a robot on wheels
  */
 function RoboPNTModel() {
     const groupRef = useRef<THREE.Group>(null);
     const { scene } = useGLTF("/models/robo-pnt.glb");
-    const [bounce, setBounce] = useState(0);
+    const [waving, setWaving] = useState(false);
     const [hovered, setHovered] = useState(false);
-    const bounceTime = useRef(0);
-    const idlePhase = useRef(Math.random() * 100); // random start so it feels natural
+    const waveTime = useRef(0);
 
-    // Configure metallic materials at runtime for maximum shine
+    // Apply metallic materials
     useMemo(() => {
         scene.traverse((child) => {
             if ((child as THREE.Mesh).isMesh) {
-                const mesh = child as THREE.Mesh;
-                if (mesh.material) {
-                    const mat = mesh.material as THREE.MeshStandardMaterial;
+                const mat = (child as THREE.Mesh).material as THREE.MeshStandardMaterial;
+                if (mat) {
                     mat.metalness = 0.92;
                     mat.roughness = 0.1;
                     mat.envMapIntensity = 2.0;
@@ -39,85 +37,68 @@ function RoboPNTModel() {
     }, [scene]);
 
     const handleClick = useCallback(() => {
-        setBounce(b => b + 1);
-        bounceTime.current = 0;
-    }, []);
+        if (!waving) {
+            setWaving(true);
+            waveTime.current = 0;
+        }
+    }, [waving]);
 
     useFrame((state, delta) => {
         if (!groupRef.current) return;
         const t = state.clock.getElapsedTime();
         const g = groupRef.current;
 
-        // ──────────────────────────────────────────────
-        // 1. CURIOUS MOUSE FOLLOWING
-        // The robot tracks your cursor like a curious pet
-        // ──────────────────────────────────────────────
-        const targetRotY = state.pointer.x * 0.5;
-        const targetRotX = -state.pointer.y * 0.25;
+        // ──── 1. SERVO MOUSE TRACKING ────
+        // Stiff, step-like movement — like a real robot servo
+        const targetRotY = state.pointer.x * 0.4;
+        const targetRotX = -state.pointer.y * 0.15;
 
-        g.rotation.y = THREE.MathUtils.lerp(g.rotation.y, targetRotY + Math.PI, 0.05);
-        g.rotation.x = THREE.MathUtils.lerp(g.rotation.x, targetRotX, 0.05);
+        // Stiffer lerp = more mechanical (0.08 vs 0.05 for smooth)
+        g.rotation.y = THREE.MathUtils.lerp(g.rotation.y, targetRotY + Math.PI, 0.08);
+        g.rotation.x = THREE.MathUtils.lerp(g.rotation.x, targetRotX, 0.08);
 
-        // ──────────────────────────────────────────────
-        // 2. IDLE PERSONALITY — "Looking around"
-        // Every few seconds, the robot looks around as if curious
-        // ──────────────────────────────────────────────
-        const idleT = t + idlePhase.current;
-        const lookCycle = Math.sin(idleT * 0.3) * Math.sin(idleT * 0.17); // irregular
-        g.rotation.y += lookCycle * 0.08;
+        // ──── 2. MECHANICAL BREATHING ────
+        // Small, piston-like vertical pulse — not smooth, slightly stepped
+        const breatheRaw = Math.sin(t * 2);
+        const breathe = Math.sign(breatheRaw) * Math.pow(Math.abs(breatheRaw), 0.5) * 0.008;
+        g.position.y = -0.6 + breathe;
 
-        // Head bob — like nodding or bobbing to music
-        g.position.y = -1.1 + Math.sin(t * 1.2) * 0.03;
+        // ──── 3. IDLE ROCKING ────
+        // Very subtle side-to-side tilt, like a robot balancing
+        g.rotation.z = Math.sin(t * 0.7) * 0.02;
 
-        // ──────────────────────────────────────────────
-        // 3. BREATHING — subtle scale pulse
-        // ──────────────────────────────────────────────
-        const breathe = Math.sin(t * 1.6) * 0.02;
-        const baseScale = hovered ? 2.4 : 2.2;
-        g.scale.setScalar(baseScale + breathe);
+        // ──── 4. CLICK WAVE ANIMATION ────
+        // Instead of jelly squash, do a stiff forward lean → rock back → settle
+        if (waving) {
+            waveTime.current += delta;
+            const wt = waveTime.current;
 
-        // ──────────────────────────────────────────────
-        // 4. BODY SWAY — gentle side-to-side rocking
-        // ──────────────────────────────────────────────
-        g.rotation.z = Math.sin(t * 0.6) * 0.04 + Math.sin(t * 1.3) * 0.02;
-
-        // ──────────────────────────────────────────────
-        // 5. CLICK BOUNCE — squash & stretch physics
-        // ──────────────────────────────────────────────
-        if (bounce > 0) {
-            bounceTime.current += delta;
-            const bt = bounceTime.current;
-            if (bt < 1.5) {
-                const decay = Math.max(0, 1 - bt / 1.5);
-                // Jump arc
-                const jumpHeight = Math.sin(bt * Math.PI / 0.35) * 0.5 * decay;
-                g.position.y = -1.1 + Math.abs(jumpHeight);
-
-                // Squash & stretch
-                const squash = 1 + Math.sin(bt * Math.PI * 5) * 0.1 * decay;
-                g.scale.x = baseScale * (2 - squash);
-                g.scale.y = baseScale * squash;
-                g.scale.z = baseScale * (2 - squash);
-
-                // Spin during bounce
-                g.rotation.y += delta * 4 * decay;
+            if (wt < 1.8) {
+                const decay = Math.max(0, 1 - wt / 1.8);
+                // Stiff forward nod (like a bow/greeting)
+                const nod = Math.sin(wt * Math.PI * 2.5) * 0.15 * decay;
+                g.rotation.x += nod;
+                // Slight side-to-side rock
+                g.rotation.z += Math.sin(wt * Math.PI * 3) * 0.08 * decay;
             } else {
-                g.position.y = -1.1;
-                setBounce(0);
+                setWaving(false);
             }
         }
+
+        // Keep scale constant — no jelly
+        const baseScale = hovered ? 1.2 : 1.15;
+        g.scale.setScalar(baseScale);
     });
 
     return (
         <group
             ref={groupRef}
-            position={[0, -1.1, 0]}
+            position={[0, -0.6, 0]}
             onClick={handleClick}
             onPointerOver={() => { setHovered(true); document.body.style.cursor = "pointer"; }}
             onPointerOut={() => { setHovered(false); document.body.style.cursor = "auto"; }}
         >
             <primitive object={scene} />
-            {/* Purple rim glow on hover */}
             {hovered && (
                 <pointLight position={[0, 1, 2]} intensity={3} color="#7c3aed" distance={5} />
             )}
@@ -125,44 +106,23 @@ function RoboPNTModel() {
     );
 }
 
-function SubtleGlow() {
-    return (
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.4, 0]}>
-            <circleGeometry args={[3, 64]} />
-            <meshStandardMaterial
-                color="#7c3aed"
-                transparent
-                opacity={0.08}
-                metalness={0.5}
-                roughness={0.8}
-            />
-        </mesh>
-    );
-}
-
 function FloatingParticles() {
     const particlesRef = useRef<THREE.Points>(null);
-    const count = 60;
+    const count = 40;
 
     const positions = useMemo(() => {
         const arr = new Float32Array(count * 3);
         for (let i = 0; i < count; i++) {
             arr[i * 3] = (Math.random() - 0.5) * 10;
-            arr[i * 3 + 1] = Math.random() * 6 - 2;
-            arr[i * 3 + 2] = (Math.random() - 0.5) * 8;
+            arr[i * 3 + 1] = Math.random() * 5 - 2;
+            arr[i * 3 + 2] = (Math.random() - 0.5) * 6;
         }
         return arr;
     }, []);
 
     useFrame((state) => {
         if (!particlesRef.current) return;
-        const t = state.clock.getElapsedTime();
-        particlesRef.current.rotation.y = t * 0.03;
-        const posArr = particlesRef.current.geometry.attributes.position.array as Float32Array;
-        for (let i = 0; i < count; i++) {
-            posArr[i * 3 + 1] += Math.sin(t * 0.5 + i * 0.7) * 0.002;
-        }
-        particlesRef.current.geometry.attributes.position.needsUpdate = true;
+        particlesRef.current.rotation.y = state.clock.getElapsedTime() * 0.02;
     });
 
     return (
@@ -173,7 +133,7 @@ function FloatingParticles() {
                     args={[positions, 3]}
                 />
             </bufferGeometry>
-            <pointsMaterial size={0.04} color="#818cf8" transparent opacity={0.5} sizeAttenuation />
+            <pointsMaterial size={0.03} color="#818cf8" transparent opacity={0.4} sizeAttenuation />
         </points>
     );
 }
@@ -183,40 +143,33 @@ useGLTF.preload("/models/robo-pnt.glb");
 export default function ContactBaymax3DScene() {
     const [clickCount, setClickCount] = useState(0);
 
-    // Personality messages — the robot says different things each click
     const messages = [
-        "👋 Hey there! I'm Robo-PNT!",
-        "🤖 I was built by PNT Academy",
-        "💬 I love answering questions — try the chatbot!",
-        "🚀 We teach Robotics, AI & IoT to kids!",
-        "✨ Click me again, I dare you!",
-        "🎓 Want to learn robotics? You're in the right place!",
-        "🤝 Let's connect — fill the form below!",
+        "👋 Hey! I'm Robo-PNT!",
+        "🤖 Built by PNT Academy",
+        "💬 Try the chatbot below!",
+        "🚀 We teach Robotics & AI!",
+        "🎓 Courses for Grades 4-12",
+        "🤝 Fill the form to connect!",
     ];
 
     return (
         <div className="h-full w-full relative">
             <Canvas
-                camera={{ position: [0, 0.3, 5], fov: 36 }}
-                gl={{ alpha: true, antialias: true, toneMappingExposure: 1.3 }}
+                camera={{ position: [0, 0.2, 6], fov: 42 }}
+                gl={{ alpha: true, antialias: true, toneMappingExposure: 1.2 }}
                 onClick={() => setClickCount(c => c + 1)}
             >
                 <Suspense fallback={null}>
-                    {/* Dramatic studio lighting for metallic robot */}
-                    <ambientLight intensity={0.25} />
-                    <directionalLight position={[4, 8, 3]} intensity={1.8} color="#e0e7ff" castShadow />
-                    <directionalLight position={[-4, 3, -2]} intensity={0.6} color="#c084fc" />
-                    <spotLight position={[0, 12, 5]} angle={0.2} penumbra={1} intensity={1.5} color="#ffffff" castShadow />
-                    <pointLight position={[-4, -1, 4]} intensity={0.5} color="#60a5fa" />
-                    <pointLight position={[4, 0, -3]} intensity={0.3} color="#a78bfa" />
+                    {/* Studio lighting for metallic finish */}
+                    <ambientLight intensity={0.3} />
+                    <directionalLight position={[4, 8, 3]} intensity={1.8} color="#e0e7ff" />
+                    <directionalLight position={[-4, 3, -2]} intensity={0.5} color="#c084fc" />
+                    <spotLight position={[0, 10, 5]} angle={0.2} penumbra={1} intensity={1.2} />
+                    <pointLight position={[-3, -1, 3]} intensity={0.4} color="#60a5fa" />
                     <Environment preset="night" />
 
-                    <Float speed={1.2} rotationIntensity={0} floatIntensity={0.2}>
-                        <RoboPNTModel />
-                    </Float>
-
+                    <RoboPNTModel />
                     <FloatingParticles />
-                    <SubtleGlow />
 
                     <OrbitControls
                         enableZoom={false}
@@ -227,20 +180,19 @@ export default function ContactBaymax3DScene() {
                 </Suspense>
             </Canvas>
 
-            {/* Speech bubble */}
             {clickCount > 0 && (
                 <div
                     key={clickCount}
-                    className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md rounded-2xl px-5 py-3 shadow-2xl border border-violet-200/50 dark:border-violet-500/30 text-sm font-medium text-slate-700 dark:text-slate-200 z-10"
-                    style={{ animation: "speechBubble 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)" }}
+                    className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md rounded-2xl px-5 py-2.5 shadow-xl border border-violet-200/50 dark:border-violet-500/30 text-sm font-medium text-slate-700 dark:text-slate-200 z-10"
+                    style={{ animation: "popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)" }}
                 >
                     {messages[(clickCount - 1) % messages.length]}
                 </div>
             )}
 
             <style jsx>{`
-                @keyframes speechBubble {
-                    0% { opacity: 0; transform: translate(-50%, 12px) scale(0.9); }
+                @keyframes popIn {
+                    0% { opacity: 0; transform: translate(-50%, 6px) scale(0.95); }
                     100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
                 }
             `}</style>
