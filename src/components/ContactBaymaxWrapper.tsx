@@ -4,12 +4,16 @@ import dynamic from "next/dynamic";
 
 const ContactBaymax3D = dynamic(() => import("./ContactBaymax3DScene"), {
     ssr: false,
-    loading: () => <div className="h-full w-full bg-slate-100/50 dark:bg-slate-800/50 animate-pulse rounded-3xl" />,
+    loading: () => (
+        <div className="h-full w-full flex items-center justify-center">
+            <div className="w-16 h-16 border-4 border-violet-500/30 border-t-violet-500 rounded-full animate-spin" />
+        </div>
+    ),
 });
 
 export default function ContactBaymaxWrapper() {
     return (
-        <div className="h-[300px] w-full max-w-[300px] mx-auto">
+        <div className="h-[400px] w-full max-w-[500px] mx-auto mt-4">
             <ContactBaymax3D />
         </div>
     );
