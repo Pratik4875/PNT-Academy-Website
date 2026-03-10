@@ -6,7 +6,6 @@ import NetworkBackground from "@/components/NetworkBackground";
 import { Send, MapPin, Mail, Phone, CheckCircle, Loader2, MessageCircle, Briefcase, ExternalLink, Instagram, Linkedin, Twitter, Youtube, ChevronDown } from "lucide-react";
 
 import ClientOnly from "@/components/ClientOnly";
-import ContactBaymaxWrapper from "@/components/ContactBaymaxWrapper";
 
 interface Faq {
     _id: string;
@@ -131,11 +130,6 @@ export default function ContactClient({ faqs, settings }: { faqs: Faq[], setting
                         >
                             Whether you want to set up a lab, enroll in a course, or explore a partnership — we&apos;re here to help.
                         </motion.p>
-
-                        {/* Baymax 3D Robot */}
-                        <ClientOnly>
-                            <ContactBaymaxWrapper />
-                        </ClientOnly>
                     </div>
                 </section>
 
