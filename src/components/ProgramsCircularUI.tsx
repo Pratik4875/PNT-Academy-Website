@@ -77,7 +77,7 @@ function RealisticEarth() {
         <group>
             {/* The Earth */}
             <mesh ref={earthRef}>
-                <sphereGeometry args={[3.2, 64, 64]} />
+                <sphereGeometry args={[5.3, 64, 64]} />
                 <meshStandardMaterial
                     map={colorMap}
                     bumpMap={bumpMap}
@@ -89,7 +89,7 @@ function RealisticEarth() {
 
             {/* Cloud Layer */}
             <mesh ref={cloudsRef}>
-                <sphereGeometry args={[3.25, 64, 64]} />
+                <sphereGeometry args={[5.65, 64, 64]} />
                 <meshStandardMaterial
                     map={cloudsMap}
                     transparent={true}
@@ -101,7 +101,7 @@ function RealisticEarth() {
 
             {/* Atmospheric Glow */}
             <mesh>
-                <sphereGeometry args={[3.4, 64, 64]} />
+                <sphereGeometry args={[4.4, 64, 64]} />
                 <meshBasicMaterial
                     color="#4b91ff"
                     transparent={true}
@@ -173,7 +173,7 @@ function OrbitingSystem() {
     const [frontNode, setFrontNode] = useState<string | null>(null);
     const frontNodeRef = useRef<string | null>(null);
 
-    const radius = 6.5; // Orbit radius (increased slightly for bigger earth)
+    const radius = 7.5; // Orbit radius (pushed outwards for larger earth)
 
     // Global rotation for the entire system and front-detection logic
     useFrame((state, delta) => {
@@ -286,7 +286,7 @@ export default function ProgramsCircularUI() {
     return (
         <div className="w-full h-[800px] md:h-[1000px] relative mt-16 overflow-visible transition-colors duration-500">
             {/* The transparent canvas allowing natural background to shine through */}
-            <Canvas camera={{ position: [0, 2, 16], fov: 45 }}>
+            <Canvas camera={{ position: [0, 2, 30], fov: 45 }}>
                 {/* Tech/Robotics Ambient Lighting */}
                 <ambientLight intensity={0.8} />
                 <directionalLight position={[10, 20, 10]} intensity={2.5} color="#ffffff" />
