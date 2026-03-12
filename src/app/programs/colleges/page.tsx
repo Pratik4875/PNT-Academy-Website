@@ -16,7 +16,7 @@ export default function CollegesProgramsPage() {
                 colorFrom="from-indigo-500"
                 colorTo="to-blue-700"
             />
-            <ComingSoon />
+            <CollegesProgramsContent />
             <Footer />
         </main>
     );

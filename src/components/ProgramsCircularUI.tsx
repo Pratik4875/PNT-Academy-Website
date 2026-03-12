@@ -77,7 +77,7 @@ function RealisticEarth() {
         <group>
             {/* The Earth */}
             <mesh ref={earthRef}>
-                <sphereGeometry args={[2.4, 64, 64]} />
+                <sphereGeometry args={[3.2, 64, 64]} />
                 <meshStandardMaterial
                     map={colorMap}
                     bumpMap={bumpMap}
@@ -89,7 +89,7 @@ function RealisticEarth() {
 
             {/* Cloud Layer */}
             <mesh ref={cloudsRef}>
-                <sphereGeometry args={[2.45, 64, 64]} />
+                <sphereGeometry args={[3.25, 64, 64]} />
                 <meshStandardMaterial
                     map={cloudsMap}
                     transparent={true}
@@ -101,7 +101,7 @@ function RealisticEarth() {
 
             {/* Atmospheric Glow */}
             <mesh>
-                <sphereGeometry args={[2.6, 64, 64]} />
+                <sphereGeometry args={[3.4, 64, 64]} />
                 <meshBasicMaterial
                     color="#4b91ff"
                     transparent={true}
@@ -152,14 +152,14 @@ function RealisticMoon() {
     return (
         <group ref={orbitRef}>
             {/* Realistic Moon (rotates sideways to Front Right on Dark Mode) */}
-            <mesh ref={moonRef} position={[-3.5, 3.5, -3.5]}>
+            <mesh ref={moonRef} position={[-4.5, 3.5, -4.5]}>
                 <sphereGeometry args={[1.0, 64, 64]} />
                 <meshStandardMaterial map={moonTexture} roughness={1} metalness={0} />
                 <pointLight intensity={0.5} color="#cbd5e1" distance={30} />
             </mesh>
 
             {/* Dynamic Starfield that swings in sideways behind the moon! */}
-            <group ref={starsRef} position={[-3.5, 0, -3.5]}>
+            <group ref={starsRef} position={[-4.5, 0, -4.5]}>
                 <Stars radius={20} depth={20} count={1000} factor={3} saturation={0} fade speed={1} />
             </group>
         </group>
@@ -170,18 +170,39 @@ function RealisticMoon() {
 function OrbitingSystem() {
     const groupRef = useRef<THREE.Group>(null);
     const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+    const [frontNode, setFrontNode] = useState<string | null>(null);
+    const frontNodeRef = useRef<string | null>(null);
 
-    // Global rotation for the entire system
+    const radius = 6.5; // Orbit radius (increased slightly for bigger earth)
+
+    // Global rotation for the entire system and front-detection logic
     useFrame((state, delta) => {
         if (groupRef.current) {
             // Only rotate if nothing is hovered, making it easier to read/click
             if (!hoveredNode) {
                 groupRef.current.rotation.y -= delta * 0.2; // Slow counter-clockwise orbit
             }
+
+            // Find which node is currently facing the front (closest to camera, meaning max Z globally)
+            let maxZ = -Infinity;
+            let currentFront = null;
+            PROGRAMS.forEach((prog, index) => {
+                const angle = (index / PROGRAMS.length) * Math.PI * 2;
+                // Calculate its absolute global Z position on the circle (taking group rotation into account)
+                const globalZ = Math.sin(angle + groupRef.current!.rotation.y) * radius;
+                if (globalZ > maxZ) {
+                    maxZ = globalZ;
+                    currentFront = prog.id;
+                }
+            });
+
+            // Update React state only if the frontmost item strictly changed to avoid thrashing
+            if (currentFront !== frontNodeRef.current) {
+                frontNodeRef.current = currentFront;
+                setFrontNode(currentFront);
+            }
         }
     });
-
-    const radius = 6; // Orbit radius
 
     return (
         <group ref={groupRef}>
@@ -193,8 +214,10 @@ function OrbitingSystem() {
                 // Add a slight vertical wave
                 const y = Math.sin(angle * 2) * 1.5;
 
-                const isHovered = hoveredNode === prog.id;
-                const isFaded = hoveredNode !== null && !isHovered;
+                // Active Node is either manually hovered, or automatically the one in front
+                const isActive = hoveredNode === prog.id || (!hoveredNode && frontNode === prog.id);
+                // Faded if something is active but it's not THIS one
+                const isFaded = (hoveredNode || frontNode) ? !isActive : false;
 
                 return (
                     <group key={prog.id} position={[x, y, z]}>
@@ -217,13 +240,13 @@ function OrbitingSystem() {
                                 onPointerEnter={() => setHoveredNode(prog.id)}
                                 onPointerLeave={() => setHoveredNode(null)}
                             >
-                                {/* Collapsed Node (Icon only) */}
-                                <div className={`w-16 h-16 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl flex items-center justify-center transition-all duration-300 ${isHovered ? 'scale-0 opacity-0' : 'scale-100 opacity-100'}`}>
-                                    <prog.icon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                                {/* Collapsed Node (Icon only) - Size Increased per Request */}
+                                <div className={`w-24 h-24 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl flex items-center justify-center transition-all duration-300 ${isActive ? 'scale-0 opacity-0' : 'scale-100 opacity-100'}`}>
+                                    <prog.icon className="w-12 h-12 text-blue-600 dark:text-blue-400" />
                                 </div>
 
                                 {/* Expanded Card State */}
-                                <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] md:w-[320px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-[2rem] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-slate-200/50 dark:border-slate-700/50 transition-all duration-700 origin-center ${isHovered ? `scale-100 opacity-100 rotate-y-0 ${prog.shadow}` : 'scale-75 opacity-0 rotate-y-90 pointer-events-none'}`}
+                                <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] md:w-[320px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-[2rem] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-slate-200/50 dark:border-slate-700/50 transition-all duration-700 origin-center ${isActive ? `scale-100 opacity-100 rotate-y-0 ${prog.shadow}` : 'scale-75 opacity-0 rotate-y-90 pointer-events-none'}`}
                                     style={{ transformStyle: 'preserve-3d', perspective: '1000px' }}>
                                     <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${prog.color} flex items-center justify-center mb-4 text-white shadow-lg transform transition-transform duration-500 hover:scale-110 hover:rotate-12`}>
                                         <prog.icon className="w-6 h-6" />
@@ -266,11 +289,12 @@ export default function ProgramsCircularUI() {
                 <directionalLight position={[10, 20, 10]} intensity={2.5} color="#ffffff" />
                 <directionalLight position={[-10, -10, -10]} intensity={1.5} color="#3b82f6" />
                 <pointLight position={[0, -5, 5]} intensity={1.0} color="#0ea5e9" />
-                {/* Background Earth */}
-                <RealisticEarth />
-
-                <RealisticMoon />
-                <OrbitingSystem />
+                {/* Translate entire visual cluster up by 1.5 units so user still looks straight on but group is elevated */}
+                <group position={[0, 1.5, 0]}>
+                    <RealisticEarth />
+                    <RealisticMoon />
+                    <OrbitingSystem />
+                </group>
 
                 {/* 
                     OrbitControls allows user to drag and spin the entire scene 

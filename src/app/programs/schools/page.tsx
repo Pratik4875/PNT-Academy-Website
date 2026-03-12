@@ -17,7 +17,7 @@ export default function SchoolsProgramsPage() {
                 colorFrom="from-blue-600"
                 colorTo="to-purple-600"
             />
-            <ComingSoon />
+            <SchoolsProgramsContent />
             <Footer />
         </main>
     );
