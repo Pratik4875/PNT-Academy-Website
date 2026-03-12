@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { getLiveAboutPhotos } from "@/lib/actions/db";
 
 interface Photo {
     _id: string;
@@ -8,11 +9,16 @@ interface Photo {
     caption?: string;
 }
 
-export default function AboutSlider({ photos }: { photos: Photo[] }) {
+export default function AboutSlider() {
+    const [photos, setPhotos] = useState<Photo[]>([]);
     const [current, setCurrent] = useState(0);
 
-    const prev = useCallback(() => setCurrent((c) => (c === 0 ? photos.length - 1 : c - 1)), [photos.length]);
-    const next = useCallback(() => setCurrent((c) => (c === photos.length - 1 ? 0 : c + 1)), [photos.length]);
+    useEffect(() => {
+        getLiveAboutPhotos().then(setPhotos).catch(console.error);
+    }, []);
+
+    const prev = useCallback(() => setCurrent((c) => (c === 0 ? Math.max(0, photos.length - 1) : c - 1)), [photos.length]);
+    const next = useCallback(() => setCurrent((c) => (c === Math.max(0, photos.length - 1) ? 0 : c + 1)), [photos.length]);
 
     // Auto-advance every 4 seconds
     useEffect(() => {

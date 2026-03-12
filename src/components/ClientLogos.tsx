@@ -1,14 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { getLiveSchools } from "@/lib/actions/db";
 
-interface ClientLogosProps {
-    logos: any[];
-}
+export default function ClientLogos() {
+    const [logos, setLogos] = useState<any[]>([]);
 
-export default function ClientLogos({ logos }: ClientLogosProps) {
-
-
+    useEffect(() => {
+        getLiveSchools().then(setLogos).catch(console.error);
+    }, []);
 
     if (logos.length === 0) {
         return (

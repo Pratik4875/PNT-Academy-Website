@@ -12,7 +12,7 @@ import TestimonialsSlider from "@/components/TestimonialsSlider";
 import BootcampCTA from "@/components/BootcampCTA";
 import Footer from "@/components/Footer";
 import AboutSlider from "@/components/AboutSlider";
-import { getLiveGallery, getLiveSchools, getLiveInternships, incrementLiveVisits, getLiveAboutPhotos } from "@/lib/actions/db";
+import { incrementLiveVisits } from "@/lib/actions/db";
 
 import ClientOnly from "@/components/ClientOnly";
 
@@ -20,13 +20,9 @@ import ClientOnly from "@/components/ClientOnly";
 export const revalidate = 60;
 
 export default async function Home() {
-  // Run all DB reads in parallel — much faster than sequential awaits
-  const [galleryItems, schools, internships, aboutPhotos] = await Promise.all([
-    getLiveGallery(),
-    getLiveSchools(),
-    getLiveInternships(),
-    getLiveAboutPhotos(),
-  ]);
+  // No longer fetching heavyweight Base64 Base DB entries here!
+  // This prevents the Vercel ISR payload from hitting the 19MB Limit.
+  // The client components now fetch their own data directly.
 
   // Fire-and-forget — never block page render for a counter update
   incrementLiveVisits().catch(() => { });
@@ -135,7 +131,7 @@ export default async function Home() {
 
               {/* Big slider */}
               <div className="w-full">
-                <AboutSlider photos={aboutPhotos} />
+                <AboutSlider />
               </div>
 
             </div>
@@ -157,7 +153,7 @@ export default async function Home() {
         </section>
 
         {/* Projects Gallery Section (Dynamic) */}
-        <Gallery items={galleryItems} />
+        <Gallery />
 
         {/* Testimonials Slider */}
         <TestimonialsSlider />
@@ -169,7 +165,7 @@ export default async function Home() {
             <p className="text-lg text-slate-600 dark:text-slate-400 mb-16 max-w-2xl mx-auto transition-colors duration-500">
               We provide hands-on internship experience working on technologies utilized by our elite clients.
             </p>
-            <InternshipLogos logos={internships} />
+            <InternshipLogos />
           </div>
         </section>
 
@@ -177,7 +173,7 @@ export default async function Home() {
         <section id="clients" className="py-24 relative border-t border-slate-900/10 dark:border-white/5 transition-colors duration-500 bg-white dark:bg-slate-950">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl font-bold mb-16 text-slate-800 dark:text-white/90 transition-colors duration-500">Trusted by Innovative Schools</h2>
-            <ClientLogos logos={schools} />
+            <ClientLogos />
             <p className="text-xl font-medium text-slate-500 dark:text-slate-400 mt-12 transition-colors duration-500">
               ...and many more schools across the country.
             </p>

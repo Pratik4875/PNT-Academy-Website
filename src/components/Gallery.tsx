@@ -1,11 +1,15 @@
 "use client";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import { getLiveGallery } from "@/lib/actions/db";
 
-interface GalleryProps {
-    items: any[];
-}
+export default function Gallery() {
+    const [items, setItems] = useState<any[]>([]);
 
-export default function Gallery({ items }: GalleryProps) {
+    useEffect(() => {
+        getLiveGallery().then(setItems).catch(console.error);
+    }, []);
+
     if (!items || items.length === 0) {
         return (
             <section id="gallery" className="py-24 relative border-t border-slate-900/10 dark:border-white/5 bg-slate-50 dark:bg-slate-900/20 backdrop-blur-sm transition-colors duration-500 overflow-hidden">

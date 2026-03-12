@@ -1,14 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { getLiveInternships } from "@/lib/actions/db";
 
-interface InternshipLogosProps {
-    logos: any[];
-}
+export default function InternshipLogos() {
+    const [logos, setLogos] = useState<any[]>([]);
 
-export default function InternshipLogos({ logos }: InternshipLogosProps) {
-
-
+    useEffect(() => {
+        getLiveInternships().then(setLogos).catch(console.error);
+    }, []);
 
     if (logos.length === 0) {
         return (
