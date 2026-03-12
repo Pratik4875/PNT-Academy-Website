@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import ComingSoon from "@/components/ComingSoon";
 
 export default function OnlineClassesPage() {
     return (
@@ -15,18 +16,7 @@ export default function OnlineClassesPage() {
                 actionText="Go to LMS Portal"
                 actionLink="/lms"
             />
-
-            <section className="py-20 container mx-auto px-4 max-w-5xl">
-                <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl text-center">
-                    <h2 className="text-3xl font-bold mb-6">Learn from Anywhere</h2>
-                    <p className="text-lg text-slate-600 dark:text-slate-400 mb-8 max-w-2xl mx-auto leading-relaxed">
-                        PNT Academy conducts free online AI & Robotics sessions for students, integrating tools like Python, block-coding, and basic circuitry simulations to impart critical problem-solving skills right from home.
-                    </p>
-                    <div className="inline-block p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold">
-                        New batch enrollments opening soon in our Learning Management System.
-                    </div>
-                </div>
-            </section>
+            <ComingSoon />
             <Footer />
         </main>
     );

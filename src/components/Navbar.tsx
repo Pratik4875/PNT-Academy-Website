@@ -30,57 +30,25 @@ export default function Navbar() {
                 </Link>
 
                 <nav className="hidden lg:flex items-center gap-5 text-sm font-medium tracking-wide">
-                    {/* Lab for Schools Dropdown */}
-                    <div className="relative group">
-                        <button className="flex items-center gap-1 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors py-2">
-                            Lab for Schools <ChevronDown className="w-3 h-3" />
-                        </button>
-                        <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col py-2 z-50">
-                            <Link href="/schools/robotics-lab" className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Robotics Lab</Link>
-                            <Link href="/schools/composite-skill-lab" className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Composite Skill Lab</Link>
-                        </div>
-                    </div>
-
-                    {/* Courses for Kids Dropdown */}
-                    <div className="relative group">
-                        <button className="flex items-center gap-1 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors py-2">
-                            Courses for Kids <ChevronDown className="w-3 h-3" />
-                        </button>
-                        <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col py-2 z-50">
-                            <Link href="/courses/online" className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Online Classes</Link>
-                            <Link href="/courses/offline-bootcamps" className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Offline Bootcamps</Link>
-                        </div>
-                    </div>
-
-                    <Link href="/championship" className="flex items-center gap-1 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors py-2">
-                        <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-green-600 dark:from-green-300 dark:to-green-500 italic">NEW</span> Championship
+                    {/* 1. Robotics LAB for Institute */}
+                    <Link href="/schools/robotics-lab" className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors py-2 whitespace-nowrap">
+                        Robotics LAB <span className="hidden xl:inline">for Institute</span>
                     </Link>
 
-                    <Link href="/workshop" className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors py-2">Workshop</Link>
+                    {/* 2. Junior Innovators Program */}
+                    <Link href="/programs/junior-innovators" className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors py-2 whitespace-nowrap">
+                        Junior Innovators <span className="hidden xl:inline">Program</span>
+                    </Link>
 
-                    <Link href="/kit" className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors py-2">Kit</Link>
+                    {/* 3. Training Programs for Schools */}
+                    <Link href="/programs/schools" className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors py-2 whitespace-nowrap">
+                        Training <span className="hidden xl:inline">for Schools</span>
+                    </Link>
 
-                    {/* Curriculum Dropdown */}
-                    <div className="relative group">
-                        <button className="flex items-center gap-1 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors py-2">
-                            Curriculum <ChevronDown className="w-3 h-3" />
-                        </button>
-                        <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col py-2 z-50">
-                            <Link href="/curriculum/nep-aligned" className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">NEP Aligned</Link>
-                            <Link href="/curriculum/cbse-icse-ib" className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">CBSE / ICSE / IB</Link>
-                        </div>
-                    </div>
-
-                    {/* Summer Camp & Internship Dropdown */}
-                    <div className="relative group">
-                        <button className="flex items-center gap-1 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors py-2">
-                            Summer Camp & Internship <ChevronDown className="w-3 h-3" />
-                        </button>
-                        <div className="absolute top-full right-0 mt-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col py-2 z-50">
-                            <Link href="/programs/summer-camp" className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Summer Camp</Link>
-                            <Link href="/programs/army-navy-internship" className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Army & Navy Internship</Link>
-                        </div>
-                    </div>
+                    {/* 4. Trainings for Colleges */}
+                    <Link href="/programs/colleges" className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors py-2 whitespace-nowrap">
+                        Trainings <span className="hidden xl:inline">for Colleges</span>
+                    </Link>
 
                     {mounted && (
                         <button

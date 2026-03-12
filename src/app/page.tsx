@@ -7,8 +7,9 @@ import NetworkBackground from "@/components/NetworkBackground";
 import ClientLogos from "@/components/ClientLogos";
 import InternshipLogos from "@/components/InternshipLogos";
 import Gallery from "@/components/Gallery";
-import NewsletterTeaser from "@/components/NewsletterTeaser";
-import ProgramsTabs from "@/components/ProgramsTabs";
+import ProgramsCircularUI from "@/components/ProgramsCircularUI";
+import TestimonialsSlider from "@/components/TestimonialsSlider";
+import BootcampCTA from "@/components/BootcampCTA";
 import Footer from "@/components/Footer";
 import AboutSlider from "@/components/AboutSlider";
 import { getLiveGallery, getLiveSchools, getLiveInternships, incrementLiveVisits, getLiveAboutPhotos } from "@/lib/actions/db";
@@ -31,11 +32,13 @@ export default async function Home() {
   incrementLiveVisits().catch(() => { });
 
   return (
-    <div className="relative">
+    <main className="relative min-h-screen text-slate-900 dark:text-slate-50 overflow-x-hidden transition-colors duration-500">
       <ClientOnly>
-        <NetworkBackground />
+        <div className="absolute inset-0 z-0">
+          <NetworkBackground />
+        </div>
       </ClientOnly>
-      <main className="min-h-screen relative text-slate-900 dark:text-slate-50 overflow-x-hidden transition-colors duration-500">
+      <div className="relative z-10">
         <Navbar />
 
         {/* Hero Section */}
@@ -140,26 +143,24 @@ export default async function Home() {
         </section>
 
 
-        {/* Programs Section with Animated Tabs */}
-        <section id="programs" className="py-32 relative border-t border-slate-900/10 dark:border-white/5 transition-colors duration-500">
+        {/* Programs Section with Animated Circular UI */}
+        <section id="programs" className="py-32 relative border-t border-slate-900/10 dark:border-white/5 transition-colors duration-500 overflow-hidden">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-slate-900 dark:text-white transition-colors duration-500">Our Training Tracks</h2>
-              <p className="text-slate-800 dark:text-slate-400 max-w-2xl mx-auto text-lg mb-10 transition-colors duration-500">
-                Select a track below to explore our tailored robotics programs for individual learners or entire school districts.
-              </p>
-
-              {/* Animated Tab Content Component */}
-              <ProgramsTabs />
+            <div className="text-center mb-24">
+              <h2 className="text-4xl md:text-5xl font-black mb-6 text-slate-900 dark:text-white transition-colors duration-500 tracking-tight">What we offer</h2>
+              <div className="w-24 h-1.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mx-auto mt-6" />
             </div>
+
+            {/* Animated Circular Node Interface */}
+            <ProgramsCircularUI />
           </div>
         </section>
 
         {/* Projects Gallery Section (Dynamic) */}
         <Gallery items={galleryItems} />
 
-        {/* Newsletter / Blog Teaser Section */}
-        <NewsletterTeaser />
+        {/* Testimonials Slider */}
+        <TestimonialsSlider />
 
         {/* Internships Section */}
         <section id="internships" className="py-24 relative border-t border-slate-900/10 dark:border-white/5 transition-colors duration-500">
@@ -173,7 +174,7 @@ export default async function Home() {
         </section>
 
         {/* Clients Section */}
-        <section id="clients" className="py-24 relative border-t border-slate-900/10 dark:border-white/5 transition-colors duration-500">
+        <section id="clients" className="py-24 relative border-t border-slate-900/10 dark:border-white/5 transition-colors duration-500 bg-white dark:bg-slate-950">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl font-bold mb-16 text-slate-800 dark:text-white/90 transition-colors duration-500">Trusted by Innovative Schools</h2>
             <ClientLogos logos={schools} />
@@ -183,9 +184,12 @@ export default async function Home() {
           </div>
         </section>
 
+        {/* Call to Action */}
+        <BootcampCTA />
+
         {/* Footer */}
         <Footer />
-      </main>
-    </div>
+      </div>
+    </main>
   );
 }
