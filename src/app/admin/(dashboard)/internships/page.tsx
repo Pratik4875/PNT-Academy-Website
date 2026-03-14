@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Plus, Trash2, Briefcase } from "lucide-react";
+import ImageCropper from "@/components/admin/ImageCropper";
 
 export default function AdminInternships() {
     const [items, setItems] = useState<any[]>([]);
@@ -10,6 +11,7 @@ export default function AdminInternships() {
 
     // Form State
     const [file, setFile] = useState<File | null>(null);
+    const [fileToCrop, setFileToCrop] = useState<File | null>(null);
     const [name, setName] = useState("");
 
     useEffect(() => {
@@ -35,6 +37,20 @@ export default function AdminInternships() {
             reader.onload = () => resolve(reader.result as string);
             reader.onerror = error => reject(error);
         });
+    };
+
+    const handleFileSelect = (selectedFile: File | undefined) => {
+        if (!selectedFile) return;
+        if (selectedFile.type === "image/gif") {
+            setFile(selectedFile);
+        } else {
+            setFileToCrop(selectedFile);
+        }
+    };
+
+    const handleCropComplete = (croppedFile: File) => {
+        setFile(croppedFile);
+        setFileToCrop(null);
     };
 
     const handleUpload = async (e: React.FormEvent) => {
@@ -120,11 +136,12 @@ export default function AdminInternships() {
                         <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Logo Image (Transparent PNG recommended)</label>
                         <input
                             type="file"
-                            required
+                            required={!file}
                             accept="image/*"
-                            onChange={(e) => setFile(e.target.files?.[0] || null)}
+                            onChange={(e) => handleFileSelect(e.target.files?.[0])}
                             className="w-full p-2 border border-slate-200 dark:border-slate-800 rounded-xl text-sm file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-emerald-50 dark:file:bg-emerald-900/30 file:text-emerald-700 dark:file:text-emerald-400 hover:file:bg-emerald-100 dark:hover:file:bg-emerald-900/50 transition-colors"
                         />
+                        {file && <p className="text-xs text-green-600 dark:text-green-400 mt-2 font-semibold">✓ Company logo prepared</p>}
                     </div>
 
                     <button
@@ -172,6 +189,15 @@ export default function AdminInternships() {
                     ))
                 )}
             </div>
+
+            {fileToCrop && (
+                <ImageCropper 
+                    file={fileToCrop} 
+                    aspectRatio={2} // Wider aspect ratio for company logos usually
+                    onCropComplete={handleCropComplete} 
+                    onCancel={() => setFileToCrop(null)} 
+                />
+            )}
         </div>
     );
 }

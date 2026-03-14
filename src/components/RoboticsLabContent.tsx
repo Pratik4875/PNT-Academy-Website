@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, Microchip, Radar, MonitorPlay, Cog, School, University, Star, Quote } from "lucide-react";
 import Image from "next/image";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Float, ContactShadows, Environment, useGLTF, Center } from "@react-three/drei";
+import { OrbitControls, Float, ContactShadows, Environment, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
 export default function RoboticsLabContent() {
@@ -120,27 +120,28 @@ export default function RoboticsLabContent() {
 // -------------------------------------------------------------
 // Interactive 3D Hardware Model Component — uses real GLB files
 // -------------------------------------------------------------
-const MODEL_MAP: Record<number, string> = {
-    0: "/models/arduino_uno.glb",
-    1: "/models/esp8266.glb",
-    2: "/models/raspberry_pi.glb",
-};
 
 // Auto-normalizing GLB model: synchronously centers and scales to fill the viewport
 function GlbModel({ path, targetSize = 5 }: { path: string; targetSize?: number }) {
     const { scene } = useGLTF(path);
     const groupRef = useRef<THREE.Group>(null);
 
-    // Compute bounding box and scale it safely ONCE before it ever renders
+    // Clone, scale, and center the scene ONCE before it ever renders
     const scaledScene = useMemo(() => {
         const cloned = scene.clone(true);
+        // First pass: scale to target size
         const box = new THREE.Box3().setFromObject(cloned);
         const size = new THREE.Vector3();
         box.getSize(size);
         const maxDim = Math.max(size.x, size.y, size.z);
-        if (maxDim > 0) {
+        if (maxDim > 0.0001) {
             cloned.scale.setScalar(targetSize / maxDim);
         }
+        // Second pass: re-center AFTER scaling so the pivot is dead center
+        const box2 = new THREE.Box3().setFromObject(cloned);
+        const center = new THREE.Vector3();
+        box2.getCenter(center);
+        cloned.position.sub(center);
         return cloned;
     }, [scene, targetSize]);
 
@@ -149,11 +150,9 @@ function GlbModel({ path, targetSize = 5 }: { path: string; targetSize?: number 
     });
 
     return (
-        <Float speed={1.2} rotationIntensity={0.2} floatIntensity={0.6}>
+        <Float speed={1.2} rotationIntensity={0.15} floatIntensity={0.4}>
             <group ref={groupRef}>
-                <Center>
-                    <primitive object={scaledScene} />
-                </Center>
+                <primitive object={scaledScene} />
             </group>
         </Float>
     );
@@ -168,11 +167,14 @@ function HardwareModel({ path }: { path: string }) {
 // State 1: For Schools
 // -------------------------------------------------------------
 // Preload known GLB models so they start downloading immediately and don't stall the UI
-useGLTF.preload("/models/arduino_uno.glb");
-useGLTF.preload("/models/esp8266.glb");
-useGLTF.preload("/models/raspberry_pi.glb");
+// Only preload smaller files to avoid blocking bandwidth
+useGLTF.preload("/models/arduino_uno.glb");       // 1.2 MB
+useGLTF.preload("/models/esp8266.glb");            // 0.3 MB
+useGLTF.preload("/models/pir_sensor.glb");         // 0.1 MB
+useGLTF.preload("/models/MQ2_sensor.glb");         // 1.1 MB
+useGLTF.preload("/models/bo_battery_operated_motor.glb"); // 0.3 MB
 
-// All hardware categories — each has a model file path (or null until GLB is added)
+// All hardware categories — each has its model file paths
 const HARDWARE_ITEMS = [
     {
         title: "Core Controllers",
@@ -182,37 +184,37 @@ const HARDWARE_ITEMS = [
         iconBg: "bg-blue-100 dark:bg-blue-900/30",
         iconColor: "text-blue-600 dark:text-blue-400",
         border: "border-blue-500",
-        models: ["/models/arduino_uno.glb", "/models/esp8266.glb", "/models/raspberry_pi.glb"],
+        models: ["/models/arduino_uno.glb", "/models/esp8266.glb", "/models/raspberry_pi_compressed.glb"],
     },
     {
         title: "Smart Sensors",
-        subtitle: "HC-SR04 Ultrasonic / PIR / IR / DHT11",
+        subtitle: "PIR Motion / MQ-2 Gas / DHT11 Temp",
         icon: Radar,
-        desc: "Real-world input — ultrasonic ranging, heat detection, gas sensing & more.",
+        desc: "Real-world input — motion detection, gas sensing, temperature & humidity monitoring.",
         iconBg: "bg-purple-100 dark:bg-purple-900/30",
         iconColor: "text-purple-600 dark:text-purple-400",
         border: "border-purple-500",
-        models: [], // Add: hc-sr04_ultrasonic.glb, pir_sensor.glb, dht11.glb
+        models: ["/models/pir_sensor.glb", "/models/MQ2_sensor.glb", "/models/DHT11_sensor_compressed.glb"],
     },
     {
         title: "Displays & Modules",
-        subtitle: "16x2 LCD / OLED / Bluetooth HC-05 / GPS",
+        subtitle: "16x2 LCD / OLED 128x64",
         icon: MonitorPlay,
-        desc: "Human-machine interfaces and wireless communication modules.",
+        desc: "Human-machine interfaces for interactive visual output and data display.",
         iconBg: "bg-emerald-100 dark:bg-emerald-900/30",
         iconColor: "text-emerald-600 dark:text-emerald-400",
         border: "border-emerald-500",
-        models: [], // Add: lcd_16x2.glb, oled_display.glb, hc05_bluetooth.glb
+        models: ["/models/display_lcd_16x2_compressed.glb", "/models/display_oled_128x64.glb"],
     },
     {
         title: "Motors & Actuators",
-        subtitle: "SG90 Servo / 28BYJ Stepper / DC Gear Motor",
+        subtitle: "SG90 Servo / Stepper Motor / BO Motor",
         icon: Cog,
-        desc: "Physical movement — servo arms, wheel drives, pump mechanisms.",
+        desc: "Physical movement — servo arms, wheel drives, stepper precision.",
         iconBg: "bg-orange-100 dark:bg-orange-900/30",
         iconColor: "text-orange-600 dark:text-orange-400",
         border: "border-orange-500",
-        models: [], // Add: sg90_servo.glb, stepper_motor.glb, dc_gear_motor.glb
+        models: ["/models/bo_battery_operated_motor.glb", "/models/servomotor_sg90_compressed.glb", "/models/aula_28_-_motor_de_passo_compressed.glb"],
     },
 ];
 
@@ -300,15 +302,15 @@ function SchoolsContent() {
                             <>
                                 <div className="absolute inset-0">
                                     <Canvas camera={{ position: [5, 4, 5], fov: 40 }}>
-                                        <ambientLight intensity={1.2} />
-                                        <directionalLight position={[5, 5, 5]} intensity={1.5} />
-                                        <directionalLight position={[-5, -5, -5]} intensity={0.5} />
-                                        <Environment preset="studio" />
+                                        <ambientLight intensity={0.4} />
+                                        <directionalLight position={[5, 8, 5]} intensity={1.0} />
+                                        <directionalLight position={[-3, -2, -4]} intensity={0.3} />
+                                        <Environment preset="warehouse" />
                                         <Suspense fallback={null}>
                                             <HardwareModel path={currentModel} />
                                         </Suspense>
                                         <ContactShadows position={[0, -2.5, 0]} opacity={0.3} scale={8} blur={2.5} far={5} />
-                                        <OrbitControls enablePan={false} enableZoom={false} autoRotate autoRotateSpeed={0.5} minPolarAngle={Math.PI / 4} maxPolarAngle={Math.PI / 1.5} />
+                                        <OrbitControls makeDefault target={[0, 0, 0]} enablePan={false} enableZoom={false} autoRotate autoRotateSpeed={0.5} minPolarAngle={Math.PI / 4} maxPolarAngle={Math.PI / 1.5} />
                                     </Canvas>
                                 </div>
                                 {/* Model label overlay */}

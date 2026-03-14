@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Plus, Trash2, Image as ImageIcon } from "lucide-react";
+import ImageCropper from "@/components/admin/ImageCropper";
 
 const CATEGORIES = ["Projects", "Workshop", "Industrial Visit", "Schools", "Lab Setup"];
 
@@ -12,6 +13,7 @@ export default function AdminGallery() {
 
     // Form State
     const [file, setFile] = useState<File | null>(null);
+    const [fileToCrop, setFileToCrop] = useState<File | null>(null);
     const [title, setTitle] = useState("");
     const [category, setCategory] = useState("Projects");
 
@@ -38,6 +40,20 @@ export default function AdminGallery() {
             reader.onload = () => resolve(reader.result as string);
             reader.onerror = error => reject(error);
         });
+    };
+
+    const handleFileSelect = (selectedFile: File | undefined) => {
+        if (!selectedFile) return;
+        if (selectedFile.type === "image/gif") {
+            setFile(selectedFile);
+        } else {
+            setFileToCrop(selectedFile);
+        }
+    };
+
+    const handleCropComplete = (croppedFile: File) => {
+        setFile(croppedFile);
+        setFileToCrop(null);
     };
 
     const handleUpload = async (e: React.FormEvent) => {
@@ -151,11 +167,12 @@ export default function AdminGallery() {
                         <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Image File</label>
                         <input
                             type="file"
-                            required
+                            required={!file}
                             accept="image/*"
-                            onChange={(e) => setFile(e.target.files?.[0] || null)}
+                            onChange={(e) => handleFileSelect(e.target.files?.[0])}
                             className="w-full p-2 border border-slate-200 dark:border-slate-800 rounded-xl text-sm file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-blue-50 dark:file:bg-blue-900/30 file:text-blue-700 dark:file:text-blue-400 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/50 transition-colors"
                         />
+                        {file && <p className="text-xs text-green-600 dark:text-green-400 mt-2 font-semibold">✓ Image ready for upload</p>}
                     </div>
 
                     <button
@@ -209,6 +226,16 @@ export default function AdminGallery() {
                     ))
                 )}
             </div>
+
+            {/* Render Cropper Modal if a file needs cropping */}
+            {fileToCrop && (
+                <ImageCropper 
+                    file={fileToCrop} 
+                    aspectRatio={16 / 9} // Widescreen for gallery
+                    onCropComplete={handleCropComplete} 
+                    onCancel={() => setFileToCrop(null)} 
+                />
+            )}
         </div>
     );
 }

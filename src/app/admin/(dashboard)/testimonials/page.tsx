@@ -4,6 +4,93 @@ import { motion } from "framer-motion";
 import { Loader2, Trash2, MessageSquareQuote } from "lucide-react";
 import TestimonialManager from "@/components/admin/TestimonialManager";
 
+function TestimonialCard({ item, index, onDelete }: { item: any; index: number; onDelete: (id: string) => void }) {
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
+
+    const handleDeleteClick = async () => {
+        if (!showConfirm) {
+            setShowConfirm(true);
+            setTimeout(() => setShowConfirm(false), 3000); // Auto-hide confirm after 3s
+            return;
+        }
+
+        setIsDeleting(true);
+        try {
+            const res = await fetch(`/api/admin/testimonials?id=${item._id}`, { method: "DELETE" });
+            if (res.ok) {
+                onDelete(item._id);
+            }
+        } catch (error) {
+            console.error(error);
+            setIsDeleting(false);
+            setShowConfirm(false);
+        }
+    };
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05 }}
+            className="group relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm flex flex-col p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+        >
+            {/* Top right gradient blob */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+
+            {/* Quote Icon Background */}
+            <div className="absolute top-6 right-6 text-slate-100 dark:text-slate-800/80 pointer-events-none">
+                <MessageSquareQuote className="w-16 h-16 transform -rotate-12" />
+            </div>
+
+            <div className="relative z-10 flex items-center gap-4 mb-6">
+                <div className="w-14 h-14 relative rounded-full overflow-hidden shrink-0 border-2 border-slate-100 dark:border-slate-700 shadow-sm">
+                    {item.imageUrl ? (
+                        <img src={item.imageUrl} alt={item.name} className="object-cover w-full h-full" />
+                    ) : (
+                        <div className="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+                            {item.name.charAt(0)}
+                        </div>
+                    )}
+                </div>
+                <div>
+                    <h4 className="text-slate-900 dark:text-white font-bold text-base tracking-wide flex items-center gap-2">
+                        {item.name}
+                        {item.page === "lab" && (
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 font-bold uppercase tracking-wider">Lab</span>
+                        )}
+                    </h4>
+                    <p className="text-blue-600 dark:text-blue-400 text-sm font-semibold mt-0.5">{item.role}</p>
+                </div>
+            </div>
+            
+            <p className="relative z-10 text-slate-600 dark:text-slate-300 text-[15px] italic leading-relaxed flex-1">
+                "{item.quote}"
+            </p>
+
+            {/* Actions */}
+            <div className="relative z-10 mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+                <button
+                    onClick={handleDeleteClick}
+                    disabled={isDeleting}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                        showConfirm 
+                            ? "bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20" 
+                            : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+                    }`}
+                >
+                    {isDeleting ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                        <Trash2 className="w-4 h-4" />
+                    )}
+                    {showConfirm ? "Sure?" : "Delete"}
+                </button>
+            </div>
+        </motion.div>
+    );
+}
+
 export default function AdminTestimonials() {
     const [items, setItems] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -23,19 +110,6 @@ export default function AdminTestimonials() {
     useEffect(() => {
         fetchTestimonials();
     }, []);
-
-    const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to remove this testimonial?")) return;
-
-        try {
-            const res = await fetch(`/api/admin/testimonials?id=${id}`, { method: "DELETE" });
-            if (res.ok) {
-                setItems(items.filter((item) => item._id !== id));
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    }
 
     return (
         <div className="space-y-8">
@@ -65,34 +139,14 @@ export default function AdminTestimonials() {
                         </div>
                     ) : (
                         items.map((item, i) => (
-                            <motion.div
-                                key={item._id}
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: i * 0.05 }}
-                                className="group relative bg-white dark:bg-[#0A0A0A] border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-sm flex flex-col p-6 hover:shadow-md transition-all"
-                            >
-                                <div className="flex items-center gap-4 mb-4">
-                                    <div className="w-12 h-12 relative rounded-full overflow-hidden shrink-0 border-2 border-slate-100 dark:border-slate-700">
-                                        <img src={item.imageUrl} alt={item.name} className="object-cover w-full h-full" />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-slate-900 dark:text-white font-bold text-sm tracking-wide">{item.name}</h4>
-                                        <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">{item.role}</p>
-                                    </div>
-                                </div>
-                                <p className="text-slate-600 dark:text-slate-300 text-sm italic leading-relaxed line-clamp-4">
-                                    "{item.quote}"
-                                </p>
-
-                                <button
-                                    onClick={() => handleDelete(item._id)}
-                                    className="absolute top-4 right-4 p-2 bg-red-500 hover:bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 -translate-y-2 group-hover:translate-y-0 transition-all shadow-md"
-                                    title="Delete Testimonial"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
-                            </motion.div>
+                            <TestimonialCard 
+                                key={item._id} 
+                                item={item} 
+                                index={i} 
+                                onDelete={(id) => {
+                                    setItems(prev => prev.filter(t => t._id !== id));
+                                }} 
+                            />
                         ))
                     )}
                 </div>

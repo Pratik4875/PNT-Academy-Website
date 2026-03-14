@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { UploadCloud, CheckCircle2, X, Home, FlaskConical } from "lucide-react";
 import Image from "next/image";
+import ImageCropper from "./ImageCropper";
 
 export default function TestimonialManager({ onSuccess }: { onSuccess?: () => void }) {
     const [name, setName] = useState("");
@@ -11,6 +12,7 @@ export default function TestimonialManager({ onSuccess }: { onSuccess?: () => vo
     const [page, setPage] = useState<"home" | "lab">("home");
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [fileToCrop, setFileToCrop] = useState<File | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [status, setStatus] = useState<{ type: "success" | "error"; msg: string } | null>(null);
@@ -32,10 +34,20 @@ export default function TestimonialManager({ onSuccess }: { onSuccess?: () => vo
     };
 
     const handleFileSelect = (file: File) => {
-        setSelectedFile(file);
+        // Automatically skip crop for GIFs to preserve animation
+        if (file.type === "image/gif") {
+            handleCropComplete(file);
+        } else {
+            setFileToCrop(file);
+        }
+    };
+
+    const handleCropComplete = (croppedFile: File) => {
+        setSelectedFile(croppedFile);
         const reader = new FileReader();
         reader.onloadend = () => setImagePreview(reader.result as string);
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(croppedFile);
+        setFileToCrop(null);
     };
 
     const clearImage = () => {
@@ -209,6 +221,19 @@ export default function TestimonialManager({ onSuccess }: { onSuccess?: () => vo
                     </button>
                 </div>
             </form>
+
+            {/* Render Cropper Modal if a file needs cropping */}
+            {fileToCrop && (
+                <ImageCropper 
+                    file={fileToCrop} 
+                    aspectRatio={1} // Square crop for testimonials
+                    onCropComplete={handleCropComplete} 
+                    onCancel={() => {
+                        setFileToCrop(null);
+                        if (fileInputRef.current) fileInputRef.current.value = "";
+                    }} 
+                />
+            )}
         </div>
     );
 }

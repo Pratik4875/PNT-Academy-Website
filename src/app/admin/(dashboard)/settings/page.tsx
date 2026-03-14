@@ -7,6 +7,7 @@ import { Settings as SettingsIcon, Shield, Bell, Key, User, Camera, Check, Alert
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { fileToBase64 } from "@/lib/utils/fileToBase64";
 import Image from "next/image";
+import ImageCropper from "@/components/admin/ImageCropper";
 
 interface SettingsForm {
     name: string;
@@ -62,32 +63,39 @@ export default function AdminSettings() {
     const [kbUploading, setKbUploading] = useState(false);
     const [kbStatus, setKbStatus] = useState<string>('');
 
-    // Active Tab state
     const [activeTab, setActiveTab] = useState("account");
 
-    // Watch for image changes to update preview
-    const profileImageFile = watch("profileImage");
-    const qrImageFile = watch("paymentDetails.upiQrCodeImage");
+    const [fileToCrop, setFileToCrop] = useState<{ file: File; type: 'profile' | 'qr' } | null>(null);
 
-    useEffect(() => {
-        if (profileImageFile && profileImageFile[0]) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreviewImage(reader.result as string);
-            };
-            reader.readAsDataURL(profileImageFile[0]);
-        }
-    }, [profileImageFile]);
+    const handleProfileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) setFileToCrop({ file, type: 'profile' });
+        // Reset input so the same file could be selected again if cancelled
+        e.target.value = '';
+    };
 
-    useEffect(() => {
-        if (qrImageFile && qrImageFile[0]) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setQrPreviewImage(reader.result as string);
-            };
-            reader.readAsDataURL(qrImageFile[0]);
+    const handleQrSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) setFileToCrop({ file, type: 'qr' });
+        e.target.value = '';
+    };
+
+    const handleCropComplete = async (croppedFile: File) => {
+        try {
+            const base64 = await fileToBase64(croppedFile);
+            if (fileToCrop?.type === 'profile') {
+                setPreviewImage(base64);
+            } else if (fileToCrop?.type === 'qr') {
+                setQrPreviewImage(base64);
+            }
+        } catch (e) {
+            console.error("Failed to convert cropped image", e);
+        } finally {
+            setFileToCrop(null);
         }
-    }, [qrImageFile]);
+    };
+
+
 
     // Fetch existing settings
     useEffect(() => {
@@ -135,27 +143,16 @@ export default function AdminSettings() {
         setLoading(true);
         setSaveStatus(null);
         try {
-            let profileImageBase64 = previewImage;
-            let qrCodeBase64 = qrPreviewImage;
-
-            // If a new file was uploaded, convert it
-            if (formData.profileImage && formData.profileImage[0]) {
-                profileImageBase64 = await fileToBase64(formData.profileImage[0]);
-            }
-            if (formData.paymentDetails?.upiQrCodeImage && formData.paymentDetails.upiQrCodeImage[0]) {
-                qrCodeBase64 = await fileToBase64(formData.paymentDetails.upiQrCodeImage[0]);
-            }
-
             const payload = {
                 name: formData.name,
                 email: formData.email,
-                profileImage: profileImageBase64,
+                profileImage: previewImage,
                 socialLinks: formData.socialLinks,
                 careersLink: formData.careersLink,
                 sheetsWebhookUrl: formData.sheetsWebhookUrl,
                 paymentDetails: {
                     ...formData.paymentDetails,
-                    upiQrCodeBase64: qrCodeBase64
+                    upiQrCodeBase64: qrPreviewImage
                 },
             };
 
@@ -262,7 +259,7 @@ export default function AdminSettings() {
                                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
                                                     <Camera size={20} className="text-white" />
                                                 </div>
-                                                <input type="file" accept="image/*" id="profileImage" {...register("profileImage")} className="absolute inset-0 opacity-0 cursor-pointer" />
+                                                <input type="file" accept="image/*" onChange={handleProfileSelect} className="absolute inset-0 opacity-0 cursor-pointer" />
                                             </div>
                                         </div>
                                         <div>
@@ -376,7 +373,7 @@ export default function AdminSettings() {
                                                             <Image src={qrPreviewImage} alt="QR Preview" fill className="object-contain p-1" />
                                                         </div>
                                                     )}
-                                                    <input type="file" accept="image/*" {...register("paymentDetails.upiQrCodeImage")} className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 dark:file:bg-amber-500/10 dark:file:text-amber-400 dark:hover:file:bg-amber-500/20" />
+                                                    <input type="file" accept="image/*" onChange={handleQrSelect} className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 dark:file:bg-amber-500/10 dark:file:text-amber-400 dark:hover:file:bg-amber-500/20" />
                                                 </div>
                                             </div>
                                         </div>
@@ -510,6 +507,15 @@ export default function AdminSettings() {
                     </div>
                 </motion.div>
             </div>
+
+            {fileToCrop && (
+                <ImageCropper 
+                    file={fileToCrop.file} 
+                    aspectRatio={1} // 1:1 square for profile pic and QR code
+                    onCropComplete={handleCropComplete} 
+                    onCancel={() => setFileToCrop(null)} 
+                />
+            )}
         </div>
     );
 }

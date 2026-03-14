@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Quote, ChevronLeft, ChevronRight } from "lucide-react";
-import Image from "next/image";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import TestimonialCard2D from "./TestimonialCard2D";
 
 export default function TestimonialsSlider() {
     const [testimonials, setTestimonials] = useState<any[]>([]);
@@ -51,35 +51,13 @@ export default function TestimonialsSlider() {
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={currentIndex}
-                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
                                 transition={{ duration: 0.5, ease: "easeOut" }}
-                                className="bg-white dark:bg-slate-800 p-8 md:p-12 rounded-[2.5rem] shadow-xl border border-slate-100 dark:border-slate-700 w-full relative z-10"
+                                className="w-full relative z-10"
                             >
-                                <Quote className="w-16 h-16 text-blue-500/20 absolute top-8 text-left -z-10 transform -rotate-12" />
-                                <div className="text-xl md:text-2xl text-slate-700 dark:text-slate-200 leading-relaxed font-medium italic mb-10 text-center relative z-10">
-                                    "{testimonials[currentIndex].quote}"
-                                </div>
-                                <div className="flex flex-col items-center justify-center text-center">
-                                    {testimonials[currentIndex].imageUrl ? (
-                                        <div className="relative w-20 h-20 rounded-full overflow-hidden mb-4 shadow-lg border-4 border-white dark:border-slate-800 shrink-0">
-                                            <Image 
-                                                src={testimonials[currentIndex].imageUrl} 
-                                                alt={testimonials[currentIndex].name}
-                                                fill
-                                                className="object-cover"
-                                                sizes="80px"
-                                            />
-                                        </div>
-                                    ) : (
-                                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 mb-4 shadow-lg flex items-center justify-center text-white font-bold text-2xl uppercase border-4 border-white dark:border-slate-800 shrink-0">
-                                            {testimonials[currentIndex].name.charAt(0)}
-                                        </div>
-                                    )}
-                                    <h4 className="text-lg font-bold text-slate-900 dark:text-white uppercase tracking-wider mt-2">{testimonials[currentIndex].name}</h4>
-                                    <p className="text-sm font-semibold text-blue-500 mt-1">{testimonials[currentIndex].role}</p>
-                                </div>
+                                <TestimonialCard2D testimonial={testimonials[currentIndex]} />
                             </motion.div>
                         </AnimatePresence>
                     </div>

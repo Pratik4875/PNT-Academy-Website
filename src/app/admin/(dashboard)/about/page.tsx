@@ -2,12 +2,14 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Plus, Trash2, Users } from "lucide-react";
+import ImageCropper from "@/components/admin/ImageCropper";
 
 export default function AdminAboutPhotos() {
     const [items, setItems] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isUploading, setIsUploading] = useState(false);
     const [file, setFile] = useState<File | null>(null);
+    const [fileToCrop, setFileToCrop] = useState<File | null>(null);
     const [caption, setCaption] = useState("");
 
     useEffect(() => { fetchPhotos(); }, []);
@@ -27,6 +29,20 @@ export default function AdminAboutPhotos() {
             reader.onload = () => resolve(reader.result as string);
             reader.onerror = reject;
         });
+
+    const handleFileSelect = (selectedFile: File | undefined) => {
+        if (!selectedFile) return;
+        if (selectedFile.type === "image/gif") {
+            setFile(selectedFile);
+        } else {
+            setFileToCrop(selectedFile);
+        }
+    };
+
+    const handleCropComplete = (croppedFile: File) => {
+        setFile(croppedFile);
+        setFileToCrop(null);
+    };
 
     const handleUpload = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -97,10 +113,11 @@ export default function AdminAboutPhotos() {
                     <div className="space-y-2">
                         <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Image File</label>
                         <input
-                            type="file" required accept="image/*"
-                            onChange={(e) => setFile(e.target.files?.[0] || null)}
+                            type="file" required={!file} accept="image/*"
+                            onChange={(e) => handleFileSelect(e.target.files?.[0])}
                             className="w-full p-2 border border-slate-200 dark:border-slate-800 rounded-xl text-sm file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-purple-50 dark:file:bg-purple-900/30 file:text-purple-700 dark:file:text-purple-400 hover:file:bg-purple-100 transition-colors"
                         />
+                        {file && <p className="text-xs text-green-600 dark:text-green-400 mt-2 font-semibold">✓ Photo prepared</p>}
                     </div>
                     <button
                         type="submit" disabled={isUploading || !file}
@@ -148,6 +165,15 @@ export default function AdminAboutPhotos() {
                     ))
                 )}
             </div>
+
+            {fileToCrop && (
+                <ImageCropper 
+                    file={fileToCrop} 
+                    aspectRatio={16 / 9} // Wide aspect ratio for about photos
+                    onCropComplete={handleCropComplete} 
+                    onCancel={() => setFileToCrop(null)} 
+                />
+            )}
         </div>
     );
 }
