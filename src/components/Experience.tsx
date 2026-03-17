@@ -1,9 +1,27 @@
 'use client'
-import { Suspense } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, Environment, ContactShadows } from '@react-three/drei'
 import { Computer } from '@/components/Computer'
 import { HelloTriangle } from '@/components/HelloTriangle'
+
+// Helper component to disable OrbitControls on mobile
+function ResponsiveOrbitControls(props: any) {
+    const [isMobile, setIsMobile] = useState(false);
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.matchMedia("(max-width: 768px)").matches);
+        checkMobile();
+        window.addEventListener("resize", checkMobile);
+        return () => window.removeEventListener("resize", checkMobile);
+    }, []);
+
+    return (
+        <OrbitControls 
+            {...props} 
+            enableRotate={!isMobile}
+        />
+    );
+}
 
 export const Experience = () => {
     return (
@@ -26,7 +44,7 @@ export const Experience = () => {
                 <ContactShadows position={[0, -2, 0]} opacity={0.5} scale={10} blur={2.5} far={4} />
             </Suspense>
             {/* Allow looking around but limit interaction to keep PC in view */}
-            <OrbitControls
+            <ResponsiveOrbitControls
                 enableZoom={true}
                 minDistance={5}
                 maxDistance={15}

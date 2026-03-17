@@ -9,6 +9,26 @@ import Link from "next/link";
 import { useTheme } from "next-themes";
 import { AGV } from "./AGV";
 
+// Helper component to disable OrbitControls on mobile
+function ResponsiveOrbitControls(props: any) {
+    const [isMobile, setIsMobile] = useState(false);
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.matchMedia("(max-width: 768px)").matches);
+        checkMobile();
+        window.addEventListener("resize", checkMobile);
+        return () => window.removeEventListener("resize", checkMobile);
+    }, []);
+
+    return (
+        <OrbitControls 
+            {...props} 
+            enableZoom={false} 
+            enablePan={false}
+            enableRotate={!isMobile} // Disable rotation on mobile so scrolling works
+        />
+    );
+}
+
 const PROGRAMS = [
     {
         id: "schools",
@@ -303,9 +323,7 @@ export default function ProgramsCircularUI() {
                     OrbitControls allows user to drag and spin the entire scene 
                     enableZoom=false prevents them from scrolling wildly out of the layout
                 */}
-                <OrbitControls
-                    enableZoom={false}
-                    enablePan={false}
+                <ResponsiveOrbitControls
                     autoRotate={true}
                     autoRotateSpeed={0.5}
                     minPolarAngle={Math.PI / 3} // Restrict viewing angle so they don't look from extreme top/bottom
@@ -313,7 +331,7 @@ export default function ProgramsCircularUI() {
                 />
             </Canvas>
 
-            <div className="absolute bottom-6 left-0 right-0 text-center pointer-events-none">
+            <div className="absolute bottom-6 left-0 right-0 text-center pointer-events-none hidden md:block">
                 <p className="text-sm font-bold tracking-widest uppercase text-slate-400 dark:text-slate-500 flex items-center justify-center gap-2">
                     <span className="w-8 h-px bg-slate-300 dark:bg-slate-700" />
                     Drag to rotate &bull; Hover to expand

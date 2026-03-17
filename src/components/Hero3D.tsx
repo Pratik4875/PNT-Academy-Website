@@ -2,8 +2,28 @@
 
 import { Canvas } from "@react-three/fiber";
 import { Environment, OrbitControls } from "@react-three/drei";
-import { Suspense } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { AGV } from "./AGV";
+
+// Helper component to disable OrbitControls on mobile
+function ResponsiveOrbitControls(props: any) {
+    const [isMobile, setIsMobile] = useState(false);
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.matchMedia("(max-width: 768px)").matches);
+        checkMobile();
+        window.addEventListener("resize", checkMobile);
+        return () => window.removeEventListener("resize", checkMobile);
+    }, []);
+
+    return (
+        <OrbitControls 
+            {...props} 
+            enableZoom={false} 
+            enablePan={false}
+            enableRotate={!isMobile} // Disable rotation on mobile so scrolling works
+        />
+    );
+}
 
 export default function Hero3D() {
     return (
@@ -27,9 +47,7 @@ export default function Hero3D() {
                     <AGV scale={6} position={[0, 0, 0]} />
 
                     {/* Let the user rotate the camera slightly, but restrict dramatic zooms/pans */}
-                    <OrbitControls
-                        enableZoom={false}
-                        enablePan={false}
+                    <ResponsiveOrbitControls
                         minPolarAngle={Math.PI / 3}
                         maxPolarAngle={Math.PI / 1.5}
                     />

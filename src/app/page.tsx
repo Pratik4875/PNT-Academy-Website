@@ -71,8 +71,8 @@ export default async function Home() {
               </div>
             </div>
 
-            {/* 3D Canvas Area (Pointer events auto to allow OrbitControls & Clicks) */}
-            <div className="h-[60vh] md:h-full relative pointer-events-auto">
+            {/* 3D Canvas Area — interactive on desktop only, passthrough on mobile for scrolling */}
+            <div className="h-[60vh] md:h-full relative pointer-events-none md:pointer-events-auto">
               <HeroSection />
             </div>
           </div>

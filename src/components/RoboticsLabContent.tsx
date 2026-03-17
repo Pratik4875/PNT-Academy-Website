@@ -3,10 +3,30 @@ import { useState, useRef, useEffect, Suspense, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, Microchip, Radar, MonitorPlay, Cog, School, University, Star, Quote } from "lucide-react";
 import Image from "next/image";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Float, ContactShadows, Environment, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { getLiveGallery } from "@/lib/actions/db";
+
+// Helper component to disable OrbitControls on mobile
+function ResponsiveOrbitControls(props: any) {
+    const [isMobile, setIsMobile] = useState(false);
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.matchMedia("(max-width: 768px)").matches);
+        checkMobile();
+        window.addEventListener("resize", checkMobile);
+        return () => window.removeEventListener("resize", checkMobile);
+    }, []);
+
+    return (
+        <OrbitControls 
+            {...props} 
+            enableZoom={false} 
+            enablePan={false}
+            enableRotate={!isMobile} // Disable rotation on mobile so scrolling works
+        />
+    );
+}
 
 export default function RoboticsLabContent() {
     const [activeTab, setActiveTab] = useState<"schools" | "colleges">("schools");
@@ -225,7 +245,7 @@ function PrinterLabSection() {
                                 <Suspense fallback={null}>
                                     <PrinterModel />
                                 </Suspense>
-                                <OrbitControls makeDefault autoRotate autoRotateSpeed={1} enableZoom={false} />
+                                <ResponsiveOrbitControls makeDefault autoRotate autoRotateSpeed={1} enableZoom={false} />
                             </Canvas>
                         </div>
 
@@ -407,7 +427,7 @@ function SchoolsContent() {
                                             <HardwareModel path={currentModel} />
                                         </Suspense>
                                         <ContactShadows position={[0, -2.5, 0]} opacity={0.3} scale={8} blur={2.5} far={5} />
-                                        <OrbitControls makeDefault target={[0, 0, 0]} enablePan={false} enableZoom={false} autoRotate autoRotateSpeed={0.5} minPolarAngle={Math.PI / 4} maxPolarAngle={Math.PI / 1.5} />
+                                        <ResponsiveOrbitControls makeDefault target={[0, 0, 0]} enablePan={false} enableZoom={false} autoRotate autoRotateSpeed={0.5} minPolarAngle={Math.PI / 4} maxPolarAngle={Math.PI / 1.5} />
                                     </Canvas>
                                 </div>
                                 {/* Model label overlay */}
@@ -491,12 +511,12 @@ function SchoolsContent() {
                                     <WrenchModel />
                                 </Suspense>
                                 <ContactShadows position={[0, -2, 0]} opacity={0.4} scale={10} blur={2} far={4} />
-                                <OrbitControls makeDefault autoRotate autoRotateSpeed={1.5} minPolarAngle={Math.PI / 4} maxPolarAngle={Math.PI / 2} enableZoom={false} />
+                                <ResponsiveOrbitControls makeDefault autoRotate autoRotateSpeed={1.5} minPolarAngle={Math.PI / 4} maxPolarAngle={Math.PI / 2} />
                             </Canvas>
                         </div>
 
                         {/* Interactive label */}
-                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none">
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none hidden md:block">
                             <span className="bg-blue-500/90 backdrop-blur text-white text-xs font-black px-4 py-1.5 rounded-full flex items-center gap-2 shadow-lg">
                                 👆 Drag to rotate
                             </span>
@@ -534,12 +554,12 @@ function SchoolsContent() {
                                     <HumanoidModel />
                                 </Suspense>
                                 <ContactShadows position={[0, -3.5, 0]} opacity={0.5} scale={15} blur={2.5} far={6} />
-                                <OrbitControls makeDefault autoRotate autoRotateSpeed={1} minPolarAngle={0} maxPolarAngle={Math.PI / 2 + 0.1} enableZoom={false} />
+                                <ResponsiveOrbitControls makeDefault autoRotate autoRotateSpeed={1} minPolarAngle={0} maxPolarAngle={Math.PI / 2 + 0.1} />
                             </Canvas>
                         </div>
 
                         {/* Interactive label */}
-                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none">
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none hidden md:block">
                             <span className="bg-cyan-500/90 backdrop-blur text-white text-xs font-black px-4 py-1.5 rounded-full flex items-center gap-2 shadow-lg">
                                 👆 Drag to inspect ED-U 01
                             </span>
