@@ -176,12 +176,10 @@ function NavLink({ item, isActive }: { item: typeof NAV_ITEMS[0]; isActive: bool
 // ─── Main Navbar ──────────────────────────────────────────────────────────────
 export default function Navbar() {
     const { theme, setTheme } = useTheme();
-    const [mounted, setMounted] = useState(false);
-    const [mobileOpen, setMobileOpen] = useState(false);
-    const pathname = usePathname();
-
-    useEffect(() => { setMounted(true); }, []);
-    useEffect(() => { setMobileOpen(false); }, [pathname]);
+        const [mounted, setMounted] = useState(false);
+        const pathname = usePathname();
+    
+        useEffect(() => { setMounted(true); }, []);
 
     const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
 
@@ -251,71 +249,15 @@ export default function Navbar() {
                     {mounted && (
                         <button
                             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 transition-all"
+                            className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 transition-all shadow-sm"
+                            aria-label="Toggle Dark Mode"
                         >
-                            {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+                            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
                         </button>
                     )}
-                    <button
-                        onClick={() => setMobileOpen(!mobileOpen)}
-                        className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition-all"
-                    >
-                        {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                    </button>
                 </div>
             </div>
 
-            {/* Mobile Menu */}
-            <AnimatePresence>
-                {mobileOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="lg:hidden overflow-hidden border-t border-slate-100 dark:border-white/5 bg-white dark:bg-slate-950"
-                    >
-                        <nav className="flex flex-col gap-1 p-4">
-                            {NAV_ITEMS.map((item) => (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all
-                                        ${isActive(item.href)
-                                            ? "bg-cyan-50 dark:bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 ring-1 ring-cyan-200 dark:ring-cyan-500/30"
-                                            : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5"
-                                        }`}
-                                >
-                                    <span className="text-lg">{item.icon}</span>
-                                    <div>
-                                        <p>{item.label} {item.sublabel}</p>
-                                        <p className="text-[10px] text-slate-400 dark:text-slate-500 font-normal">{item.preview.headline}</p>
-                                    </div>
-                                </Link>
-                            ))}
-                            <div className="h-px bg-slate-100 dark:bg-white/5 my-1" />
-                            {SIMPLE_LINKS.map((link) => (
-                                <Link
-                                    key={link.href}
-                                    href={link.href}
-                                    className={`px-4 py-3 rounded-xl text-sm font-semibold transition-all
-                                        ${isActive(link.href)
-                                            ? "bg-cyan-50 dark:bg-cyan-500/10 text-cyan-600 dark:text-cyan-400"
-                                            : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5"
-                                        }`}
-                                >
-                                    {link.label}
-                                </Link>
-                            ))}
-                            <Link
-                                href="/lms"
-                                className="mt-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-bold text-sm text-center"
-                            >
-                                LMS Portal →
-                            </Link>
-                        </nav>
-                    </motion.div>
-                )}
-            </AnimatePresence>
         </header>
     );
 }

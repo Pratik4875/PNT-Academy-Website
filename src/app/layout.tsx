@@ -7,6 +7,7 @@ import "./globals.css";
 
 import ClientIntroWrapper from "@/components/ClientIntroWrapper";
 import ClientAIChatbot from "@/components/ClientAIChatbot";
+import MobileBottomNav from "@/components/MobileBottomNav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -77,8 +78,12 @@ export default function RootLayout({
 
           {/* Server-rendered page content */}
           {children}
+
+          {/* Mobile App Navigation */}
+          <MobileBottomNav />
         </ThemeProvider>
       </body>
     </html>
   );
 }
+
