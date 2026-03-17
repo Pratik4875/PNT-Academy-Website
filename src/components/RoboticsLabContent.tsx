@@ -759,10 +759,10 @@ function CollegesContent() {
                         <p className="text-slate-600 dark:text-slate-400 text-lg">That&apos;s where we come in — with an industry-aligned Robotics & Autonomous Systems Lab within the institution.</p>
                     </motion.div>
 
-                    <div className="grid md:grid-cols-3 gap-6">
+                    <div className="flex overflow-x-auto pb-4 -mx-4 px-4 md:px-0 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:pb-0 scrollbar-hide">
                         {PRODUCTS.map((p, i) => (
                             <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.5 }}
-                                className="bg-white dark:bg-slate-900/60 backdrop-blur-xl shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-200/60 dark:border-slate-800 rounded-2xl p-8 text-center group hover:border-blue-500/40 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300 cursor-pointer">
+                                className="min-w-[80vw] md:min-w-0 snap-center shrink-0 mr-4 md:mr-0 last:mr-0 bg-white dark:bg-slate-900/60 backdrop-blur-xl shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-200/60 dark:border-slate-800 rounded-2xl p-8 text-center group hover:border-blue-500/40 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300 cursor-pointer">
                                 <span className="text-5xl block mb-4">{p.icon}</span>
                                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{p.name}</h3>
                                 <p className="text-sm text-slate-500 dark:text-slate-400">{p.specs}</p>
@@ -809,7 +809,7 @@ function CollegesContent() {
                         <h2 className="text-4xl md:text-5xl font-black">Value Proposition</h2>
                     </motion.div>
 
-                    <div className="grid md:grid-cols-2 gap-8">
+                    <div className="flex overflow-x-auto pb-4 -mx-4 px-4 md:px-0 snap-x snap-mandatory md:grid md:grid-cols-2 md:gap-8 md:overflow-visible md:pb-0 scrollbar-hide">
                         {[
                             { icon: "🔧", title: "Modular Design", points: ["Add or replace microcontrollers/SBCs", "Integrate additional sensors, drivers, communication modules", "Increase degrees of freedom in robotic arms", "Redesign power distribution, control logic, and feedback loops"] },
                             { icon: "🖨️", title: "3D Printed & Customizable", points: ["Parts of robotic arm, AGV, or AMR are 3D printed", "CAD files and tutorials provided", "Students can experiment with different designs", "Encourages reverse engineering & system-level thinking"] },
@@ -817,7 +817,7 @@ function CollegesContent() {
                             { icon: "🔬", title: "Research & IIC Enablement", points: ["Encourages reverse engineering", "System-level thinking", "Innovation beyond predefined experiments", "IEEE / Scopus paper guidance"] },
                         ].map((pillar, i) => (
                             <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.12, duration: 0.5 }}
-                                className="bg-white dark:bg-slate-900/60 backdrop-blur-xl shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-200/60 dark:border-slate-800 rounded-2xl p-8 hover:border-emerald-500/30 transition-all">
+                                className="min-w-[85vw] md:min-w-0 snap-center shrink-0 mr-4 md:mr-0 last:mr-0 bg-white dark:bg-slate-900/60 backdrop-blur-xl shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-200/60 dark:border-slate-800 rounded-2xl p-8 hover:border-emerald-500/30 transition-all">
                                 <span className="text-4xl block mb-4">{pillar.icon}</span>
                                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">{pillar.title}</h3>
                                 <ul className="space-y-2">
@@ -875,7 +875,7 @@ function CollegesContent() {
                         <h2 className="text-4xl md:text-5xl font-black">College Benefits</h2>
                     </motion.div>
 
-                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="flex overflow-x-auto pb-4 -mx-4 px-4 md:px-0 snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-4 md:gap-6 md:overflow-visible md:pb-0 scrollbar-hide">
                         {[
                             { icon: "🎓", title: "Academic Benefits", points: ["Supports NEP 2020 experiential & skill-based learning", "Branch-aligned curriculum integration"] },
                             { icon: "💡", title: "Innovation & Entrepreneurship", points: ["Innovation challenges & hackathons", "Prototype development", "Student startups support"] },
@@ -883,7 +883,7 @@ function CollegesContent() {
                             { icon: "💼", title: "Revenue & Research", points: ["Certification programs for external students", "Industry workshops & bootcamps", "Sponsored final-year projects", "Capstone & minor project themes", "IEEE / Scopus paper guidance", "Prototype-to-patent pathway", "Support for innovation grants & competitions"] },
                         ].map((b, i) => (
                             <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.5 }}
-                                className="bg-white dark:bg-slate-900/60 backdrop-blur-xl shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-200/60 dark:border-slate-800 rounded-2xl p-6 hover:border-blue-500/30 transition-all">
+                                className="min-w-[80vw] md:min-w-0 snap-center shrink-0 mr-4 md:mr-0 last:mr-0 bg-white dark:bg-slate-900/60 backdrop-blur-xl shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-200/60 dark:border-slate-800 rounded-2xl p-6 hover:border-blue-500/30 transition-all">
                                 <span className="text-3xl block mb-3">{b.icon}</span>
                                 <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">{b.title}</h3>
                                 <ul className="space-y-2">
@@ -919,13 +919,13 @@ function CollegesContent() {
                 <div className="container mx-auto max-w-5xl text-center">
                     <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
                         <h2 className="text-4xl md:text-5xl font-black mb-12">Our Clients</h2>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        <div className="flex overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory md:grid md:grid-cols-4 md:gap-6 md:overflow-visible md:pb-0 md:px-0 scrollbar-hide">
                             {(labPartners.filter(p => p.category === 'client').length > 0
                                 ? labPartners.filter(p => p.category === 'client')
                                 : [{name:'Client 1', imageUrl:''},{name:'Client 2', imageUrl:''},{name:'Client 3', imageUrl:''},{name:'Client 4', imageUrl:''}]
                             ).map((c: any, i: number) => (
                                 <motion.div key={c._id || i} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.08, duration: 0.4 }}
-                                    className="bg-white dark:bg-slate-900/60 backdrop-blur-xl shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-200/60 dark:border-slate-800 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-blue-500/40 transition-all">
+                                    className="min-w-[60vw] md:min-w-0 snap-center shrink-0 mr-4 md:mr-0 last:mr-0 bg-white dark:bg-slate-900/60 backdrop-blur-xl shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-200/60 dark:border-slate-800 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-blue-500/40 transition-all">
                                     {c.imageUrl ? (
                                         <img src={c.imageUrl} alt={c.name} className="h-16 w-auto object-contain" />
                                     ) : (
@@ -963,13 +963,13 @@ function CollegesContent() {
                     <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-12">
                         <h2 className="text-4xl md:text-5xl font-black">Our Top Industry Associations</h2>
                     </motion.div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div className="flex overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory md:grid md:grid-cols-4 md:gap-6 md:overflow-visible md:pb-0 md:px-0 scrollbar-hide">
                         {(labPartners.filter(p => p.category === 'industry').length > 0
                             ? labPartners.filter(p => p.category === 'industry')
                             : [{name:'Indian Army', imageUrl:''},{name:'TATA Power', imageUrl:''},{name:'Wockhardt', imageUrl:''},{name:'Unilever UK', imageUrl:''}]
                         ).map((a: any, i: number) => (
                             <motion.div key={a._id || i} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.4 }}
-                                className="bg-white dark:bg-slate-900/60 backdrop-blur-xl shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-200/60 dark:border-slate-800 rounded-2xl p-8 text-center hover:border-blue-500/40 hover:shadow-lg hover:shadow-blue-500/5 transition-all">
+                                className="min-w-[65vw] md:min-w-0 snap-center shrink-0 mr-4 md:mr-0 last:mr-0 bg-white dark:bg-slate-900/60 backdrop-blur-xl shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-200/60 dark:border-slate-800 rounded-2xl p-8 text-center hover:border-blue-500/40 hover:shadow-lg hover:shadow-blue-500/5 transition-all">
                                 {a.imageUrl ? (
                                     <img src={a.imageUrl} alt={a.name} className="h-16 w-auto mx-auto object-contain mb-4" />
                                 ) : (
