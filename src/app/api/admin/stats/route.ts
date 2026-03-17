@@ -6,6 +6,8 @@ import Internship from "@/lib/models/Internship";
 import SiteMetric from "@/lib/models/SiteMetric";
 import mongoose from "mongoose";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     try {
         await connectMongo();
@@ -47,8 +49,8 @@ export async function GET() {
 
                 if (cloudRes.ok) {
                     const cloudData = await cloudRes.json();
-                    // Cloudinary returns storage in MB under storage.usage
-                    cloudinaryUsageMB = cloudData.storage?.usage || 0;
+                    // Cloudinary returns storage in bytes under storage.usage
+                    cloudinaryUsageMB = (cloudData.storage?.usage || 0) / (1024 * 1024);
                 }
             }
         } catch (cloudError) {

@@ -220,7 +220,7 @@ export default function AdminDashboard() {
                                 <span className="text-slate-400 text-sm ml-1 font-medium">MB Used</span>
                             </div>
                             <span className="text-emerald-400 text-sm font-bold bg-emerald-500/10 px-3 py-1 rounded-full">
-                                {loading ? "-" : storagePercentage.toFixed(3)}%
+                                {loading ? "-" : storagePercentage.toFixed(2)}%
                             </span>
                         </div>
 
@@ -272,7 +272,7 @@ export default function AdminDashboard() {
                                 <span className="text-slate-400 text-sm ml-1 font-medium">MB Used</span>
                             </div>
                             <span className="text-blue-400 text-sm font-bold bg-blue-500/10 px-3 py-1 rounded-full">
-                                {loading ? "-" : cloudinaryPercentage.toFixed(4)}%
+                                {loading ? "-" : cloudinaryPercentage.toFixed(2)}%
                             </span>
                         </div>
 

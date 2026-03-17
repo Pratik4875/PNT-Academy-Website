@@ -5,6 +5,49 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, Bot, User, Loader2, ThumbsUp, ThumbsDown } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
+// Smooth wave letter animation component
+function WaveText({ text }: { text: string }) {
+    const letters = text.split("");
+    const colors = [
+        "#93c5fd", // blue-300
+        "#a5b4fc", // indigo-300
+        "#c4b5fd", // violet-300
+        "#67e8f9", // cyan-300
+        "#a5b4fc", // indigo-300
+        "#93c5fd", // blue-300
+    ];
+    return (
+        <span className="inline-flex" aria-label={text}>
+            {letters.map((letter, i) => (
+                <motion.span
+                    key={i}
+                    animate={{
+                        y: [0, -5, 0],
+                        color: colors,
+                    }}
+                    transition={{
+                        y: {
+                            duration: 1.8,
+                            repeat: Infinity,
+                            ease: "easeInOut",
+                            delay: i * 0.07,
+                        },
+                        color: {
+                            duration: 4,
+                            repeat: Infinity,
+                            ease: "linear",
+                            delay: i * 0.1,
+                        },
+                    }}
+                    style={{ display: "inline-block", whiteSpace: letter === " " ? "pre" : "normal" }}
+                >
+                    {letter === " " ? "\u00A0" : letter}
+                </motion.span>
+            ))}
+        </span>
+    );
+}
+
 interface Message {
     role: "user" | "model";
     content: string;
@@ -244,7 +287,7 @@ export default function AIChatbot() {
                                         <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-indigo-600 animate-pulse shadow-md"></span>
                                     </div>
                                     <div>
-                                        <h3 className="font-black text-base tracking-tight text-white drop-shadow-sm">PNT AI Assistant</h3>
+                                        <h3 className="font-black text-base tracking-tight text-white drop-shadow-sm">PNT Chatbot</h3>
                                         <div className="flex items-center gap-1.5 mt-0.5">
                                             <span className={`text-[10px] uppercase font-black tracking-[0.1em] transition-colors duration-300 ${isLocalMode ? "text-orange-300" : "text-blue-100 opacity-90"}`}>
                                                 {isLocalMode ? "Local Shield Active" : "Cloud Core Systems Active"}
@@ -371,7 +414,7 @@ export default function AIChatbot() {
                                         value={input}
                                         onChange={(e) => setInput(e.target.value)}
                                         placeholder="Ask about PNT Academy..."
-                                        className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/10 rounded-2xl py-4 pl-5 pr-14 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-white dark:focus:bg-slate-800 transition-all dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                                        className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/10 rounded-2xl py-4 pl-5 pr-14 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-white dark:focus:bg-slate-800 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                         disabled={isLoading}
                                     />
                                     <button

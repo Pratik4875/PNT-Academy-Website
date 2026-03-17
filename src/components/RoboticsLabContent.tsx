@@ -127,17 +127,22 @@ function GlbModel({ path, targetSize = 5 }: { path: string; targetSize?: number 
     const groupRef = useRef<THREE.Group>(null);
 
     // Clone, scale, and center the scene ONCE before it ever renders
-    const scaledScene = useMemo(() => {
+    const clonedScene = useMemo(() => {
         const cloned = scene.clone(true);
 
-        // Fix materials: ensure textures have proper color space (fixes white PCB on Raspberry Pi)
+        // Fix materials: ensure textures have proper color space
         cloned.traverse((child: any) => {
             if (child.isMesh && child.material) {
                 const mats = Array.isArray(child.material) ? child.material : [child.material];
                 mats.forEach((mat: any) => {
-                    if (mat.map) mat.map.colorSpace = THREE.SRGBColorSpace;
-                    if (mat.emissiveMap) mat.emissiveMap.colorSpace = THREE.SRGBColorSpace;
-                    mat.needsUpdate = true;
+                    if (mat.map) {
+                        mat.map.colorSpace = THREE.SRGBColorSpace;
+                        mat.map.needsUpdate = true;
+                    }
+                    if (mat.emissiveMap) {
+                        mat.emissiveMap.colorSpace = THREE.SRGBColorSpace;
+                        mat.emissiveMap.needsUpdate = true;
+                    }
                 });
             }
         });
@@ -165,7 +170,7 @@ function GlbModel({ path, targetSize = 5 }: { path: string; targetSize?: number 
     return (
         <Float speed={1.2} rotationIntensity={0.15} floatIntensity={0.4}>
             <group ref={groupRef}>
-                <primitive object={scaledScene} />
+                <primitive object={clonedScene} />
             </group>
         </Float>
     );
@@ -174,6 +179,83 @@ function GlbModel({ path, targetSize = 5 }: { path: string; targetSize?: number 
 // Simple wrapper: receives the glb path directly
 function HardwareModel({ path }: { path: string }) {
     return <GlbModel path={path} targetSize={4} />;
+}
+
+function PrinterModel() {
+    return <GlbModel path="/models/3d_printer_2.0.glb" targetSize={6.0} />;
+}
+
+function WrenchModel() {
+    return <GlbModel path="/models/toolkit_3D.glb" targetSize={7.0} />;
+}
+
+function HumanoidModel() {
+    return <GlbModel path="/models/hr-os1_humanoid_robot_kit_-_endo_v1.0.glb" targetSize={9.0} />;
+}
+
+function PrinterLabSection() {
+    return (
+        <section className="mb-24">
+            <div className="text-center mb-12">
+                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-black uppercase tracking-widest mb-4">🖨️ Lab 2</span>
+                <h2 className="text-3xl md:text-5xl font-black mb-4">3D Printer Lab</h2>
+                <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto">From digital blueprints to physical reality — students design, slice, and print their own inventions.</p>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-10 items-center">
+                {/* Interactive 3D Printer Visual */}
+                <div className="flex flex-col gap-6">
+                    <div className="relative flex items-center justify-center h-[500px] cursor-grab active:cursor-grabbing">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-orange-400/20 dark:bg-orange-500/10 rounded-full blur-[80px] -z-10" />
+
+                        <div className="absolute inset-0">
+                            <Canvas 
+                                shadows 
+                                gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.0 }}
+                                camera={{ position: [10, 4, 10], fov: 40 }}
+                            >
+                                <ambientLight intensity={0.4} />
+                                <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1.5} castShadow />
+                                <directionalLight position={[10, 10, 5]} intensity={1.2} />
+                                <directionalLight position={[-10, -10, -5]} intensity={0.4} />
+                                <Environment preset="studio" />
+                                <Suspense fallback={null}>
+                                    <PrinterModel />
+                                </Suspense>
+                                <OrbitControls makeDefault autoRotate autoRotateSpeed={1} enableZoom={false} />
+                            </Canvas>
+                        </div>
+
+
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none">
+                            <span className="bg-orange-500/90 backdrop-blur text-white text-xs font-black px-4 py-1.5 rounded-full flex items-center gap-2 shadow-lg">
+                                👆 Drag to rotate
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Feature cards */}
+                <div className="flex flex-col gap-4">
+                    {[
+                        { icon: "🎨", title: "CAD Design Training", desc: "Students learn Tinkercad & Fusion 360 to design custom 3D models from scratch." },
+                        { icon: "🔧", title: "FDM & Resin Printers", desc: "Exposure to both FDM (PLA/ABS) and Resin printers for different material properties." },
+                        { icon: "⚙️", title: "Slicing & Settings", desc: "Learn layer height, infill, supports, and print speed optimization with Cura/PrusaSlicer." },
+                        { icon: "🏆", title: "Project-Based Output", desc: "Students print drone frames, robot parts, and custom enclosures for their projects." },
+                    ].map((f, i) => (
+                        <motion.div key={i} initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
+                            className="flex items-start gap-4 p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
+                            <div className="w-12 h-12 shrink-0 rounded-xl bg-orange-100 dark:bg-orange-500/10 flex items-center justify-center text-2xl">{f.icon}</div>
+                            <div>
+                                <h4 className="font-bold text-slate-800 dark:text-white mb-0.5">{f.title}</h4>
+                                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{f.desc}</p>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
 }
 
 // -------------------------------------------------------------
@@ -354,37 +436,145 @@ function SchoolsContent() {
                 </div>
             </section>
 
-            {/* Section 3: Other Lab Components (Grid Layout) */}
-            <section>
-                <h2 className="text-3xl md:text-4xl font-black mb-12 text-center">Complete Infrastructure</h2>
-                <div className="grid md:grid-cols-2 gap-8">
-                    {[
-                        { title: "Rapid Prototyping", items: "3D Printers, PLA/ABS Filaments, Design Software" },
-                        { title: "Mechanical & Tools", items: "Workstations, Calipers, Drilling Machines, Toolsets" },
-                        { title: "Power & Safety", items: "Bench Power Supplies, Multimeters, Soldering Stations, Safety Gear" },
-                        { title: "Lab Interiors", items: "Custom tables, ergonomic chairs, engaging vinyl wallpapers" },
-                    ].map((comp, i) => (
-                        <div key={i} className="flex flex-col md:flex-row bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-lg group">
-                            {/* Modern Image Placeholder */}
-                            <div className="w-full md:w-2/5 h-48 md:h-auto bg-slate-100 dark:bg-slate-800 relative overflow-hidden flex flex-col items-center justify-center shrink-0">
-                                {/* Glassmorphism Skeleton Placeholder */}
-                                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 backdrop-blur-md" />
-                                <div className="w-16 h-16 bg-white/40 dark:bg-black/20 rounded-full animate-pulse flex items-center justify-center backdrop-blur-xl border border-white/50 dark:border-white/10 mb-2">
-                                    <span className="text-2xl">📷</span>
-                                </div>
-                                <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest relative z-10">Image Needed</span>
-                            </div>
-                            <div className="p-8 md:w-3/5 flex flex-col justify-center">
-                                <h3 className="text-2xl font-bold mb-4 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{comp.title}</h3>
-                                <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-lg">{comp.items}</p>
-                            </div>
+
+            {/* ===== 3D PRINTER LAB ===== */}
+            <PrinterLabSection />
+
+            {/* ===== MECHANICAL LAB ===== */}
+            <section className="mb-24">
+                <div className="text-center mb-12">
+                    <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-black uppercase tracking-widest mb-4">🔩 Lab 3</span>
+                    <h2 className="text-3xl md:text-5xl font-black mb-4">Mechanical Lab</h2>
+                    <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto">Hands-on engineering fundamentals — where students get real exposure to tools, materials, and mechanical systems.</p>
+                </div>
+
+                <div className="grid lg:grid-cols-2 gap-10 items-center">
+                    {/* Cards on the Left */}
+                    <div className="grid sm:grid-cols-2 gap-5 order-2 lg:order-1">
+                        {[
+                            { icon: "🔩", title: "Precision Tools", desc: "Vernier calipers, micrometers, and measuring instruments for accurate fabrication.", color: "from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-900", border: "border-slate-200 dark:border-slate-700" },
+                        { icon: "🪛", title: "Workstations", desc: "Professional grade workbenches with vises, clamps, and full hand toolsets.", color: "from-blue-50 to-slate-50 dark:from-blue-900/20 dark:to-slate-900", border: "border-blue-100 dark:border-blue-800/30" },
+                        { icon: "⚡", title: "Power Tools", desc: "Drilling machines, angle grinders, and bench grinders for material shaping.", color: "from-yellow-50 to-slate-50 dark:from-yellow-900/20 dark:to-slate-900", border: "border-yellow-100 dark:border-yellow-800/30" },
+                        { icon: "🏗️", title: "Structural Assembly", desc: "Aluminium extrusion systems, fasteners, and frame construction kits.", color: "from-emerald-50 to-slate-50 dark:from-emerald-900/20 dark:to-slate-900", border: "border-emerald-100 dark:border-emerald-800/30" },
+                        { icon: "⚙️", title: "Gear & Drive Systems", desc: "Gears, pulleys, belts, and chain drives for understanding mechanical advantage.", color: "from-purple-50 to-slate-50 dark:from-purple-900/20 dark:to-slate-900", border: "border-purple-100 dark:border-purple-800/30" },
+                        { icon: "🛡️", title: "Safety Training", desc: "PPE, machine guarding, safe operating procedures, and lab safety protocols.", color: "from-red-50 to-slate-50 dark:from-red-900/20 dark:to-slate-900", border: "border-red-100 dark:border-red-800/30" },
+                        ].map((item, i) => (
+                            <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.07 }}
+                                className={`bg-gradient-to-br ${item.color} rounded-2xl border ${item.border} p-6 hover:-translate-y-1 hover:shadow-lg transition-all`}>
+                                <div className="text-4xl mb-4">{item.icon}</div>
+                                <h4 className="font-bold text-slate-800 dark:text-white text-lg mb-2">{item.title}</h4>
+                                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{item.desc}</p>
+                            </motion.div>
+                        ))}
+                    </div>
+
+                    {/* Interactive 3D Wrench Visual on the Right */}
+                    <div className="relative flex items-center justify-center h-[450px] cursor-grab active:cursor-grabbing order-1 lg:order-2">
+                        {/* Soft Glow Behind */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-400/20 dark:bg-blue-500/10 rounded-full blur-[80px] -z-10" />
+
+                        <div className="absolute inset-0">
+                            <Canvas 
+                                shadows
+                                gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.0 }}
+                                camera={{ position: [8, 6, 15], fov: 35 }}
+                            >
+                                <ambientLight intensity={0.4} />
+                                <spotLight position={[10, 10, 10]} intensity={1.5} angle={0.2} castShadow />
+                                <directionalLight position={[10, 10, 5]} intensity={1.2} />
+                                <directionalLight position={[-10, -10, -5]} intensity={0.4} />
+                                <Environment preset="warehouse" />
+                                <Suspense fallback={null}>
+                                    <WrenchModel />
+                                </Suspense>
+                                <ContactShadows position={[0, -2, 0]} opacity={0.4} scale={10} blur={2} far={4} />
+                                <OrbitControls makeDefault autoRotate autoRotateSpeed={1.5} minPolarAngle={Math.PI / 4} maxPolarAngle={Math.PI / 2} enableZoom={false} />
+                            </Canvas>
                         </div>
-                    ))}
+
+                        {/* Interactive label */}
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none">
+                            <span className="bg-blue-500/90 backdrop-blur text-white text-xs font-black px-4 py-1.5 rounded-full flex items-center gap-2 shadow-lg">
+                                👆 Drag to rotate
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ===== HUMANOID ROBOT LAB ===== */}
+            <section className="mb-8">
+                <div className="text-center mb-12">
+                    <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-100 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 text-xs font-black uppercase tracking-widest mb-4">🤖 Lab 4</span>
+                    <h2 className="text-3xl md:text-5xl font-black mb-4">Humanoid Robot Lab</h2>
+                    <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto">The future of robotics is human-shaped. Students program, interact with, and study full bipedal humanoid platforms.</p>
+                </div>
+
+                <div className="grid lg:grid-cols-2 gap-10 items-center">
+                    {/* Interactive 3D Humanoid Robot Visual */}
+                    <div className="relative flex items-center justify-center h-[500px] cursor-grab active:cursor-grabbing lg:order-2">
+                        {/* Soft Glow Behind */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-cyan-400/20 dark:bg-cyan-500/10 rounded-full blur-[80px] -z-10" />
+
+                        <div className="absolute inset-0">
+                            <Canvas 
+                                shadows
+                                gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.0 }}
+                                camera={{ position: [0, 4, 22], fov: 35 }}
+                            >
+                                <ambientLight intensity={0.5} />
+                                <spotLight position={[5, 15, 10]} intensity={2} angle={0.3} castShadow />
+                                <directionalLight position={[10, 10, 5]} intensity={1.2} />
+                                <directionalLight position={[-10, -10, -5]} intensity={0.4} />
+                                <Environment preset="studio" />
+                                <Suspense fallback={null}>
+                                    <HumanoidModel />
+                                </Suspense>
+                                <ContactShadows position={[0, -3.5, 0]} opacity={0.5} scale={15} blur={2.5} far={6} />
+                                <OrbitControls makeDefault autoRotate autoRotateSpeed={1} minPolarAngle={0} maxPolarAngle={Math.PI / 2 + 0.1} enableZoom={false} />
+                            </Canvas>
+                        </div>
+
+                        {/* Interactive label */}
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none">
+                            <span className="bg-cyan-500/90 backdrop-blur text-white text-xs font-black px-4 py-1.5 rounded-full flex items-center gap-2 shadow-lg">
+                                👆 Drag to inspect ED-U 01
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Description */}
+                    <div className="flex flex-col gap-5 lg:order-1">
+                        <div className="p-6 bg-gradient-to-br from-cyan-50 to-slate-50 dark:from-cyan-900/20 dark:to-slate-900 rounded-2xl border border-cyan-100 dark:border-cyan-800/30">
+                            <h3 className="text-2xl font-black text-slate-800 dark:text-white mb-3">What Students Learn</h3>
+                            <ul className="space-y-3">
+                                {[
+                                    "Bipedal locomotion & balance control",
+                                    "Voice and gesture interaction programming",
+                                    "Facial recognition & emotion detection",
+                                    "Sensor fusion: LiDAR, depth camera, IMU",
+                                    "Real-time navigation in dynamic environments",
+                                    "Human-Robot Interaction design & ethics",
+                                ].map((item, i) => (
+                                    <li key={i} className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
+                                        <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 flex items-center justify-center text-xs font-black shrink-0">✓</span>
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                        <div className="p-5 bg-amber-50 dark:bg-amber-900/20 rounded-2xl border border-amber-200 dark:border-amber-800/30">
+                            <p className="text-amber-700 dark:text-amber-400 text-sm font-semibold">
+                                🚀 <strong>Coming in 2025–26:</strong> PNT's in-house ED-U 01 humanoid platform, developed in partnership with Indian defense research labs. Institutions can pre-register for early access.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>
     );
 }
+
 
 // -------------------------------------------------------------
 // State 2: For Colleges — Full PDF Content
