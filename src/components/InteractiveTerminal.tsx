@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
-import { Float, PresentationControls, Environment, useGLTF } from "@react-three/drei";
+import { Float, PresentationControls, Environment, useGLTF, useAnimations } from "@react-three/drei";
 import * as THREE from "three";
 import { Terminal, Lightbulb, Minimize2, Cpu, Maximize2, X, Power, BatteryCharging, Wifi } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -155,19 +155,35 @@ useGLTF.preload('/models/macbook_pro_13_inch_2020.glb');
 // --- The Reliable Floating 3D Primitive ---
 function ComputerModel({ onClick }: { onClick: () => void }) {
     const groupRef = useRef<THREE.Group>(null);
-    const { scene } = useGLTF('/models/macbook_pro_13_inch_2020.glb') as any;
+    const { scene, animations } = useGLTF('/models/macbook_pro_13_inch_2020.glb') as any;
+    const { mixer, actions } = useAnimations(animations, groupRef);
 
     useEffect(() => {
-        // 1. Force the lid open and strip the baked display texture off the screen mesh
-        scene.traverse((child: any) => {
-            // Force the specific lid mesh to an open rotation (1.94 radians roughly 111 degrees)
-            if (child.name === "Macbook_Pro_4") {
-                child.rotation.set(1.94, 0, 0);
+        // 1. Use the animation to open the lid: skip to end frame
+        if (actions && Object.keys(actions).length > 0) {
+            const action = actions[Object.keys(actions)[0]];
+            if (action) {
+                action.reset();
+                action.clampWhenFinished = true;
+                action.loop = THREE.LoopOnce;
+                action.play();
+                // Jump to the very last frame (lid fully open) and freeze
+                if (mixer) {
+                    mixer.update(999);
+                }
             }
+        }
 
+        // 2. Log all node names for debugging + strip baked screen texture
+        scene.traverse((child: any) => {
+            console.log('[GLB Node]', child.name, child.type, child.isMesh ? '(MESH)' : '');
+            
             // Pure black screen for a clean, sleek floating look
-            if (child.isMesh && (child.name === "Object_16" || child.material?.name === "Material.001")) {
-                child.material = new THREE.MeshBasicMaterial({ color: 0x010101 }); 
+            if (child.isMesh && child.material) {
+                const matName = child.material.name || '';
+                if (matName.includes('Material.001') || child.name.includes('Object_16') || child.name.includes('screen') || child.name.includes('Screen')) {
+                    child.material = new THREE.MeshBasicMaterial({ color: 0x111111 }); 
+                }
             }
         });
 
@@ -177,19 +193,19 @@ function ComputerModel({ onClick }: { onClick: () => void }) {
             groupRef.current.position.set(0,0,0);
             groupRef.current.updateMatrixWorld(true);
 
-            const box = new THREE.Box3().setFromObject(scene);
+            const box = new THREE.Box3().setFromObject(groupRef.current);
             const size = box.getSize(new THREE.Vector3());
             const center = box.getCenter(new THREE.Vector3());
             
             const maxDim = Math.max(size.x, size.y, size.z);
-            const scaleFact = 4.0 / maxDim; 
+            const scaleFact = 3.5 / maxDim; 
             
             groupRef.current.scale.setScalar(scaleFact);
             groupRef.current.position.x = -center.x * scaleFact;
             groupRef.current.position.y = -center.y * scaleFact; 
             groupRef.current.position.z = -center.z * scaleFact;
         }
-    }, [scene]);
+    }, [scene, actions, mixer]);
 
     return (
         <group 
@@ -223,6 +239,11 @@ export default function InteractiveTerminal() {
     const handleMacbookClick = () => {
         if (!osActive && !isTransitioning) {
             setIsTransitioning(true);
+            // Reliable: after the blackout animation (600ms), show OS and clear blackout
+            setTimeout(() => {
+                setOsActive(true);
+                setIsTransitioning(false);
+            }, 700);
         }
     };
 
@@ -268,12 +289,6 @@ export default function InteractiveTerminal() {
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.6, ease: "easeInOut" }}
                         className="fixed inset-0 z-[900] bg-black pointer-events-none"
-                        onAnimationComplete={(def) => {
-                            if (def === "opacity") {
-                                setOsActive(true);
-                                setIsTransitioning(false); 
-                            }
-                        }}
                     />
                 )}
             </AnimatePresence>

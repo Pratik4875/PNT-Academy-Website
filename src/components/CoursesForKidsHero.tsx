@@ -76,13 +76,13 @@ export default function CoursesForKidsHero() {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 1, delay: 0.2 }}
-                    className="relative w-full flex items-center justify-center aspect-square lg:aspect-auto lg:h-[600px] p-3"
+                    className="relative w-full flex items-center justify-center aspect-square lg:aspect-auto lg:h-[600px] p-3 overflow-visible"
                 >
                     {/* Glowing Aura for contrast */}
                     <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/20 via-indigo-900/10 to-transparent rounded-[3rem] blur-3xl -z-10 animate-pulse" />
                     
                     {/* Free-floating Macbook without the rigid border cutout */}
-                    <div className="absolute inset-0 z-10 w-full h-full">
+                    <div className="absolute inset-0 z-10 w-full h-full overflow-visible">
                         <InteractiveTerminal />
                     </div>
                 </motion.div>
