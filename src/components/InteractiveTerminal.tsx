@@ -129,7 +129,32 @@ function InnerOS({ activeApp, setActiveApp, isMaximized, setIsMaximized, onShutD
 function DesktopOS({ onShutDown }: { onShutDown: () => void }) {
     const [activeApp, setActiveApp] = useState<"python" | "arduino" | "tinkercad" | null>(null);
     const [isMaximized, setIsMaximized] = useState(false);
-    const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    const [time, setTime] = useState(new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}));
+    const [battery, setBattery] = useState<number | null>(null);
+    const [isCharging, setIsCharging] = useState(false);
+    const [isOnline, setIsOnline] = useState(true);
+    const [openMenu, setOpenMenu] = useState<string | null>(null);
+
+    useEffect(() => {
+        // Live clock
+        const timer = setInterval(() => setTime(new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second: '2-digit'})), 1000);
+        // Real battery API
+        if ('getBattery' in navigator) {
+            (navigator as any).getBattery().then((bat: any) => {
+                setBattery(Math.round(bat.level * 100));
+                setIsCharging(bat.charging);
+                bat.addEventListener('levelchange', () => setBattery(Math.round(bat.level * 100)));
+                bat.addEventListener('chargingchange', () => setIsCharging(bat.charging));
+            });
+        }
+        // Online status
+        setIsOnline(navigator.onLine);
+        const goOnline = () => setIsOnline(true);
+        const goOffline = () => setIsOnline(false);
+        window.addEventListener('online', goOnline);
+        window.addEventListener('offline', goOffline);
+        return () => { clearInterval(timer); window.removeEventListener('online', goOnline); window.removeEventListener('offline', goOffline); };
+    }, []);
 
     return (
         <motion.div 
@@ -137,26 +162,58 @@ function DesktopOS({ onShutDown }: { onShutDown: () => void }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5, ease: "circOut" }}
-            className="fixed inset-0 z-[1000] w-screen h-screen overflow-hidden font-sans select-none bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop')] bg-cover bg-center"
+            className="fixed inset-0 z-[1000] w-screen h-screen overflow-hidden font-sans select-none bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop')] bg-cover bg-center flex flex-col"
+            onClick={() => setOpenMenu(null)}
         >
             {/* Top Menu Bar */}
-            <div className="flex items-center justify-between px-4 py-1 bg-black/30 backdrop-blur-xl text-white text-xs z-50">
-                <div className="flex items-center gap-3">
-                    <span className="font-bold">PNT OS</span>
-                    <span className="opacity-60">File</span>
-                    <span className="opacity-60">Edit</span>
-                    <span className="opacity-60">View</span>
+            <div className="flex items-center justify-between px-4 py-1.5 bg-black/40 backdrop-blur-xl text-white text-xs z-50 shrink-0">
+                <div className="flex items-center gap-4">
+                    <span className="font-bold text-sm">🍎 PNT OS</span>
+                    {["File", "Edit", "View", "Window", "Help"].map(menu => (
+                        <div key={menu} className="relative">
+                            <button 
+                                onClick={(e) => { e.stopPropagation(); setOpenMenu(openMenu === menu ? null : menu); }}
+                                className={`px-2 py-0.5 rounded hover:bg-white/10 transition-colors ${openMenu === menu ? 'bg-white/20' : ''}`}
+                            >
+                                {menu}
+                            </button>
+                            {openMenu === menu && (
+                                <div className="absolute top-full left-0 mt-1 w-48 bg-slate-800/95 backdrop-blur-xl rounded-lg border border-white/10 shadow-2xl py-1 text-white/80">
+                                    {menu === "File" && (
+                                        <>{["New Project", "Open...", "Save", "---", "Close Window"].map((item, i) => item === "---" ? <div key={i} className="h-px bg-white/10 my-1" /> : <button key={i} className="w-full text-left px-3 py-1.5 hover:bg-blue-500/50 text-xs">{item}</button>)}</>
+                                    )}
+                                    {menu === "Edit" && (
+                                        <>{["Undo", "Redo", "---", "Cut", "Copy", "Paste"].map((item, i) => item === "---" ? <div key={i} className="h-px bg-white/10 my-1" /> : <button key={i} className="w-full text-left px-3 py-1.5 hover:bg-blue-500/50 text-xs">{item}</button>)}</>
+                                    )}
+                                    {menu === "View" && (
+                                        <>{["Toggle Fullscreen", "---", "Zoom In", "Zoom Out", "Actual Size"].map((item, i) => item === "---" ? <div key={i} className="h-px bg-white/10 my-1" /> : <button key={i} className="w-full text-left px-3 py-1.5 hover:bg-blue-500/50 text-xs">{item}</button>)}</>
+                                    )}
+                                    {menu === "Window" && (
+                                        <>{["Minimize", "Maximize", "---", "Close All"].map((item, i) => item === "---" ? <div key={i} className="h-px bg-white/10 my-1" /> : <button key={i} className="w-full text-left px-3 py-1.5 hover:bg-blue-500/50 text-xs">{item}</button>)}</>
+                                    )}
+                                    {menu === "Help" && (
+                                        <>{["PNT Academy Docs", "Keyboard Shortcuts", "---", "About PNT OS"].map((item, i) => item === "---" ? <div key={i} className="h-px bg-white/10 my-1" /> : <button key={i} className="w-full text-left px-3 py-1.5 hover:bg-blue-500/50 text-xs">{item}</button>)}</>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    ))}
                 </div>
                 <div className="flex items-center gap-3">
-                    <Wifi className="w-3.5 h-3.5 opacity-70" />
-                    <BatteryCharging className="w-3.5 h-3.5 opacity-70" />
+                    <div className={`flex items-center gap-1 ${isOnline ? 'text-white/80' : 'text-red-400'}`}>
+                        <Wifi className="w-3.5 h-3.5" />
+                        <span className="text-[10px]">{isOnline ? 'Connected' : 'Offline'}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <BatteryCharging className={`w-3.5 h-3.5 ${isCharging ? 'text-green-400' : 'text-white/70'}`} />
+                        <span className="text-[10px]">{battery !== null ? `${battery}%` : '...'}</span>
+                    </div>
                     <span className="opacity-80 font-medium">{time}</span>
                 </div>
             </div>
 
             {/* Desktop Area */}
-            <div className="flex-1 w-full h-[calc(100vh-60px)] relative">
-                {/* App Windows */}
+            <div className="flex-1 w-full relative">
                 <AnimatePresence>
                     {activeApp && (
                         <motion.div
@@ -165,22 +222,28 @@ function DesktopOS({ onShutDown }: { onShutDown: () => void }) {
                             exit={{ opacity: 0, y: 30, scale: 0.9 }}
                             transition={{ type: "spring", damping: 20 }}
                             className={`absolute bg-slate-900/95 backdrop-blur-xl rounded-xl border border-white/10 shadow-2xl flex flex-col ${
-                                isMaximized ? "inset-2" : "top-8 left-[10%] w-[80%] h-[75%]"
+                                isMaximized ? "inset-2" : "top-8 left-[10%] w-[80%] h-[80%]"
                             }`}
                         >
-                            <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/10">
+                            <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/10 shrink-0">
                                 <div className="flex items-center gap-2">
-                                    <button onClick={() => setActiveApp(null)} className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-400" />
+                                    <button onClick={() => setActiveApp(null)} className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-400 transition-colors" />
                                     <button className="w-3 h-3 rounded-full bg-yellow-500" />
-                                    <button onClick={() => setIsMaximized(!isMaximized)} className="w-3 h-3 rounded-full bg-green-500" />
+                                    <button onClick={() => setIsMaximized(!isMaximized)} className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-400 transition-colors" />
                                 </div>
                                 <span className="text-white/70 text-xs font-medium capitalize">{activeApp} IDE</span>
                                 <div />
                             </div>
                             <div className="flex-1 p-4 font-mono text-sm text-green-400 overflow-auto">
                                 <p className="text-white/40">// Welcome to PNT {activeApp} IDE</p>
-                                <p>{'>'} Ready to code...</p>
-                                <p className="animate-pulse">█</p>
+                                <p className="text-blue-400">// Build robots, train AI, change the world 🚀</p>
+                                <p className="mt-2">{'>'} import pnt_academy</p>
+                                <p>{'>'} bot = pnt_academy.Robot("Navigator")</p>
+                                <p>{'>'} bot.connect()</p>
+                                <p className="text-yellow-300">✓ Connected to PNT Robot via WiFi</p>
+                                <p>{'>'} bot.move_forward(100)</p>
+                                <p className="text-cyan-400">→ Moving forward 100 units...</p>
+                                <p className="mt-2 animate-pulse">{'>'} █</p>
                             </div>
                         </motion.div>
                     )}
@@ -189,17 +252,17 @@ function DesktopOS({ onShutDown }: { onShutDown: () => void }) {
 
             {/* Dock */}
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-2xl rounded-2xl border border-white/20 shadow-2xl z-50">
-                <button onClick={() => setActiveApp("python")} className="w-12 h-12 rounded-xl bg-gradient-to-b from-blue-400 to-blue-600 flex items-center justify-center hover:scale-110 transition-transform shadow-lg" title="Python">
+                <button onClick={() => setActiveApp("python")} className="w-12 h-12 rounded-xl bg-gradient-to-b from-blue-400 to-blue-600 flex items-center justify-center hover:scale-110 active:scale-95 transition-transform shadow-lg" title="Python">
                     <Terminal className="w-6 h-6 text-white" />
                 </button>
-                <button onClick={() => setActiveApp("arduino")} className="w-12 h-12 rounded-xl bg-gradient-to-b from-teal-400 to-teal-600 flex items-center justify-center hover:scale-110 transition-transform shadow-lg" title="Arduino">
+                <button onClick={() => setActiveApp("arduino")} className="w-12 h-12 rounded-xl bg-gradient-to-b from-teal-400 to-teal-600 flex items-center justify-center hover:scale-110 active:scale-95 transition-transform shadow-lg" title="Arduino">
                     <Cpu className="w-6 h-6 text-white" />
                 </button>
-                <button onClick={() => setActiveApp("tinkercad")} className="w-12 h-12 rounded-xl bg-gradient-to-b from-orange-400 to-orange-600 flex items-center justify-center hover:scale-110 transition-transform shadow-lg" title="Tinkercad">
+                <button onClick={() => setActiveApp("tinkercad")} className="w-12 h-12 rounded-xl bg-gradient-to-b from-orange-400 to-orange-600 flex items-center justify-center hover:scale-110 active:scale-95 transition-transform shadow-lg" title="Tinkercad">
                     <Lightbulb className="w-6 h-6 text-white" />
                 </button>
                 <div className="w-px h-8 bg-white/20 mx-1" />
-                <button onClick={onShutDown} className="w-12 h-12 rounded-xl bg-gradient-to-b from-red-400 to-red-600 flex items-center justify-center hover:scale-110 transition-transform shadow-lg" title="Shutdown">
+                <button onClick={onShutDown} className="w-12 h-12 rounded-xl bg-gradient-to-b from-red-400 to-red-600 flex items-center justify-center hover:scale-110 active:scale-95 transition-transform shadow-lg" title="Shutdown">
                     <Power className="w-6 h-6 text-white" />
                 </button>
             </div>
@@ -214,20 +277,21 @@ useGLTF.preload('/models/macbook_pro_13_inch_2020.glb');
 function ComputerModel({ onClick }: { onClick: () => void }) {
     const groupRef = useRef<THREE.Group>(null);
     const { scene, animations } = useGLTF('/models/macbook_pro_13_inch_2020.glb') as any;
-    const { mixer, actions } = useAnimations(animations, groupRef);
-    const animReady = useRef(false);
+    const mixerRef = useRef<THREE.AnimationMixer | null>(null);
+    const centeredRef = useRef(false);
 
     useEffect(() => {
-        // Start the animation and flag it for useFrame to hold at end
-        if (actions && Object.keys(actions).length > 0) {
-            const action = actions[Object.keys(actions)[0]];
-            if (action) {
-                action.reset();
-                action.clampWhenFinished = true;
-                action.loop = THREE.LoopOnce;
-                action.play();
-                animReady.current = true;
-            }
+        // Create mixer directly on scene (not groupRef!) so animation tracks can find their targets
+        if (animations.length > 0) {
+            const mixer = new THREE.AnimationMixer(scene);
+            const clip = animations[0];
+            const action = mixer.clipAction(clip);
+            action.clampWhenFinished = true;
+            action.loop = THREE.LoopOnce;
+            action.play();
+            // Jump to last frame immediately
+            mixer.setTime(clip.duration);
+            mixerRef.current = mixer;
         }
 
         // Strip baked screen texture
@@ -239,16 +303,16 @@ function ComputerModel({ onClick }: { onClick: () => void }) {
                 }
             }
         });
-    }, [scene, actions]);
+    }, [scene, animations]);
 
-    // Continuously force the animation to the very last frame so the lid stays OPEN
+    // Keep the lid locked at the final open frame
     useFrame(() => {
-        if (animReady.current && mixer) {
-            mixer.setTime(999);
+        if (mixerRef.current && animations.length > 0) {
+            mixerRef.current.setTime(animations[0].duration);
         }
 
-        // Centering (runs once effectively since values stabilize)
-        if (groupRef.current && !groupRef.current.userData.centered) {
+        // One-time centering
+        if (groupRef.current && !centeredRef.current) {
             groupRef.current.scale.setScalar(1);
             groupRef.current.position.set(0,0,0);
             groupRef.current.updateMatrixWorld(true);
@@ -264,7 +328,7 @@ function ComputerModel({ onClick }: { onClick: () => void }) {
             groupRef.current.position.x = -center.x * scaleFact;
             groupRef.current.position.y = -center.y * scaleFact; 
             groupRef.current.position.z = -center.z * scaleFact;
-            groupRef.current.userData.centered = true;
+            centeredRef.current = true;
         }
     });
 
