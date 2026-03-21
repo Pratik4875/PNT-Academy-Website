@@ -225,7 +225,7 @@ function DesktopOS({ onShutDown }: { onShutDown: () => void }) {
                                 isMaximized ? "inset-2" : "top-8 left-[10%] w-[80%] h-[80%]"
                             }`}
                         >
-                            <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/10 shrink-0">
+                            <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/10 shrink-0 bg-slate-900">
                                 <div className="flex items-center gap-2">
                                     <button onClick={() => setActiveApp(null)} className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-400 transition-colors" />
                                     <button className="w-3 h-3 rounded-full bg-yellow-500" />
@@ -234,16 +234,25 @@ function DesktopOS({ onShutDown }: { onShutDown: () => void }) {
                                 <span className="text-white/70 text-xs font-medium capitalize">{activeApp} IDE</span>
                                 <div />
                             </div>
-                            <div className="flex-1 p-4 font-mono text-sm text-green-400 overflow-auto">
-                                <p className="text-white/40">// Welcome to PNT {activeApp} IDE</p>
-                                <p className="text-blue-400">// Build robots, train AI, change the world 🚀</p>
-                                <p className="mt-2">{'>'} import pnt_academy</p>
-                                <p>{'>'} bot = pnt_academy.Robot("Navigator")</p>
-                                <p>{'>'} bot.connect()</p>
-                                <p className="text-yellow-300">✓ Connected to PNT Robot via WiFi</p>
-                                <p>{'>'} bot.move_forward(100)</p>
-                                <p className="text-cyan-400">→ Moving forward 100 units...</p>
-                                <p className="mt-2 animate-pulse">{'>'} █</p>
+                            <div className="flex-1 w-full bg-slate-800">
+                                {activeApp === "python" && (
+                                    <iframe 
+                                        src="https://trinket.io/embed/python3?runOption=run" 
+                                        width="100%" height="100%" frameBorder="0" marginWidth={0} marginHeight={0} allowFullScreen
+                                    ></iframe>
+                                )}
+                                {activeApp === "arduino" && (
+                                    <iframe 
+                                        src="https://wokwi.com/arduino/projects/322233630656004690" 
+                                        width="100%" height="100%" frameBorder="0" allowFullScreen
+                                    ></iframe>
+                                )}
+                                {activeApp === "tinkercad" && (
+                                    <iframe 
+                                        src="https://scratch.mit.edu/projects/editor/?tutorial=getStarted" 
+                                        width="100%" height="100%" frameBorder="0" allowFullScreen
+                                    ></iframe>
+                                )}
                             </div>
                         </motion.div>
                     )}
@@ -276,40 +285,30 @@ useGLTF.preload('/models/macbook_pro_13_inch_2020.glb');
 // --- The Reliable Floating 3D Primitive ---
 function ComputerModel({ onClick }: { onClick: () => void }) {
     const groupRef = useRef<THREE.Group>(null);
-    const { scene, animations } = useGLTF('/models/macbook_pro_13_inch_2020.glb') as any;
-    const mixerRef = useRef<THREE.AnimationMixer | null>(null);
+    const { scene } = useGLTF('/models/macbook_pro_13_inch_2020.glb') as any;
     const centeredRef = useRef(false);
 
     useEffect(() => {
-        // Create mixer directly on scene (not groupRef!) so animation tracks can find their targets
-        if (animations.length > 0) {
-            const mixer = new THREE.AnimationMixer(scene);
-            const clip = animations[0];
-            const action = mixer.clipAction(clip);
-            action.clampWhenFinished = true;
-            action.loop = THREE.LoopOnce;
-            action.play();
-            // Jump to last frame immediately
-            mixer.setTime(clip.duration);
-            mixerRef.current = mixer;
-        }
-
-        // Strip baked screen texture
+        // 1. Manually force the lid perfectly open (skip broken animation mixer)
         scene.traverse((child: any) => {
+            // "Macbook_Pro_4" or "Macbook_Pro_3" are usually the hinge/lid nodes in this specific GLTF.
+            if (child.name.includes("Macbook_Pro_4") || child.name.includes("Macbook_Pro_3") || child.name === "screen") {
+                // Approximate 111-degree open angle for a realistic laptop hinge
+                child.rotation.set(1.94, 0, 0);
+            }
+
+            // 2. Strip baked screen texture so it looks clean/black
             if (child.isMesh && child.material) {
                 const matName = child.material.name || '';
                 if (matName.includes('Material.001') || child.name.includes('Object_16') || child.name.includes('screen') || child.name.includes('Screen')) {
-                    child.material = new THREE.MeshBasicMaterial({ color: 0x111111 }); 
+                    child.material = new THREE.MeshBasicMaterial({ color: 0x050505 }); 
                 }
             }
         });
-    }, [scene, animations]);
+    }, [scene]);
 
-    // Keep the lid locked at the final open frame
+    // Keep centering logical loop
     useFrame(() => {
-        if (mixerRef.current && animations.length > 0) {
-            mixerRef.current.setTime(animations[0].duration);
-        }
 
         // One-time centering
         if (groupRef.current && !centeredRef.current) {
