@@ -89,23 +89,22 @@ export async function POST(req: Request) {
         await connectMongo();
         await Enquiry.create({ name, email, phone, subject, message });
 
-        // Fire-and-forget side effects — never block the 200 response
-        (async () => {
-            try {
-                const settings = await getAdminSettings();
+        // Await side effects so Vercel does not kill the serverless function early
+        try {
+            const settings = await getAdminSettings();
 
-                // 1. Google Sheets sync
-                if (settings?.sheetsWebhookUrl) {
-                    syncToGoogleSheets({ name, email, phone, subject, message }, settings.sheetsWebhookUrl);
-                }
-
-                // 2. Email notification to admin ← NEW
-                await sendEnquiryEmail({ name, email, phone, subject, message });
-
-            } catch {
-                // Non-blocking
+            // 1. Google Sheets sync
+            if (settings?.sheetsWebhookUrl) {
+                await syncToGoogleSheets({ name, email, phone, subject, message }, settings.sheetsWebhookUrl);
             }
-        })();
+
+            // 2. Email notification to admin ← NEW
+            await sendEnquiryEmail({ name, email, phone, subject, message });
+
+        } catch (err) {
+            console.error("[CONTACT API] Non-fatal error during side effects:", err);
+            // Non-blocking: we still send the 201 Created response to the user below
+        }
 
         return NextResponse.json({ success: true }, { status: 201 });
     } catch {
