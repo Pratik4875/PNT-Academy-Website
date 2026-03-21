@@ -243,13 +243,13 @@ function DesktopOS({ onShutDown }: { onShutDown: () => void }) {
                                 )}
                                 {activeApp === "arduino" && (
                                     <iframe 
-                                        src="https://wokwi.com/arduino/projects/322233630656004690" 
+                                        src="https://wokwi.com/" 
                                         width="100%" height="100%" frameBorder="0" allowFullScreen
                                     ></iframe>
                                 )}
                                 {activeApp === "tinkercad" && (
                                     <iframe 
-                                        src="https://scratch.mit.edu/projects/editor/?tutorial=getStarted" 
+                                        src="https://www.tinkercad.com/" 
                                         width="100%" height="100%" frameBorder="0" allowFullScreen
                                     ></iframe>
                                 )}
@@ -285,19 +285,25 @@ useGLTF.preload('/models/macbook_pro_13_inch_2020.glb');
 // --- The Reliable Floating 3D Primitive ---
 function ComputerModel({ onClick }: { onClick: () => void }) {
     const groupRef = useRef<THREE.Group>(null);
-    const { scene } = useGLTF('/models/macbook_pro_13_inch_2020.glb') as any;
-    const centeredRef = useRef(false);
+    const { scene, animations } = useGLTF('/models/macbook_pro_13_inch_2020.glb') as any;
+    const { mixer, actions } = useAnimations(animations, groupRef);
+    const animReady = useRef(false);
 
     useEffect(() => {
-        // 1. Manually force the lid perfectly open (skip broken animation mixer)
-        scene.traverse((child: any) => {
-            // "Macbook_Pro_4" or "Macbook_Pro_3" are usually the hinge/lid nodes in this specific GLTF.
-            if (child.name.includes("Macbook_Pro_4") || child.name.includes("Macbook_Pro_3") || child.name === "screen") {
-                // Approximate 111-degree open angle for a realistic laptop hinge
-                child.rotation.set(1.94, 0, 0);
+        // Start the animation and flag it for useFrame to hold at end
+        if (actions && Object.keys(actions).length > 0) {
+            const action = actions[Object.keys(actions)[0]];
+            if (action) {
+                action.reset();
+                action.clampWhenFinished = true;
+                action.loop = THREE.LoopOnce;
+                action.play();
+                animReady.current = true;
             }
+        }
 
-            // 2. Strip baked screen texture so it looks clean/black
+        // Strip baked screen texture
+        scene.traverse((child: any) => {
             if (child.isMesh && child.material) {
                 const matName = child.material.name || '';
                 if (matName.includes('Material.001') || child.name.includes('Object_16') || child.name.includes('screen') || child.name.includes('Screen')) {
@@ -305,13 +311,16 @@ function ComputerModel({ onClick }: { onClick: () => void }) {
                 }
             }
         });
-    }, [scene]);
+    }, [scene, actions]);
 
-    // Keep centering logical loop
+    // Continuously force the animation to the very last frame so the lid stays OPEN
     useFrame(() => {
+        if (animReady.current && mixer) {
+            mixer.setTime(999);
+        }
 
         // One-time centering
-        if (groupRef.current && !centeredRef.current) {
+        if (groupRef.current && !groupRef.current.userData.centered) {
             groupRef.current.scale.setScalar(1);
             groupRef.current.position.set(0,0,0);
             groupRef.current.updateMatrixWorld(true);
@@ -327,7 +336,7 @@ function ComputerModel({ onClick }: { onClick: () => void }) {
             groupRef.current.position.x = -center.x * scaleFact;
             groupRef.current.position.y = -center.y * scaleFact; 
             groupRef.current.position.z = -center.z * scaleFact;
-            centeredRef.current = true;
+            groupRef.current.userData.centered = true;
         }
     });
 
