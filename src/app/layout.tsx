@@ -6,10 +6,10 @@ import "./globals.css";
 
 import ClientIntroWrapper from "@/components/ClientIntroWrapper";
 import ClientAIChatbot from "@/components/ClientAIChatbot";
-import MobileBottomNav from "@/components/MobileBottomNav";
 import ClientOnly from "@/components/ClientOnly";
 import NetworkBackground from "@/components/NetworkBackground";
-import GoogleAnalytics from "@/components/GoogleAnalytics"; // ← NEW
+import GoogleAnalytics from "@/components/GoogleAnalytics";
+import MobileBottomNav from "@/components/MobileBottomNav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +33,12 @@ export const metadata: Metadata = {
   publisher: "PNT Academy",
   metadataBase: new URL("https://pntacademy.com"),
   alternates: { canonical: "/" },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "PNT Academy",
+  },
   openGraph: {
     title: "PNT Academy | Robotics & STEM Education",
     description: "Shape the Future of Robotics. Hands-on training programs for students and institutions.",
@@ -111,10 +117,11 @@ export default function RootLayout({
           <ClientIntroWrapper />
           <PageLoader />
 
-          <div className="relative z-10">
+          <div className="relative z-10 pb-32 md:pb-0">
             {children}
           </div>
 
+          {/* Mobile Tab Bar */}
           <MobileBottomNav />
         </ThemeProvider>
       </body>

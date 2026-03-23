@@ -42,12 +42,12 @@ export default function RoboticsLabContent() {
                 {/* Just a subtle dark vignette at the bottom so text stays readable */}
                 <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
 
-                <div className="relative z-10 w-full max-w-4xl mx-auto px-6 flex flex-col items-center">
+                <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 flex flex-col items-center">
                     <motion.h1
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.7, ease: "easeOut" }}
-                        className="text-5xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tight text-white text-center leading-tight"
+                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black mb-5 sm:mb-6 tracking-tight text-white text-center leading-tight"
                     >
                         Industrial Robotics{" "}
                         <span className="text-cyan-300">Lab Setup</span>

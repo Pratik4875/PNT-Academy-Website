@@ -42,10 +42,10 @@ export default async function Home() {
 
         {/* Hero Section */}
         <section id="hero" className="relative h-screen flex items-center pt-20">
-          <div className="container mx-auto px-4 z-10 grid md:grid-cols-2 gap-8 items-center h-full">
+          <div className="container mx-auto px-4 sm:px-6 z-10 grid md:grid-cols-2 gap-8 items-center h-full">
             {/* Text Content */}
             <div className="flex flex-col gap-6" style={{ pointerEvents: 'none' }}>
-              <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 dark:text-white drop-shadow-sm dark:drop-shadow-lg transition-colors duration-500">
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight text-slate-900 dark:text-white drop-shadow-sm dark:drop-shadow-lg transition-colors duration-500">
                 Position your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-500">School</span>
               </h1>
               <div className="flex items-center flex-wrap gap-2 md:gap-4">
@@ -64,19 +64,34 @@ export default async function Home() {
               <p className="text-lg text-slate-800 dark:text-slate-300 max-w-lg leading-relaxed drop-shadow-none dark:drop-shadow mt-2 transition-colors duration-500">
                 Empowering the next generation of innovators with hands-on training in AI, Robotics, and automation.
               </p>
-              <div className="flex gap-4 mt-4 pointer-events-auto">
-                <a href="#programs" className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-semibold transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-4 pointer-events-auto">
+                <a href="#programs" className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-semibold transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] text-center">
                   Explore Programs
                 </a>
-                <a href="#about" className="px-8 py-4 bg-slate-200/50 dark:bg-white/10 hover:bg-slate-300/50 dark:hover:bg-white/20 text-slate-900 dark:text-white rounded-full font-semibold backdrop-blur-sm transition-all border border-slate-900/10 dark:border-white/10">
+                <a href="#about" className="px-8 py-4 bg-slate-200/50 dark:bg-white/10 hover:bg-slate-300/50 dark:hover:bg-white/20 text-slate-900 dark:text-white rounded-full font-semibold backdrop-blur-sm transition-all border border-slate-900/10 dark:border-white/10 text-center">
                   Learn More
                 </a>
               </div>
             </div>
 
-            {/* 3D Canvas Area — interactive on desktop only, passthrough on mobile for scrolling */}
-            <div className="h-[60vh] md:h-full relative pointer-events-none md:pointer-events-auto">
+            {/* 3D Canvas Area — DESKTOP ONLY. Hidden on mobile to avoid model overflow. */}
+            <div className="hidden md:block h-[60vh] md:h-full relative pointer-events-none md:pointer-events-auto">
               <HeroSection />
+            </div>
+
+            {/* Mobile-only stat badges — shown instead of the 3D canvas */}
+            <div className="grid grid-cols-2 gap-3 md:hidden mt-2">
+              {[
+                { label: "10,000+", sub: "Students" },
+                { label: "Since 2016", sub: "Founded" },
+                { label: "Shark Tank", sub: "Funded" },
+                { label: "PM Award", sub: "Received" },
+              ].map((s) => (
+                <div key={s.label} className="rounded-2xl p-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur border border-white/40 dark:border-slate-700/50 shadow-sm text-center">
+                  <div className="font-black text-blue-600 dark:text-blue-400 text-base">{s.label}</div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{s.sub}</div>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -173,7 +188,7 @@ export default async function Home() {
         </section>
 
         {/* Clients Section */}
-        <section id="clients" className="py-24 relative border-t border-slate-900/10 dark:border-white/5 transition-colors duration-500 bg-white dark:bg-slate-950">
+        <section id="clients" className="py-24 relative border-t border-slate-900/10 dark:border-white/5 transition-colors duration-500 bg-white/60 dark:bg-slate-950/60 backdrop-blur-sm">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl font-bold mb-16 text-slate-800 dark:text-white/90 transition-colors duration-500">Trusted by Innovative Schools</h2>
             <ClientLogos />

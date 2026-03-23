@@ -5,7 +5,7 @@ import CoursesForKidsContent from "@/components/CoursesForKidsContent";
 
 export default function CoursesForKidsPage() {
     return (
-        <main className="min-h-screen text-slate-900 dark:text-slate-50 overflow-x-hidden bg-slate-50 dark:bg-slate-950 transition-colors duration-500">
+        <main className="min-h-screen text-slate-900 dark:text-slate-50 overflow-x-hidden transition-colors duration-500">
             <Navbar />
 
             <CoursesForKidsHero />

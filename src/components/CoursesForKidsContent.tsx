@@ -4,6 +4,7 @@ import CampSeasonToggle from "@/components/CampSeasonToggle";
 import { Monitor, Wrench, Brain, Clock, MessageSquare, ArrowRight, Sparkles, Star, Zap, Users, CheckCircle2, GraduationCap, Phone } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import RoboticsCurriculum from "./RoboticsCurriculum";
 
 // ─── Reusable Course Card ─────────────────────────────────────────────
 interface CourseCardProps {
@@ -131,110 +132,67 @@ function SectionHeading({ label, title, subtitle, color }: { label: string; titl
 // ─── Main Component ───────────────────────────────────────────────────
 export default function CoursesForKidsContent() {
     return (
-        <section className="py-20 container mx-auto px-4 max-w-7xl">
+        <section className="py-16 sm:py-20 container mx-auto px-4 sm:px-6 max-w-7xl">
 
             {/* ══════════════════════════════════════════════════════
                    UNIFIED ROBOTICS & HARDWARE CATEGORY
                ══════════════════════════════════════════════════════ */}
             <SectionHeading
-                label="🌐 Online & 🏭 Offline"
-                title="Robotics & Hardware Programs"
-                subtitle="Whether from the comfort of home or directly in our state-of-the-art lab, we provide hands-on experiences that ignite a passion for engineering."
+                label="🌐 Available Online & Offline"
+                title="Robotics & Hardware Labs"
+                subtitle="From the comfort of your room or right here in our high-tech lab—choose your battle station and start engineering the robots of tomorrow."
                 color="text-blue-600 dark:text-blue-400"
             />
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-24">
-                {/* ── Online Basic ── */}
+            <div className="grid sm:grid-cols-2 max-w-4xl mx-auto gap-5 sm:gap-7 mb-20 sm:mb-32">
                 <CourseCard
                     level="Basic"
                     headerGradient="bg-gradient-to-br from-sky-500 to-blue-600"
-                    icon={<Monitor className="w-8 h-8 text-white" />}
+                    icon={<Wrench className="w-8 h-8 text-white" />}
                     iconBg="bg-white/20"
                     levelBadgeClass="bg-white/20 text-white border border-white/30"
-                    tag="Online • Ages 8–11"
+                    tag="Online & Offline • Ages 8–12"
                     tagClass="bg-sky-50 dark:bg-sky-900/30 border-sky-200 dark:border-sky-700 text-sky-700 dark:text-sky-300"
-                    title="Online Robotics (Live)"
-                    description="The perfect launchpad! Students learn logic fundamentals and drag-and-drop coding in a live, interactive environment."
-                    audience="Ages 8–11"
+                    title="Basic Robotics"
+                    description="The perfect launchpad for young creators! Choose between our immersive interactive online coding simulator or get hands-on with live wiring and assembly in our state-of-the-art lab."
+                    audience="Ages 8–12"
                     bullets={[
-                        "Scratch logic building",
-                        "Intro to Python for Kids",
-                        "Tinkercad 3D basics",
-                        "Simulation bots",
+                        "Scratch logic & drag-and-drop",
+                        "Arduino simulators & basic wiring",
+                        "Tinkercad 3D modeling",
+                        "Fun introductory challenges",
                     ]}
                     bulletColor="text-sky-500"
                     ctaLabel="Enquire Now"
                     ctaGradient="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700"
                 />
-
-                {/* ── Offline Basic ── */}
-                <CourseCard
-                    level="Basic"
-                    headerGradient="bg-gradient-to-br from-purple-500 to-violet-600"
-                    icon={<Wrench className="w-8 h-8 text-white" />}
-                    iconBg="bg-white/20"
-                    levelBadgeClass="bg-white/20 text-white border border-white/30"
-                    tag="Offline Lab • Ages 9–12"
-                    tagClass="bg-purple-50 dark:bg-purple-900/30 border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300"
-                    title="Offline Robotics Lab"
-                    description="Start your hardware adventure! Safely wire, assemble, and program beginner robots with mentor support."
-                    audience="Ages 9–12"
-                    bullets={[
-                        "Arduino & breadboarding",
-                        "Basic sensor integration",
-                        "Line-follower builds",
-                        "3D Printer intro",
-                    ]}
-                    bulletColor="text-purple-500"
-                    ctaLabel="Enquire Now"
-                    ctaGradient="bg-gradient-to-r from-purple-500 to-violet-600 hover:from-purple-600 hover:to-violet-700"
-                />
-
-                {/* ── Online Advanced ── */}
+                
                 <CourseCard
                     level="Advanced"
-                    headerGradient="bg-gradient-to-br from-blue-600 to-indigo-700"
+                    headerGradient="bg-gradient-to-br from-indigo-500 to-purple-600"
                     icon={<Monitor className="w-8 h-8 text-white" />}
                     iconBg="bg-white/20"
                     levelBadgeClass="bg-white/20 text-white border border-white/30"
-                    tag="Online • Ages 12–15"
+                    tag="Online & Offline • Ages 12–16"
                     tagClass="bg-indigo-50 dark:bg-indigo-900/30 border-indigo-200 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300"
-                    title="Online Robotics (Live)"
-                    description="Level up fast! Dive deep into Python and complex multi-sensor simulation challenges that mirror real-world robotics."
-                    audience="Ages 12–15"
+                    title="Advanced Robotics"
+                    description="Challenge accepted! Dive deep into text-based programming, conquer complex multi-sensor systems, and compete in advanced drone or simulation challenges."
+                    audience="Ages 12–16"
                     bullets={[
-                        "Python OOP concepts",
-                        "AI & ML basics",
-                        "Advanced Circuits",
-                        "Multi-sensor simulation",
+                        "Python OOP & C++",
+                        "Drone assembly & tuning",
+                        "Multi-sensor hardware systems",
+                        "Real-world AI & ML basics",
                     ]}
                     bulletColor="text-indigo-500"
                     ctaLabel="Enquire Now"
-                    ctaGradient="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800"
-                />
-
-                {/* ── Offline Advanced ── */}
-                <CourseCard
-                    level="Advanced"
-                    headerGradient="bg-gradient-to-br from-fuchsia-600 to-pink-600"
-                    icon={<Wrench className="w-8 h-8 text-white" />}
-                    iconBg="bg-white/20"
-                    levelBadgeClass="bg-white/20 text-white border border-white/30"
-                    tag="Offline Lab • Ages 12–16"
-                    tagClass="bg-fuchsia-50 dark:bg-fuchsia-900/30 border-fuchsia-200 dark:border-fuchsia-700 text-fuchsia-700 dark:text-fuchsia-300"
-                    title="Offline Robotics Lab"
-                    description="Challenge accepted! Build sophisticated multi-sensor bots, fly drones, and compete in in-house robot challenges."
-                    audience="Ages 12–16"
-                    bullets={[
-                        "Obstacle avoidance bots",
-                        "Drone assembly & tuning",
-                        "Advanced Arduino C++",
-                        "3D Printer operations",
-                    ]}
-                    bulletColor="text-fuchsia-500"
-                    ctaLabel="Enquire Now"
-                    ctaGradient="bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-700 hover:to-pink-700"
+                    ctaGradient="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
                 />
             </div>
+
+            {/* ─── Expandable Full Curriculum Accordion ─── */}
+            <RoboticsCurriculum />
+
+            <div className="my-24 h-px bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-800 to-transparent max-w-lg mx-auto" />
 
             {/* ══════════════════════════════════════════════════════
                    AI & PYTHON CLASS
