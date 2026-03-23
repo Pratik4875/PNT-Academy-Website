@@ -147,7 +147,7 @@ export default function ContactClient({ faqs, settings }: { faqs: Faq[], setting
                             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-500/10 border border-blue-200/50 dark:border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-[0.3em] mb-6"
                         >
                             <Sparkles className="w-3.5 h-3.5" />
-                            Get In Touch
+                            Start a Conversation
                         </motion.div>
 
                         <motion.h1
@@ -156,9 +156,9 @@ export default function ContactClient({ faqs, settings }: { faqs: Faq[], setting
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.15 }}
                         >
-                            <span className="text-slate-900 dark:text-white">Let&apos;s </span>
+                            <span className="text-slate-900 dark:text-white">Let&apos;s Build </span>
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-gradient-x">
-                                Connect
+                                Something Great
                             </span>
                         </motion.h1>
 
@@ -168,7 +168,7 @@ export default function ContactClient({ faqs, settings }: { faqs: Faq[], setting
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.35, duration: 0.5 }}
                         >
-                            Whether you want to set up a lab, enroll in a course, or explore a partnership — we&apos;re here to help.
+                            From setting up your first robotics lab to launching institution-wide STEM programs — every great innovation starts with a simple hello.
                         </motion.p>
 
                         {/* Animated scroll indicator */}
@@ -206,10 +206,10 @@ export default function ContactClient({ faqs, settings }: { faqs: Faq[], setting
                                 <motion.div variants={staggerItem} className="bg-white/70 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 rounded-3xl p-6 shadow-lg shadow-black/[0.03] dark:shadow-black/20">
                                     <h3 className="font-black text-lg text-slate-800 dark:text-white mb-4 flex items-center gap-2">
                                         <div className="w-1.5 h-6 rounded-full bg-gradient-to-b from-blue-500 to-purple-600" />
-                                        We work with
+                                        Trusted By
                                     </h3>
                                     <div className="space-y-2.5">
-                                        {["Schools & Colleges", "Individual Students", "Corporate CSR Programs", "Government Bodies", "EdTech Partners"].map((item, i) => (
+                                        {["500+ Schools & Universities", "Aspiring Young Innovators", "Corporate CSR & Skill India Programs", "Indian Army & Navy Partnerships", "Leading EdTech Platforms"].map((item, i) => (
                                             <motion.div
                                                 key={item}
                                                 initial={{ opacity: 0, x: -10 }}
@@ -260,9 +260,9 @@ export default function ContactClient({ faqs, settings }: { faqs: Faq[], setting
                                     <div className="absolute inset-0 bg-[linear-gradient(110deg,transparent_25%,rgba(255,255,255,0.08)_50%,transparent_75%)] bg-[length:200%_100%] animate-shimmer" />
 
                                     <div className="relative z-10">
-                                        <p className="text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Average Response</p>
+                                        <p className="text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Lightning-Fast Response</p>
                                         <p className="text-5xl font-black">&lt; 24h</p>
-                                        <p className="text-sm opacity-70 mt-2 mb-6">Business days. We get back to every genuine enquiry.</p>
+                                        <p className="text-sm opacity-70 mt-2 mb-6">No auto-replies. A real human from our team will personally respond to your enquiry.</p>
 
                                         <div className="pt-4 border-t border-white/20">
                                             <p className="text-xs font-bold uppercase tracking-widest opacity-60 mb-3">Follow Us</p>
@@ -282,13 +282,13 @@ export default function ContactClient({ faqs, settings }: { faqs: Faq[], setting
                                         <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
                                             <Briefcase className="w-5 h-5" />
                                         </div>
-                                        <h3 className="font-black text-lg text-slate-800 dark:text-white">Careers & Openings</h3>
+                                        <h3 className="font-black text-lg text-slate-800 dark:text-white">Join the Mission</h3>
                                     </div>
                                     <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
-                                        Join our mission to build the future of robotics education. We are always looking for passionate educators, engineers, and sales rockstars.
+                                        We&apos;re shaping the future of robotics education in India. If you&apos;re a passionate educator, creative engineer, or driven sales professional — we want to hear from you.
                                     </p>
                                     <a href={careersLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors group/link">
-                                        Apply Now <ExternalLink className="w-3.5 h-3.5 group-hover/link:translate-x-0.5 transition-transform" />
+                                        Explore Open Roles <ExternalLink className="w-3.5 h-3.5 group-hover/link:translate-x-0.5 transition-transform" />
                                     </a>
                                 </motion.div>
                             </motion.div>
@@ -328,8 +328,8 @@ export default function ContactClient({ faqs, settings }: { faqs: Faq[], setting
                                     ) : (
                                         <form onSubmit={handleSubmit} className="space-y-5 relative z-10">
                                             <div>
-                                                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mb-1">Send us a message</h2>
-                                                <p className="text-sm text-slate-500 dark:text-slate-400">Fill in the details below and we&apos;ll reach out promptly.</p>
+                                                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mb-1">Tell Us About Your Vision</h2>
+                                                <p className="text-sm text-slate-500 dark:text-slate-400">Share a few details and our team will craft a personalized response within 24 hours.</p>
                                             </div>
 
                                             <div className="grid sm:grid-cols-2 gap-4">
@@ -366,7 +366,7 @@ export default function ContactClient({ faqs, settings }: { faqs: Faq[], setting
                                                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Message *</label>
                                                 <div className={`relative rounded-2xl transition-all duration-300 ${focusedField === "message" ? "ring-2 ring-blue-500/30 dark:ring-blue-400/30" : ""}`}>
                                                     <textarea required name="message" value={form.message} onChange={handleChange} onFocus={() => setFocusedField("message")} onBlur={() => setFocusedField(null)} rows={5}
-                                                        placeholder="Tell us about your school, the number of students, and what you're looking for..."
+                                                        placeholder="E.g., We're a school with 200+ students interested in starting a robotics lab and an after-school STEM club..."
                                                         className={`${inputCls} resize-none`}
                                                     />
                                                 </div>
@@ -399,8 +399,8 @@ export default function ContactClient({ faqs, settings }: { faqs: Faq[], setting
                                 {faqs.length > 0 && (
                                     <AnimatedSection delay={0.3}>
                                         <div className="bg-white/70 dark:bg-white/[0.03] backdrop-blur-2xl border border-slate-200/60 dark:border-white/10 rounded-3xl p-6 sm:p-8 md:p-10 shadow-2xl shadow-black/[0.05] dark:shadow-black/30">
-                                            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mb-2">Frequently Asked Questions</h2>
-                                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-8">Quick answers to common questions about our programs.</p>
+                                            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mb-2">Common Questions, Straight Answers</h2>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-8">Everything you need to know before getting started with PNT Academy.</p>
 
                                             <div className="space-y-3">
                                                 {faqs.map((faq, i) => (
