@@ -117,40 +117,41 @@ export default function RoboMatchGame() {
             </div>
 
             {/* Game States */}
-            <AnimatePresence mode="wait">
-                {gameState === "start" && (
-                    <motion.div
-                        key="start"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        className="flex flex-col items-center text-center max-w-sm z-10 bg-slate-800/80 backdrop-blur border border-white/10 p-8 rounded-3xl shadow-2xl"
-                    >
-                        <Bot className="w-20 h-20 text-blue-500 mb-6" />
-                        <h3 className="text-2xl font-black text-white mb-2">Build the Robot!</h3>
-                        <p className="text-slate-300 text-sm mb-8">Test your memory. Match all pairs of robotics components in under 60 seconds to win an exclusive coupon code.</p>
-                        <button
-                            onClick={initGame}
-                            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold px-8 py-3 rounded-xl w-full hover:shadow-[0_0_20px_rgba(79,70,229,0.4)] transition-all active:scale-95"
+            <div className="flex-1 w-full min-h-0 flex flex-col items-center justify-center relative z-10 overflow-hidden p-2 sm:p-4">
+                <AnimatePresence mode="wait">
+                    {gameState === "start" && (
+                        <motion.div
+                            key="start"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            className="flex flex-col items-center text-center max-w-sm z-10 bg-slate-800/80 backdrop-blur border border-white/10 p-8 rounded-3xl shadow-2xl"
                         >
-                            Start Mission
-                        </button>
-                    </motion.div>
-                )}
+                            <Bot className="w-20 h-20 text-blue-500 mb-6" />
+                            <h3 className="text-2xl font-black text-white mb-2">Build the Robot!</h3>
+                            <p className="text-slate-300 text-sm mb-8">Test your memory. Match all pairs of robotics components in under 60 seconds to win an exclusive coupon code.</p>
+                            <button
+                                onClick={initGame}
+                                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold px-8 py-3 rounded-xl w-full hover:shadow-[0_0_20px_rgba(79,70,229,0.4)] transition-all active:scale-95"
+                            >
+                                Start Mission
+                            </button>
+                        </motion.div>
+                    )}
 
-                {gameState === "playing" && (
-                    <motion.div
-                        key="playing"
-                        variants={{
-                            hidden: { opacity: 0 },
-                            show: { opacity: 1, transition: { staggerChildren: 0.08 } }
-                        }}
-                        initial="hidden"
-                        animate="show"
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        className="grid grid-cols-4 gap-1.5 sm:gap-3 w-full max-w-xl z-10 max-h-[70vh] sm:max-h-full overflow-y-auto p-1 sm:p-2 scrollbar-hide"
-                        style={{ alignContent: "center" }}
-                    >
+                    {gameState === "playing" && (
+                        <motion.div
+                            key="playing"
+                            variants={{
+                                hidden: { opacity: 0 },
+                                show: { opacity: 1, transition: { staggerChildren: 0.08 } }
+                            }}
+                            initial="hidden"
+                            animate="show"
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            className="grid grid-cols-4 gap-1.5 sm:gap-3 w-full aspect-square mx-auto z-10 p-1 sm:p-2 scrollbar-hide"
+                            style={{ maxWidth: "min(100%, 65vh, 500px)", alignContent: "center" }}
+                        >
                         {cards.map((card, index) => {
                             const Icon = card.icon;
                             return (
@@ -255,6 +256,7 @@ export default function RoboMatchGame() {
                     </motion.div>
                 )}
             </AnimatePresence>
+            </div>
         </div>
     );
 }
