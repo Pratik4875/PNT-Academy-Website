@@ -139,9 +139,16 @@ export default function PaymentDetailsClient({ details, amount, course, clientNa
     // Construct UPI URL with optional amount
     const accountName = details?.accountName || "PNT Academy";
     const upiId = details?.upiId || "";
-    const upiUrl = upiId
-        ? `upi://pay?pa=${upiId}&pn=${encodeURIComponent(accountName)}${amount ? `&am=${amount}` : ""}&cu=INR`
-        : "";
+    // Some apps break if pn is an email and the @ is URL encoded to %40
+    const safeAccountNameQR = encodeURIComponent(accountName).replace(/%40/g, '@');
+    
+    let baseUpiUrl = "";
+    if (upiId) {
+        baseUpiUrl = `upi://pay?pa=${upiId}&pn=${safeAccountNameQR}`;
+        if (amount) baseUpiUrl += `&am=${amount}`;
+        baseUpiUrl += `&cu=INR`;
+    }
+    const upiUrl = baseUpiUrl;
     const qrCodeUrl = upiUrl
         ? `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiUrl)}&margin=10`
         : "";
@@ -170,7 +177,13 @@ export default function PaymentDetailsClient({ details, amount, course, clientNa
     const buildUpiIntentUrl = () => {
         if (!upiId) return "#";
         const amountFormatted = amount ? parseFloat(amount).toFixed(2) : null;
-        return `upi://pay?pa=${upiId}&pn=${encodeURIComponent(accountName)}${amountFormatted ? `&am=${amountFormatted}` : ""}&cu=INR&tn=${encodeURIComponent(course ? `PNT Academy - ${course.replace(/\+/g, ' ')}` : 'PNT Academy Payment')}`;
+        // Some UPI apps break if the pn (payee name) is an email and the @ is URL encoded to %40
+        const safeAccountName = encodeURIComponent(accountName).replace(/%40/g, '@');
+        
+        let url = `upi://pay?pa=${upiId}&pn=${safeAccountName}`;
+        if (amountFormatted) url += `&am=${amountFormatted}`;
+        url += `&cu=INR`;
+        return url;
     };
 
     return (
