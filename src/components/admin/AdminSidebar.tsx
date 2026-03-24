@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { LayoutDashboard, Image as ImageIcon, Briefcase, GraduationCap, FileText, Settings, LogOut, Users, MessageSquare, Inbox, ThumbsDown, Ticket } from "lucide-react";
+import { LayoutDashboard, Image as ImageIcon, Briefcase, GraduationCap, FileText, Settings, LogOut, Users, MessageSquare, Inbox, ThumbsDown, Ticket, Video } from "lucide-react";
 import { auth } from "@/lib/firebase/config";
 import { signOut } from "firebase/auth";
 
@@ -12,6 +12,7 @@ const MENU_ITEMS = [
     { name: "Enquiries", href: "/admin/enquiries", icon: Inbox },
     { name: "Payment Tickets", href: "/admin/tickets", icon: Ticket },
     { name: "Gallery", href: "/admin/gallery", icon: ImageIcon },
+    { name: "School Videos", href: "/admin/videos", icon: Video },
     { name: "About Photos", href: "/admin/about", icon: Users },
     { name: "Partner Schools", href: "/admin/schools", icon: GraduationCap },
     { name: "Partners & Logos", href: "/admin/partners", icon: Briefcase },
