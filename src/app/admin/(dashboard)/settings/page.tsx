@@ -65,6 +65,21 @@ export default function AdminSettings() {
 
     const [activeTab, setActiveTab] = useState("account");
 
+    // Payment Link Generator state
+    const [linkCourse, setLinkCourse] = useState('');
+    const [linkAmount, setLinkAmount] = useState('');
+    const [linkClientName, setLinkClientName] = useState('');
+    const [linkCopied, setLinkCopied] = useState(false);
+
+    const generatedLink = (() => {
+        const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://pntacademy.com';
+        const params = new URLSearchParams();
+        if (linkAmount) params.set('amount', linkAmount);
+        if (linkCourse) params.set('course', linkCourse);
+        if (linkClientName) params.set('name', linkClientName);
+        return `${baseUrl}/payments?${params.toString()}`;
+    })();
+
     const [fileToCrop, setFileToCrop] = useState<{ file: File; type: 'profile' | 'qr' } | null>(null);
 
     const handleProfileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -396,6 +411,90 @@ export default function AdminSettings() {
                                                 <input type="text" {...register("paymentDetails.ifscCode")} placeholder="e.g., HDFC0001234" className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all uppercase" />
                                             </div>
                                         </div>
+                                    </section>
+
+                                    {/* Payment Link Generator */}
+                                    <section className="space-y-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+                                        <div className="flex items-center gap-4 text-slate-900 dark:text-white">
+                                            <LinkIcon className="w-5 h-5 text-emerald-500" />
+                                            <h3 className="text-xl font-bold">Payment Link Generator</h3>
+                                            <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold">NEW</span>
+                                        </div>
+                                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                                            Generate a custom payment link to share with your client. The link will show the exact course, amount, and a pre-filled QR code.
+                                        </p>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Course Name</label>
+                                                <input
+                                                    type="text"
+                                                    value={linkCourse}
+                                                    onChange={(e) => setLinkCourse(e.target.value)}
+                                                    placeholder="e.g., Robotics Basic"
+                                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Amount (₹)</label>
+                                                <input
+                                                    type="number"
+                                                    value={linkAmount}
+                                                    onChange={(e) => setLinkAmount(e.target.value)}
+                                                    placeholder="e.g., 5000"
+                                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Client Name (Optional)</label>
+                                                <input
+                                                    type="text"
+                                                    value={linkClientName}
+                                                    onChange={(e) => setLinkClientName(e.target.value)}
+                                                    placeholder="e.g., Rahul"
+                                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Generated Link Display */}
+                                        {(linkCourse || linkAmount) && (
+                                            <div className="space-y-3">
+                                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Generated Link</label>
+                                                <div className="flex items-center gap-2">
+                                                    <input
+                                                        type="text"
+                                                        readOnly
+                                                        value={generatedLink}
+                                                        className="flex-1 px-4 py-3 rounded-xl border border-emerald-200 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 font-mono text-xs focus:outline-none"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => { navigator.clipboard.writeText(generatedLink); setLinkCopied(true); setTimeout(() => setLinkCopied(false), 2000); }}
+                                                        className={`px-4 py-3 rounded-xl transition-all font-bold text-sm whitespace-nowrap ${linkCopied ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-emerald-100 dark:hover:bg-emerald-500/20'}`}
+                                                    >
+                                                        {linkCopied ? '✓ Copied' : 'Copy'}
+                                                    </button>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <a
+                                                        href={`https://wa.me/?text=${encodeURIComponent(`Here's your payment link for ${linkCourse || 'your course'}: ${generatedLink}`)}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg text-xs transition-colors"
+                                                    >
+                                                        📱 Share via WhatsApp
+                                                    </a>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => { setLinkCourse(''); setLinkAmount(''); setLinkClientName(''); }}
+                                                        className="px-4 py-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium rounded-lg text-xs transition-colors"
+                                                    >
+                                                        Clear
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
                                     </section>
                                 </>
                             )}
