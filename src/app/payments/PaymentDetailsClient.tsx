@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -91,13 +91,6 @@ const PROCESS_STEPS = [
     },
 ];
 
-/* ── UPI App Buttons Data ── */
-const UPI_APPS = [
-    { name: "GPay", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Google_Pay_Logo.svg/512px-Google_Pay_Logo.svg.png", color: "from-blue-500 to-blue-600" },
-    { name: "PhonePe", logo: "/icons/phonepe.svg", color: "from-purple-600 to-indigo-600" },
-    { name: "Paytm", logo: "/icons/paytm.svg", color: "from-blue-400 to-cyan-500" },
-];
-
 /* ══════════════════════════════════════════════════════════════════════════════ */
 export default function PaymentDetailsClient({ details, amount, course, clientName, whatsappNumber = "919326014648" }: PaymentDetailsClientProps) {
     const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -105,11 +98,42 @@ export default function PaymentDetailsClient({ details, amount, course, clientNa
     const [showUtrInput, setShowUtrInput] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+    const [ticketId, setTicketId] = useState<string>('');
+
+    /* ── Link Expiration Timer (15 mins) ── */
+    const [timeLeft, setTimeLeft] = useState<number>(15 * 60);
+    const [isExpired, setIsExpired] = useState(false);
+
+    useEffect(() => {
+        if (!amount) return; // No timer if no amount is provided (not a custom link)
+        const timer = setInterval(() => {
+            setTimeLeft((prev) => {
+                if (prev <= 1) {
+                    clearInterval(timer);
+                    setIsExpired(true);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [amount]);
+
+    const formatTime = (seconds: number) => {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m}:${s.toString().padStart(2, '0')}`;
+    };
 
     /* ── Send payment confirmation email to admin ── */
     const handlePaymentConfirm = async () => {
-        if (!utrNumber.trim() || utrNumber.trim().length < 6) return;
+        if (!utrNumber.trim() || utrNumber.trim().length < 2) return;
         setIsSubmitting(true);
+        
+        // Generate a random ticket ID like PNT-A1B2C3
+        const newTicketId = `PNT-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+        setTicketId(newTicketId);
+
         try {
             await fetch('/api/payments/confirm', {
                 method: 'POST',
@@ -118,7 +142,8 @@ export default function PaymentDetailsClient({ details, amount, course, clientNa
                     clientName: clientName || 'Not provided',
                     courseName: course || 'Not specified',
                     amount: amount?.toString() || 'Not specified',
-                    utrNumber: utrNumber.trim(),
+                    queryMessage: utrNumber.trim(),
+                    ticketId: newTicketId,
                 }),
             });
             setSubmitStatus('success');
@@ -162,12 +187,15 @@ export default function PaymentDetailsClient({ details, amount, course, clientNa
     // WhatsApp confirmation message
     const buildWhatsAppUrl = () => {
         const parts = [
-            `Hi PNT Academy, I've completed my payment.`,
+            `Hi PNT Academy, I have a query regarding my payment.`,
+            ticketId ? `Ticket ID: *${ticketId}*` : "",
             formattedAmount ? `Amount: ${formattedAmount}` : "",
             course ? `Course: ${course.replace(/\+/g, " ")}` : "",
             clientName ? `Name: ${clientName.replace(/\+/g, " ")}` : "",
-            utrNumber ? `UTR/Ref: ${utrNumber}` : "",
-            `Please confirm my enrollment.`,
+            utrNumber ? `Query/Issue: ${utrNumber}` : "",
+            ``,
+            `*I will attach a screenshot of my transaction / issue here.*`,
+            `Please assist me with this.`,
         ].filter(Boolean).join("\n");
         return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(parts)}`;
     };
@@ -258,7 +286,7 @@ export default function PaymentDetailsClient({ details, amount, course, clientNa
                         transition={{ delay: 0.4, duration: 0.6 }}
                     >
                         {formattedAmount
-                            ? "Scan the QR code or use the UPI buttons below to complete your payment securely."
+                            ? "Scan the QR code below or transfer securely to our bank account. The link expires in 15 minutes."
                             : "Contact us first — we'll understand your goals, craft the perfect plan, and then share a personalized payment link."}
                     </motion.p>
                 </div>
@@ -311,8 +339,20 @@ export default function PaymentDetailsClient({ details, amount, course, clientNa
             )}
 
             {/* ═══════ PAYMENT METHODS ═══════ */}
-            {hasPaymentDetails ? (
+            {/* ═══════ PAYMENT METHODS (Only show if link has amount and not expired) ═══════ */}
+            {hasPaymentDetails && amount && !isExpired && (
                 <section className="pb-16 sm:pb-24 container mx-auto px-4 max-w-5xl">
+                    {/* Timer Badge */}
+                    <AnimatedSection>
+                        <div className="flex justify-center mb-8">
+                            <div className="flex items-center gap-2 px-6 py-2 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-full shadow-sm">
+                                <span className="animate-pulse text-xl">⏳</span>
+                                <span className="text-amber-700 dark:text-amber-400 font-bold text-sm">
+                                    Link expires in {formatTime(timeLeft)}
+                                </span>
+                            </div>
+                        </div>
+                    </AnimatedSection>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
 
                         {/* ─── UPI QR CODE CARD ─── */}
@@ -375,33 +415,11 @@ export default function PaymentDetailsClient({ details, amount, course, clientNa
                                         </div>
                                     )}
 
-                                    {/* UPI App Buttons — Mobile */}
-                                    {upiId && (
-                                        <div className="w-full space-y-3 mb-6">
-                                            <div className="text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Pay with UPI App</div>
-                                            <div className="grid grid-cols-3 gap-2">
-                                                {UPI_APPS.map((app) => (
-                                                    <a
-                                                        key={app.name}
-                                                        href={buildUpiIntentUrl()}
-                                                        className={`flex flex-col items-center gap-1.5 p-3 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-500/50 transition-all hover:-translate-y-0.5 hover:shadow-lg`}
-                                                    >
-                                                        <div className="relative w-8 h-8">
-                                                            <Image
-                                                                src={app.logo}
-                                                                alt={app.name}
-                                                                fill
-                                                                className="object-contain"
-                                                                unoptimized
-                                                            />
-                                                        </div>
-                                                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300">{app.name}</span>
-                                                    </a>
-                                                ))}
-                                            </div>
-                                            {/* Generic UPI Intent */}
+                                    {/* Generic UPI Intent */}
+                                    {upiUrl && (
+                                        <div className="w-full mb-6">
                                             <a
-                                                href={buildUpiIntentUrl()}
+                                                href={upiUrl}
                                                 className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-sm hover:shadow-xl hover:shadow-blue-500/20 transition-all hover:scale-[1.01] active:scale-95"
                                             >
                                                 <Smartphone className="w-4 h-4" />
@@ -500,8 +518,25 @@ export default function PaymentDetailsClient({ details, amount, course, clientNa
                         </AnimatedSection>
                     </div>
                 </section>
-            ) : (
-                /* No payment details configured */
+            )}
+
+            {/* Expired State */}
+            {hasPaymentDetails && amount && isExpired && (
+                <section className="pb-16 sm:pb-24 container mx-auto px-4 max-w-3xl">
+                    <AnimatedSection>
+                        <div className="text-center p-12 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-3xl shadow-lg">
+                            <span className="text-4xl block mb-4">⏱️</span>
+                            <h2 className="text-2xl font-black text-amber-700 dark:text-amber-400 mb-2">Payment Link Expired</h2>
+                            <p className="text-amber-600/80 dark:text-amber-500/80 font-medium">
+                                For security, this payment link was only valid for 15 minutes. Please contact our team for a new link.
+                            </p>
+                        </div>
+                    </AnimatedSection>
+                </section>
+            )}
+
+            {/* No payment details configured */}
+            {!hasPaymentDetails && (
                 <section className="pb-16 sm:pb-24 container mx-auto px-4 max-w-3xl">
                     <AnimatedSection>
                         <div className="text-center p-12 bg-white/70 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 rounded-3xl shadow-xl">
@@ -515,7 +550,7 @@ export default function PaymentDetailsClient({ details, amount, course, clientNa
                 </section>
             )}
 
-            {/* ═══════ I'VE PAID — UTR CONFIRMATION ═══════ */}
+            {/* ═══════ PAYMENT TICKET ═══════ */}
             {hasPaymentDetails && (
                 <section className="pb-16 sm:pb-24 container mx-auto px-4 max-w-3xl">
                     <AnimatedSection delay={0.1}>
@@ -527,12 +562,12 @@ export default function PaymentDetailsClient({ details, amount, course, clientNa
                             <div className="relative z-10">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="p-2.5 rounded-xl bg-white/20">
-                                        <CheckCircle className="w-6 h-6" />
+                                        <MessageCircle className="w-6 h-6" />
                                     </div>
-                                    <h2 className="text-2xl font-black">Already Paid?</h2>
+                                    <h2 className="text-2xl font-black">Payment Issue?</h2>
                                 </div>
                                 <p className="text-sm opacity-80 mb-6 max-w-lg">
-                                    Confirm your payment by sharing your UTR/reference number. We&apos;ll verify and activate your enrollment within minutes.
+                                    Have a query or facing an issue with your payment? Create a ticket and we will assist you immediately.
                                 </p>
 
                                 <AnimatePresence mode="wait">
@@ -544,8 +579,8 @@ export default function PaymentDetailsClient({ details, amount, course, clientNa
                                             onClick={() => setShowUtrInput(true)}
                                             className="inline-flex items-center gap-2 px-6 py-3 bg-white text-green-700 font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all text-sm"
                                         >
-                                            <CheckCircle className="w-4 h-4" />
-                                            I&apos;ve Paid — Confirm Now
+                                            <MessageCircle className="w-4 h-4" />
+                                            Raise Payment Ticket
                                         </motion.button>
                                     ) : (
                                         <motion.div
@@ -555,22 +590,39 @@ export default function PaymentDetailsClient({ details, amount, course, clientNa
                                             className="space-y-3"
                                         >
                                             <div>
-                                                <label className="text-xs font-bold uppercase tracking-widest opacity-60 mb-2 block">UTR / Reference Number</label>
+                                                <label className="text-xs font-bold uppercase tracking-widest opacity-60 mb-2 block">Your Query / Issue</label>
                                                 <input
                                                     type="text"
                                                     value={utrNumber}
                                                     onChange={(e) => setUtrNumber(e.target.value)}
-                                                    placeholder="Enter 12-digit UTR number"
-                                                    maxLength={22}
-                                                    className="w-full px-5 py-3.5 bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/50 rounded-xl font-mono text-sm tracking-wide focus:outline-none focus:ring-2 focus:ring-white/40"
+                                                    placeholder="Describe your payment issue..."
+                                                    maxLength={150}
+                                                    className="w-full px-5 py-3.5 bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/50 rounded-xl font-medium text-sm focus:outline-none focus:ring-2 focus:ring-white/40"
                                                 />
-                                                <p className="text-[10px] opacity-50 mt-1.5">Found in your UPI app&apos;s transaction receipt</p>
+                                                <p className="text-[10px] opacity-70 mt-1.5">Attach payment screenshots directly in WhatsApp on the next step.</p>
                                             </div>
                                             {submitStatus === 'success' ? (
-                                                <div className="p-4 bg-white/20 rounded-xl text-center">
-                                                    <CheckCircle className="w-8 h-8 mx-auto mb-2" />
-                                                    <p className="font-bold">Confirmation Sent!</p>
-                                                    <p className="text-xs opacity-80 mt-1">We&apos;ll verify your payment and activate enrollment within minutes.</p>
+                                                <div className="p-5 bg-white/20 rounded-xl text-center border border-white/30">
+                                                    <CheckCircle className="w-8 h-8 mx-auto mb-2 text-green-300" />
+                                                    <p className="font-black text-lg">Ticket Created!</p>
+                                                    <div className="my-3 py-2 bg-black/20 rounded-lg">
+                                                        <p className="text-xs uppercase tracking-widest opacity-70 mb-1">Ticket ID</p>
+                                                        <p className="font-mono text-xl font-bold tracking-wider text-green-300">{ticketId}</p>
+                                                    </div>
+                                                    <p className="text-xs opacity-90 mt-2">
+                                                        Please click the WhatsApp button below to send us your screenshots and continue the chat.
+                                                    </p>
+                                                    <div className="mt-4 flex gap-2">
+                                                        <a
+                                                            href={buildWhatsAppUrl()}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-green-700 font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all text-sm"
+                                                        >
+                                                            <Send className="w-4 h-4" />
+                                                            Open WhatsApp
+                                                        </a>
+                                                    </div>
                                                 </div>
                                             ) : (
                                                 <div className="flex gap-2">
@@ -578,14 +630,21 @@ export default function PaymentDetailsClient({ details, amount, course, clientNa
                                                         href={buildWhatsAppUrl()}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        onClick={handlePaymentConfirm}
+                                                        onClick={(e) => {
+                                                            if (!utrNumber.trim() || utrNumber.trim().length < 2) {
+                                                                e.preventDefault();
+                                                                alert("Please enter a query before continuing.");
+                                                                return;
+                                                            }
+                                                            handlePaymentConfirm();
+                                                        }}
                                                         className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-green-700 font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all text-sm"
                                                     >
                                                         <Send className="w-4 h-4" />
-                                                        {isSubmitting ? 'Sending...' : 'Send via WhatsApp'}
+                                                        {isSubmitting ? 'Raising Ticket...' : 'Send via WhatsApp'}
                                                     </a>
                                                     <button
-                                                        onClick={() => { setShowUtrInput(false); setUtrNumber(""); setSubmitStatus('idle'); }}
+                                                        onClick={() => { setShowUtrInput(false); setUtrNumber(""); setSubmitStatus('idle'); setTicketId(""); }}
                                                         className="px-4 py-3 bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition-all text-sm"
                                                     >
                                                         Cancel

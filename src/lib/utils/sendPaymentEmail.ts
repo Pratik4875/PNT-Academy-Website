@@ -12,7 +12,8 @@ interface PaymentPayload {
     clientName: string;
     courseName: string;
     amount: string;
-    utrNumber: string;
+    queryMessage: string;
+    ticketId?: string;
     timestamp: string;
 }
 
@@ -52,14 +53,19 @@ export async function sendPaymentEmail(data: PaymentPayload): Promise<{ success:
 </head>
 <body>
   <div class="card">
-    <div class="badge">💰 Payment Received</div>
-    <h2>A client has confirmed payment</h2>
+    <div class="badge">🎫 Payment Ticket</div>
+    <h2>A client has raised a payment query</h2>
 
     ${data.amount ? `
     <div class="amount-box">
       <div class="label">Amount Paid</div>
       <div class="value">₹${escapeHtml(data.amount)}</div>
     </div>` : ""}
+
+    <div class="row">
+      <div class="label">Ticket ID</div>
+      <div class="value utr">${escapeHtml(data.ticketId || "N/A")}</div>
+    </div>
 
     <div class="row">
       <div class="label">Client Name</div>
@@ -72,8 +78,8 @@ export async function sendPaymentEmail(data: PaymentPayload): Promise<{ success:
     </div>
 
     <div class="row">
-      <div class="label">UTR / Reference Number</div>
-      <div class="value utr">${escapeHtml(data.utrNumber)}</div>
+      <div class="label">Client Query / Issue</div>
+      <div class="value utr">${escapeHtml(data.queryMessage)}</div>
     </div>
 
     <div class="row">
@@ -82,8 +88,8 @@ export async function sendPaymentEmail(data: PaymentPayload): Promise<{ success:
     </div>
 
     <div class="action-box">
-      <p>🔍 <strong>Action Required:</strong> Verify this UTR in your bank statement.</p>
-      <p>Once confirmed, activate the client's enrollment.</p>
+      <p>🔍 <strong>Action Required:</strong> Review this query and assist the client.</p>
+      <p>Reply directly to them via WhatsApp or email using the contact details provided.</p>
     </div>
 
     <div class="footer">
@@ -104,7 +110,7 @@ export async function sendPaymentEmail(data: PaymentPayload): Promise<{ success:
             body: JSON.stringify({
                 from: `PNT Academy Payments <${fromEmail}>`,
                 to: [toEmail],
-                subject: `💰 Payment Confirmed: ₹${data.amount || "N/A"} — ${data.clientName || "Client"} (${data.courseName || "Course"})`,
+                subject: `🎫 [${data.ticketId || "N/A"}] Payment Ticket: ${data.clientName || "Client"} (${data.courseName || "Course"})`,
                 html,
             }),
         });

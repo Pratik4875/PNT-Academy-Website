@@ -4,20 +4,20 @@ import { sendPaymentEmail } from "@/lib/utils/sendPaymentEmail";
 /**
  * POST /api/payments/confirm
  * ──────────────────────────
- * Called when a client clicks "I've Paid" and submits their UTR number.
- * Sends an email notification to the admin with payment details.
+ * Called when a client clicks "Raise Payment Ticket" and submits their query.
+ * Sends an email notification to the admin with the ticket details.
  *
- * Body: { clientName, courseName, amount, utrNumber }
+ * Body: { clientName, courseName, amount, queryMessage }
  */
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { clientName, courseName, amount, utrNumber } = body;
+        const { clientName, courseName, amount, queryMessage, ticketId } = body;
 
         // Basic validation
-        if (!utrNumber || utrNumber.trim().length < 6) {
+        if (!queryMessage || queryMessage.trim().length < 2) {
             return NextResponse.json(
-                { error: "Please provide a valid UTR/reference number (minimum 6 characters)" },
+                { error: "Please provide a valid query or issue description" },
                 { status: 400 }
             );
         }
@@ -27,7 +27,8 @@ export async function POST(req: NextRequest) {
             clientName: clientName || "Not provided",
             courseName: courseName || "Not specified",
             amount: amount || "Not specified",
-            utrNumber: utrNumber.trim(),
+            queryMessage: queryMessage.trim(),
+            ticketId: ticketId || "N/A",
             timestamp: new Date().toLocaleString("en-IN", {
                 timeZone: "Asia/Kolkata",
                 dateStyle: "long",
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({
             success: true,
             emailSent: emailResult.success,
-            message: "Payment confirmation submitted. We'll verify and activate your enrollment shortly.",
+            message: "Ticket submitted. We'll be in touch shortly.",
         });
     } catch (error) {
         console.error("[PAYMENT CONFIRM] Error:", error);
