@@ -493,6 +493,9 @@ export default function AdminSettings() {
                                                         Clear
                                                     </button>
                                                 </div>
+                                                <p className="text-[11px] text-amber-600 dark:text-amber-400/80 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-lg px-3 py-2 mt-2">
+                                                    ⚠️ <strong>Note:</strong> UPI app deep links are not yet tested with merchant UPI. The QR code on the payment page works reliably — ask the client to scan the QR. Once merchant UPI ID is configured, re-test the intent links.
+                                                </p>
                                             </div>
                                         )}
                                     </section>
