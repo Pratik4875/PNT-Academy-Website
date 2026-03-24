@@ -1,59 +1,82 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import { connectDB } from "@/lib/db";
+import { SchoolVideo } from "@/lib/models/SchoolVideo";
+import { v2 as cloudinary } from "cloudinary";
 
-// This API auto-detects video files in /public/videos and returns them.
-// It also supports POST to register new videos and DELETE to remove them.
+// Configure Cloudinary for deletions (since uploads happen via unsigned preset on client)
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "dycht8a6s",
+    api_key: process.env.CLOUDINARY_API_KEY || "889225457437711",
+    api_secret: process.env.CLOUDINARY_API_SECRET || "cJaINIKbk-AvK-PR67tQoWrmEdc",
+});
 
-const VIDEOS_DIR = path.join(process.cwd(), "public", "videos");
-const SUPPORTED_EXTENSIONS = [".mp4", ".webm", ".mov"];
-
+// GET: Fetch all videos from MongoDB
 export async function GET() {
     try {
-        // Ensure the videos directory exists
-        if (!fs.existsSync(VIDEOS_DIR)) {
-            fs.mkdirSync(VIDEOS_DIR, { recursive: true });
-        }
-
-        // Scan the directory for video files
-        const files = fs.readdirSync(VIDEOS_DIR);
-        const videos = files
-            .filter((file) => SUPPORTED_EXTENSIONS.includes(path.extname(file).toLowerCase()))
-            .map((file) => ({
-                filename: file,
-                url: `/videos/${file}`,
-                size: fs.statSync(path.join(VIDEOS_DIR, file)).size,
-                lastModified: fs.statSync(path.join(VIDEOS_DIR, file)).mtime.toISOString(),
-            }))
-            .sort((a, b) => a.filename.localeCompare(b.filename));
-
+        await connectDB();
+        const videos = await SchoolVideo.find().sort({ createdAt: -1 });
         return NextResponse.json(videos);
     } catch (error) {
-        console.error("Failed to scan videos directory:", error);
+        console.error("Failed to fetch videos from DB:", error);
         return NextResponse.json([], { status: 500 });
     }
 }
 
-// DELETE: Remove a video file from the /public/videos folder
+// POST: Save a new video URL to MongoDB
+export async function POST(req: Request) {
+    try {
+        await connectDB();
+        const body = await req.json();
+        const { filename, url, size, publicId } = body;
+
+        if (!filename || !url || !publicId) {
+            return NextResponse.json({ error: "Missing video data" }, { status: 400 });
+        }
+
+        const newVideo = new SchoolVideo({
+            filename,
+            url,
+            size: size || 0,
+            publicId,
+        });
+
+        await newVideo.save();
+        return NextResponse.json({ success: true, video: newVideo });
+    } catch (error) {
+        console.error("Failed to save video to DB:", error);
+        return NextResponse.json({ error: "Database save failed" }, { status: 500 });
+    }
+}
+
+// DELETE: Remove from DB AND Cloudinary
 export async function DELETE(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
-        const filename = searchParams.get("filename");
-        
-        if (!filename) {
-            return NextResponse.json({ error: "filename is required" }, { status: 400 });
-        }
+        const id = searchParams.get("id");
 
-        // Security: prevent path traversal
-        const safeName = path.basename(filename);
-        const filePath = path.join(VIDEOS_DIR, safeName);
+        if (!id) return NextResponse.json({ error: "id is required" }, { status: 400 });
 
-        if (!fs.existsSync(filePath)) {
+        await connectDB();
+        const video = await SchoolVideo.findById(id);
+
+        if (!video) {
             return NextResponse.json({ error: "Video not found" }, { status: 404 });
         }
 
-        fs.unlinkSync(filePath);
-        return NextResponse.json({ success: true, deleted: safeName });
+        // 1. Delete from Cloudinary
+        if (video.publicId) {
+            try {
+                // Because it's a video, resource_type MUST be 'video' to delete properly
+                await cloudinary.uploader.destroy(video.publicId, { resource_type: "video" });
+            } catch (cloudErr) {
+                console.error("Cloudinary delete failed, but continuing to remove from DB:", cloudErr);
+            }
+        }
+
+        // 2. Delete from MongoDB
+        await SchoolVideo.findByIdAndDelete(id);
+
+        return NextResponse.json({ success: true, deleted: id });
     } catch (error) {
         console.error("Failed to delete video:", error);
         return NextResponse.json({ error: "Delete failed" }, { status: 500 });
