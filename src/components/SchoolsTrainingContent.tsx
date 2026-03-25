@@ -241,7 +241,7 @@ function RotatingText() {
 // ═══════════════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════════════
-export default function SchoolsTrainingContent({ bootcampLink = "/bootcamp" }: { bootcampLink?: string }) {
+export default function SchoolsTrainingContent({ bootcampLink = "https://forms.gle/" }: { bootcampLink?: string }) {
     const [liveSchools, setLiveSchools] = useState<any[]>([]);
     const [flippedIndex, setFlippedIndex] = useState<number | null>(null);
 

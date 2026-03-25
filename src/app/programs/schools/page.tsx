@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default async function SchoolsProgramsPage() {
     const settings = await getAdminSettings();
-    const bootcampLink = settings?.bootcampLink || "/bootcamp";
+    const bootcampLink = settings?.bootcampLink || "https://forms.gle/";
 
     return (
         <main className="min-h-screen text-slate-900 dark:text-slate-50 overflow-x-hidden transition-colors duration-500 bg-transparent selection:bg-blue-600 selection:text-white">
