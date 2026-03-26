@@ -20,6 +20,7 @@ import TestimonialsSlider from "@/components/TestimonialsSlider";
 import BootcampCTA from "@/components/BootcampCTA";
 import Footer from "@/components/Footer";
 import AboutSlider from "@/components/AboutSlider";
+import MobileARButton from "@/components/MobileARButton";
 import { incrementLiveVisits, getAdminSettings } from "@/lib/actions/db";
 
 
@@ -98,24 +99,27 @@ export default async function Home() {
               </div>
             </div>
 
-            {/* 3D Canvas Area & AR Button */}
-            <div className="absolute inset-0 md:relative md:inset-auto h-full w-full pointer-events-none md:pointer-events-auto md:col-start-2 z-50 md:z-auto">
+            {/* 3D Canvas Area — DESKTOP ONLY. Hidden on mobile to optimize DOM since AGV is disabled there. */}
+            <div className="hidden md:block md:relative md:inset-auto h-full w-full pointer-events-none md:pointer-events-auto md:col-start-2 z-0">
               <HeroSection />
             </div>
 
-            {/* Mobile-only stat badges — shown instead of the 3D canvas */}
-            <div className="grid grid-cols-2 gap-3 md:hidden mt-2">
-              {[
-                { label: "10,000+", sub: "Students" },
-                { label: "Since 2016", sub: "Founded" },
-                { label: "Shark Tank", sub: "Funded" },
-                { label: "PM Award", sub: "Received" },
-              ].map((s) => (
-                <div key={s.label} className="rounded-2xl p-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur border border-white/40 dark:border-slate-700/50 shadow-sm text-center">
-                  <div className="font-black text-blue-600 dark:text-blue-400 text-base">{s.label}</div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{s.sub}</div>
-                </div>
-              ))}
+            {/* Mobile-only stat badges & AR Button — shown instead of the 3D canvas */}
+            <div className="flex flex-col gap-4 md:hidden mt-2 pointer-events-auto">
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: "10,000+", sub: "Students" },
+                  { label: "Since 2016", sub: "Founded" },
+                  { label: "Shark Tank", sub: "Funded" },
+                  { label: "PM Award", sub: "Received" },
+                ].map((s) => (
+                  <div key={s.label} className="rounded-2xl p-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur border border-white/40 dark:border-slate-700/50 shadow-sm text-center">
+                    <div className="font-black text-blue-600 dark:text-blue-400 text-base">{s.label}</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{s.sub}</div>
+                  </div>
+                ))}
+              </div>
+              <MobileARButton />
             </div>
           </div>
 
