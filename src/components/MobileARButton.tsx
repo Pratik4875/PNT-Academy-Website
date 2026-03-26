@@ -8,7 +8,7 @@ export default function MobileARButton() {
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
-        const checkMobile = () => setIsMobile(window.matchMedia("(max-width: 768px)").matches);
+        const checkMobile = () => setIsMobile(window.matchMedia("(max-width: 1024px)").matches);
         checkMobile();
         window.addEventListener("resize", checkMobile);
         return () => window.removeEventListener("resize", checkMobile);

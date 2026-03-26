@@ -368,6 +368,7 @@ function RotatingText() {
 export default function SchoolsTrainingContent({ championshipLink = "https://forms.gle/" }: { championshipLink?: string }) {
     const [liveSchools, setLiveSchools] = useState<any[]>([]);
     const [flippedIndex, setFlippedIndex] = useState<number | null>(null);
+    const [activeGrade, setActiveGrade] = useState(0);
 
     useEffect(() => {
         const fetchSchools = async () => {
@@ -690,35 +691,73 @@ export default function SchoolsTrainingContent({ championshipLink = "https://for
                             </div>
                         </div>
 
-                        <div className="w-full lg:w-1/2 relative">
-                            <div className="bg-white dark:bg-slate-900/50 rounded-3xl p-6 md:p-8 shadow-2xl border border-slate-200 dark:border-slate-800 backdrop-blur-sm">
-                                <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-6">Grade-Wise Project Explorer</h3>
-                                <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                        <div className="w-full lg:w-1/2 relative flex flex-col h-full rounded-3xl overflow-hidden shadow-2xl">
+                            <div className="bg-white/90 dark:bg-slate-900/90 p-6 md:p-8 border border-slate-200/60 dark:border-slate-800 backdrop-blur-xl flex flex-col h-full relative z-10 w-full">
+                                
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                                    <h3 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white flex items-center gap-3 tracking-tight">
+                                        <GraduationCap className="w-8 h-8 text-blue-500" />
+                                        Interactive Curriculum
+                                    </h3>
+                                </div>
+                                
+                                {/* Grade Chips Row */}
+                                <div className="flex overflow-x-auto gap-2.5 pb-4 mb-4 mt-2 custom-scrollbar select-none" style={{ scrollSnapType: 'x mandatory' }}>
                                     {GRADE_EXPLORER_DATA.map((grade, i) => (
-                                        <details key={i} className="group bg-slate-50 dark:bg-slate-800 border-none rounded-2xl overflow-hidden [&_summary::-webkit-details-marker]:hidden">
-                                            <summary className="flex items-center justify-between p-5 cursor-pointer select-none">
-                                                <div className="flex items-center gap-4">
-                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white ${grade.color} shadow-md`}>
-                                                        {i + 1}
+                                        <button
+                                            key={i}
+                                            onClick={() => setActiveGrade(i)}
+                                            style={{ scrollSnapAlign: 'start' }}
+                                            className={`whitespace-nowrap flex-shrink-0 px-6 py-3 rounded-full text-sm font-black transition-all duration-300 ${activeGrade === i ? grade.color + ' text-white shadow-[0_10px_20px_-10px_rgba(0,0,0,0.3)] scale-105' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105'}`}
+                                        >
+                                            {grade.grade}
+                                        </button>
+                                    ))}
+                                </div>
+                                
+                                {/* Selected Grade Content */}
+                                <div className="relative flex-grow flex flex-col min-h-[350px]">
+                                    <AnimatePresence mode="wait">
+                                        <motion.div
+                                            key={activeGrade}
+                                            initial={{ opacity: 0, x: 20, scale: 0.98 }}
+                                            animate={{ opacity: 1, x: 0, scale: 1 }}
+                                            exit={{ opacity: 0, x: -20, scale: 0.98 }}
+                                            transition={{ duration: 0.3, type: "spring", stiffness: 200, damping: 20 }}
+                                            className="flex flex-col flex-grow bg-slate-50/50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 p-6 md:p-8 rounded-3xl shadow-inner relative overflow-hidden"
+                                        >
+                                            {/* Decorative Background Glow */}
+                                            <div className={`absolute -right-12 -top-12 w-64 h-64 ${GRADE_EXPLORER_DATA[activeGrade].color} opacity-10 dark:opacity-20 blur-[60px] rounded-full pointer-events-none`} />
+                                            <div className={`absolute -left-12 -bottom-12 w-64 h-64 ${GRADE_EXPLORER_DATA[activeGrade].color} opacity-[0.05] dark:opacity-10 blur-[60px] rounded-full pointer-events-none`} />
+                                            
+                                            <div className="relative z-10 flex flex-col h-full">
+                                                <div className="flex items-center gap-5 mb-5">
+                                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-white text-xl ${GRADE_EXPLORER_DATA[activeGrade].color} shadow-xl shadow-[${GRADE_EXPLORER_DATA[activeGrade].color}]/20 shrink-0`}>
+                                                        {activeGrade + 1}
                                                     </div>
-                                                    <span className="font-bold text-slate-900 dark:text-white text-lg">{grade.grade}</span>
+                                                    <h4 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight">
+                                                        {GRADE_EXPLORER_DATA[activeGrade].title}
+                                                    </h4>
                                                 </div>
-                                                <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-700 flex items-center justify-center text-slate-500 group-open:rotate-90 transition-transform">
-                                                    <ChevronRight className="w-4 h-4" />
-                                                </div>
-                                            </summary>
-                                            <div className="p-5 pt-0 px-5 pb-5">
-                                                <p className="text-slate-600 dark:text-slate-300 text-sm font-medium mb-4">{grade.title} — {grade.desc}</p>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {grade.tags.map((tag, idx) => (
-                                                        <span key={idx} className="bg-white dark:bg-black border border-slate-200 dark:border-slate-700 text-xs font-bold px-3 py-1.5 rounded-full text-slate-700 dark:text-slate-300 shadow-sm">
-                                                            {tag}
-                                                        </span>
-                                                    ))}
+                                                
+                                                <p className="text-slate-600 dark:text-slate-300 text-lg md:text-xl font-medium leading-relaxed mb-10 flex-grow">
+                                                    {GRADE_EXPLORER_DATA[activeGrade].desc}
+                                                </p>
+                                                
+                                                <div>
+                                                    <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 mb-5">Key Projects & Deliverables</p>
+                                                    <div className="flex flex-wrap gap-3">
+                                                        {GRADE_EXPLORER_DATA[activeGrade].tags.map((tag, idx) => (
+                                                            <span key={idx} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-semibold px-5 py-2.5 rounded-xl text-slate-700 dark:text-slate-300 shadow-sm flex items-center gap-3 transition-transform hover:-translate-y-1">
+                                                                <span className={`w-2.5 h-2.5 rounded-full ${GRADE_EXPLORER_DATA[activeGrade].color} shadow-sm`} />
+                                                                {tag}
+                                                            </span>
+                                                        ))}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </details>
-                                    ))}
+                                        </motion.div>
+                                    </AnimatePresence>
                                 </div>
                             </div>
                         </div>

@@ -47,7 +47,7 @@ export default async function Home() {
 
         {/* Hero Section */}
         <section id="hero" className="relative h-screen flex items-center pt-20">
-          <div className="container mx-auto px-4 sm:px-6 z-10 grid md:grid-cols-2 gap-8 items-center h-full">
+          <div className="container mx-auto px-4 sm:px-6 z-10 grid lg:grid-cols-2 gap-8 items-center h-full">
             {/* Text Content */}
             <div className="flex flex-col gap-6" style={{ pointerEvents: 'none' }}>
               
@@ -99,13 +99,13 @@ export default async function Home() {
               </div>
             </div>
 
-            {/* 3D Canvas Area — DESKTOP ONLY. Hidden on mobile to optimize DOM since AGV is disabled there. */}
-            <div className="hidden md:block md:relative md:inset-auto h-full w-full pointer-events-none md:pointer-events-auto md:col-start-2 z-0">
+            {/* 3D Canvas Area — DESKTOP ONLY. Hidden on mobile and tablets to optimize DOM since AGV is disabled there. */}
+            <div className="hidden lg:block lg:relative lg:inset-auto h-full w-full pointer-events-none lg:pointer-events-auto lg:col-start-2 z-0">
               <HeroSection />
             </div>
 
-            {/* Mobile-only stat badges & AR Button — shown instead of the 3D canvas */}
-            <div className="flex flex-col gap-4 md:hidden mt-2 pointer-events-auto">
+            {/* Mobile & Tablet stat badges & AR Button — shown instead of the 3D canvas */}
+            <div className="flex flex-col gap-4 lg:hidden mt-2 pointer-events-auto">
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { label: "10,000+", sub: "Students" },

@@ -12,7 +12,7 @@ import { getLiveGallery } from "@/lib/actions/db";
 function useIsMobile() {
     const [isMobile, setIsMobile] = useState(false);
     useEffect(() => {
-        const check = () => setIsMobile(window.matchMedia("(max-width: 768px)").matches);
+        const check = () => setIsMobile(window.matchMedia("(max-width: 1024px)").matches);
         check();
         window.addEventListener("resize", check);
         return () => window.removeEventListener("resize", check);
