@@ -421,26 +421,38 @@ export default function SchoolsTrainingContent({ championshipLink = "https://for
 
                 <div className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-8 xl:px-0 flex flex-col items-center justify-center text-center py-20 md:py-32">
                     
-                    {/* Clickable Championship Ribbon */}
+                    {/* Championship Banner — prominently styled */}
                     <motion.div 
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
+                        className="mb-10"
                     >
                         <Link 
                             href={championshipLink} 
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-red-500/90 dark:bg-red-600/90 backdrop-blur-xl border border-red-400/50 mb-10 shadow-[0_0_30px_rgba(239,68,68,0.3)] hover:shadow-[0_0_50px_rgba(239,68,68,0.5)] hover:scale-105 transition-all cursor-pointer group"
+                            className="group inline-flex items-center gap-4 px-7 py-4 rounded-2xl backdrop-blur-xl border border-blue-300/60 dark:border-blue-500/50 shadow-[0_0_40px_rgba(37,99,235,0.3)] hover:shadow-[0_0_60px_rgba(99,102,241,0.5)] hover:scale-105 transition-all duration-300 cursor-pointer relative overflow-hidden"
+                            style={{ background: 'linear-gradient(135deg, rgba(29,78,216,0.92) 0%, rgba(79,70,229,0.92) 60%, rgba(124,58,237,0.92) 100%)' }}
                         >
-                            <span className="flex h-3 w-3 relative">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+                            {/* Shimmer */}
+                            <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
+                            {/* Pulsing live dot */}
+                            <span className="relative flex h-3.5 w-3.5 shrink-0">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-300 opacity-80" />
+                                <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-yellow-300" />
                             </span>
-                            <span className="text-white text-sm md:text-base font-bold tracking-wide">
-                                🏆 Robotics Championship 2026-27 — Register Your School Now!
+                            {/* Trophy */}
+                            <span className="text-3xl leading-none">🏆</span>
+                            {/* Text block */}
+                            <span className="flex flex-col items-start">
+                                <span className="text-yellow-200 text-[10px] font-black uppercase tracking-[0.2em]">Now Open for Registration</span>
+                                <span className="text-white text-base md:text-xl font-black tracking-wide leading-tight">National Robotics Championship 2026-27</span>
                             </span>
-                            <ExternalLink className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />
+                            {/* Arrow */}
+                            <span className="ml-auto flex items-center justify-center w-8 h-8 rounded-full bg-white/20 border border-white/30 text-white text-sm group-hover:translate-x-1 transition-transform shrink-0">
+                                →
+                            </span>
                         </Link>
                     </motion.div>
 

@@ -57,14 +57,19 @@ export default async function Home() {
                   href={roboticsChampionshipLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-3 px-5 py-2.5 sm:px-6 sm:py-3 rounded-full font-bold text-sm md:text-base text-white border border-amber-300/40 shadow-[0_0_25px_rgba(234,179,8,0.5)] hover:shadow-[0_0_45px_rgba(234,179,8,0.7)] transition-all duration-300 hover:scale-105 relative overflow-hidden group"
-                  style={{ background: 'linear-gradient(135deg, #b45309 0%, #ef4444 40%, #dc2626 70%, #7c3aed 100%)' }}
+                  className="inline-flex items-center gap-3 px-5 py-2.5 sm:px-6 sm:py-3 rounded-full font-bold text-sm md:text-base text-white border border-blue-400/40 shadow-[0_0_20px_rgba(37,99,235,0.35)] hover:shadow-[0_0_35px_rgba(99,102,241,0.55)] transition-all duration-300 hover:scale-105 relative overflow-hidden group"
+                  style={{ background: 'linear-gradient(135deg, #1d4ed8 0%, #4f46e5 60%, #7c3aed 100%)' }}
                 >
                   {/* Shimmer sweep */}
-                  <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                  <span className="text-xl animate-bounce leading-none">🏆</span>
-                  <span className="font-black tracking-wide uppercase">Register for Robotics Championship 2026-27</span>
-                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-white/20 border border-white/30 text-xs group-hover:translate-x-1 transition-transform">
+                  <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+                  {/* Pulsing star */}
+                  <span className="relative flex h-3 w-3 shrink-0">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-300 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-yellow-300" />
+                  </span>
+                  <span className="text-lg leading-none">🏆</span>
+                  <span className="font-black tracking-wide">Robotics Championship 2026-27 — Register Now!</span>
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-white/20 border border-white/30 text-xs group-hover:translate-x-1 transition-transform shrink-0">
                     →
                   </span>
                 </a>

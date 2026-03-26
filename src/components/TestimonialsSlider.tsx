@@ -37,9 +37,9 @@ export default function TestimonialsSlider({ staticData }: { staticData?: any[] 
         <section className="py-24 relative border-t border-slate-900/10 dark:border-white/5 bg-slate-50 dark:bg-slate-900/40 transition-colors duration-500 overflow-hidden">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-16">
-                    <p className="text-sm font-bold uppercase tracking-widest text-blue-500 dark:text-blue-400 mb-3">Community Voices</p>
+                    <p className="text-sm font-bold uppercase tracking-widest text-blue-500 dark:text-blue-400 mb-3">What Educators Say</p>
                     <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white transition-colors duration-500">
-                        Student Testimonials
+                        Teacher Testimonials
                     </h2>
                     <div className="w-16 h-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mx-auto mt-6" />
                 </div>

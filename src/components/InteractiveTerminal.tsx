@@ -358,6 +358,11 @@ function RobotModel({ onClick, osActive }: { onClick: () => void; osActive: bool
             onPointerOver={() => { document.body.style.cursor = "pointer"; setHovered(true); }}
             onPointerOut={() => { document.body.style.cursor = "auto"; setHovered(false); }}
         >
+            {/* Invisible large click sphere to expand hit area */}
+            <mesh visible={false}>
+                <sphereGeometry args={[2.5, 8, 8]} />
+                <meshBasicMaterial transparent opacity={0} />
+            </mesh>
             <group ref={groupRef}>
                 <primitive object={scene} />
                 
@@ -379,8 +384,8 @@ function RobotModel({ onClick, osActive }: { onClick: () => void; osActive: bool
                             className={`whitespace-nowrap flex flex-col items-center pointer-events-none transition-all duration-300 ${hovered ? 'scale-90 opacity-0' : 'scale-100 opacity-100'}`}
                         >
                             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-base md:text-lg font-black px-6 py-3 rounded-2xl shadow-[0_4px_30px_rgba(37,99,235,0.6)] border-2 border-white/40 flex items-center gap-3 ring-4 ring-blue-500/20">
-                                <span className="text-2xl animate-bounce">👋</span> 
-                                TAP ME TO EXPLORE!
+                                <span className="text-2xl animate-bounce">🎮</span> 
+                                Click on me to play game!
                             </div>
                             <div className="w-0 h-0 border-l-[10px] border-r-[10px] border-t-[10px] border-l-transparent border-r-transparent border-t-blue-600 -mt-[1px]" />
                         </motion.div>

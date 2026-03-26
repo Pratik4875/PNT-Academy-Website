@@ -208,8 +208,121 @@ function WrenchModel() {
     return <GlbModel path="/models/toolkit_3D.glb" targetSize={5.0} />;
 }
 
+function AngleGrinderModel() {
+    return <GlbModel path="/models/angle_grinder.glb" targetSize={5.0} />;
+}
+
+function SpannerModel() {
+    return <GlbModel path="/models/spanner.glb" targetSize={5.0} />;
+}
+
+function VernierModel() {
+    return <GlbModel path="/models/verniercaliper.glb" targetSize={5.0} />;
+}
+
+function WrenchSizeModel() {
+    return <GlbModel path="/models/wrench_size_24_tools.glb" targetSize={5.0} />;
+}
+
 function HumanoidModel() {
     return <GlbModel path="/models/hr-os1_humanoid_robot_kit_-_endo_v1.0.glb" targetSize={9.0} />;
+}
+
+// Mechanical Lab models — the new ones the user added
+const MECH_MODELS = [
+    { path: "/models/angle_grinder.glb", label: "Angle Grinder", targetSize: 5.0 },
+    { path: "/models/spanner.glb",       label: "Spanner",        targetSize: 5.0 },
+    { path: "/models/verniercaliper.glb",label: "Vernier Caliper",targetSize: 5.0 },
+    { path: "/models/wrench_size_24_tools.glb", label: "Wrench Set", targetSize: 5.0 },
+];
+
+function MechModel({ path, targetSize }: { path: string; targetSize: number }) {
+    return <GlbModel path={path} targetSize={targetSize} />;
+}
+
+function MechanicalLabSection() {
+    const isMobile = useIsMobile();
+    const [modelIdx, setModelIdx] = useState(0);
+
+    // Auto-cycle through models every 3 s (same as Electronics Lab)
+    useEffect(() => {
+        const t = setInterval(() => setModelIdx(i => (i + 1) % MECH_MODELS.length), 3000);
+        return () => clearInterval(t);
+    }, []);
+
+    const current = MECH_MODELS[modelIdx];
+
+    return (
+        <section className="mb-24">
+            <div className="text-center mb-12">
+                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-black uppercase tracking-widest mb-4">🔩 Lab 3</span>
+                <h2 className="text-3xl md:text-5xl font-black mb-4">Mechanical Lab</h2>
+                <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto">Hands-on engineering fundamentals — where students get real exposure to tools, materials, and mechanical systems.</p>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-10 items-center">
+                {/* Cards on the Left */}
+                <div className="grid sm:grid-cols-2 gap-5 order-2 lg:order-1">
+                    {[
+                        { icon: "🔩", title: "Precision Tools", desc: "Vernier calipers, micrometers, and measuring instruments for accurate fabrication.", color: "from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-900", border: "border-slate-200 dark:border-slate-700" },
+                        { icon: "🪛", title: "Workstations", desc: "Professional grade workbenches with vises, clamps, and full hand toolsets.", color: "from-blue-50 to-slate-50 dark:from-blue-900/20 dark:to-slate-900", border: "border-blue-100 dark:border-blue-800/30" },
+                        { icon: "⚡", title: "Power Tools", desc: "Drilling machines, angle grinders, and bench grinders for material shaping.", color: "from-yellow-50 to-slate-50 dark:from-yellow-900/20 dark:to-slate-900", border: "border-yellow-100 dark:border-yellow-800/30" },
+                        { icon: "🏗️", title: "Structural Assembly", desc: "Aluminium extrusion systems, fasteners, and frame construction kits.", color: "from-emerald-50 to-slate-50 dark:from-emerald-900/20 dark:to-slate-900", border: "border-emerald-100 dark:border-emerald-800/30" },
+                        { icon: "⚙️", title: "Gear & Drive Systems", desc: "Gears, pulleys, belts, and chain drives for understanding mechanical advantage.", color: "from-purple-50 to-slate-50 dark:from-purple-900/20 dark:to-slate-900", border: "border-purple-100 dark:border-purple-800/30" },
+                        { icon: "🛡️", title: "Safety Training", desc: "PPE, machine guarding, safe operating procedures, and lab safety protocols.", color: "from-red-50 to-slate-50 dark:from-red-900/20 dark:to-slate-900", border: "border-red-100 dark:border-red-800/30" },
+                    ].map((item, i) => (
+                        <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.07 }}
+                            className={`bg-gradient-to-br ${item.color} rounded-2xl border ${item.border} p-6 hover:-translate-y-1 hover:shadow-lg transition-all`}>
+                            <div className="text-4xl mb-4">{item.icon}</div>
+                            <h4 className="font-bold text-slate-800 dark:text-white text-lg mb-2">{item.title}</h4>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{item.desc}</p>
+                        </motion.div>
+                    ))}
+                </div>
+
+                {/* Right: 3D Slideshow — cycles through new models */}
+                <div className="h-[400px] lg:h-[520px] w-full relative flex items-center justify-center order-1 lg:order-2">
+                    {/* Decorative glow */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-slate-500/10 dark:bg-slate-400/5 rounded-full blur-[60px] pointer-events-none" />
+
+                    <div className="absolute inset-0 mobile-safe-canvas">
+                        <Canvas
+                            shadows
+                            gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.0 }}
+                            camera={{ position: isMobile ? [8, 6, 14] : [6, 5, 12], fov: isMobile ? 48 : 38 }}
+                            frameloop={isMobile ? "demand" : "always"}
+                            dpr={isMobile ? [1, 1.5] : [1, 2]}
+                        >
+                            <ambientLight intensity={0.4} />
+                            <spotLight position={[10, 10, 10]} intensity={1.5} angle={0.2} castShadow />
+                            <directionalLight position={[10, 10, 5]} intensity={1.2} />
+                            <directionalLight position={[-10, -10, -5]} intensity={0.4} />
+                            <Environment preset="warehouse" />
+                            <Suspense fallback={null}>
+                                <MechModel path={current.path} targetSize={current.targetSize} />
+                            </Suspense>
+                            <ContactShadows position={[0, -2.5, 0]} opacity={0.35} scale={10} blur={2.5} far={5} />
+                            {!isMobile && <OrbitControls makeDefault autoRotate autoRotateSpeed={1.2} enableZoom={false} minPolarAngle={Math.PI / 5} maxPolarAngle={Math.PI / 1.8} />}
+                        </Canvas>
+                    </div>
+
+                    {/* Model label */}
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none z-10">
+                        <div className="bg-slate-900/60 dark:bg-black/60 backdrop-blur-md border border-white/10 text-white text-sm font-semibold px-5 py-2.5 rounded-full shadow-xl">
+                            {current.label}
+                        </div>
+                    </div>
+
+                    {/* Carousel dots */}
+                    <div className="absolute top-4 right-4 flex gap-2 pointer-events-none z-10">
+                        {MECH_MODELS.map((_, i) => (
+                            <div key={i} className={`h-2 rounded-full transition-all ${i === modelIdx ? "w-6 bg-slate-600 dark:bg-slate-300" : "w-2 bg-slate-300 dark:bg-white/30"}`} />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
 }
 
 function PrinterLabSection() {
@@ -467,71 +580,7 @@ function SchoolsContent() {
             <PrinterLabSection />
 
             {/* ===== MECHANICAL LAB ===== */}
-            <section className="mb-24">
-                <div className="text-center mb-12">
-                    <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-black uppercase tracking-widest mb-4">🔩 Lab 3</span>
-                    <h2 className="text-3xl md:text-5xl font-black mb-4">Mechanical Lab</h2>
-                    <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto">Hands-on engineering fundamentals — where students get real exposure to tools, materials, and mechanical systems.</p>
-                </div>
-
-                <div className="grid lg:grid-cols-2 gap-10 items-center">
-                    {/* Cards on the Left */}
-                    <div className="grid sm:grid-cols-2 gap-5 order-2 lg:order-1">
-                        {[
-                            { icon: "🔩", title: "Precision Tools", desc: "Vernier calipers, micrometers, and measuring instruments for accurate fabrication.", color: "from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-900", border: "border-slate-200 dark:border-slate-700" },
-                        { icon: "🪛", title: "Workstations", desc: "Professional grade workbenches with vises, clamps, and full hand toolsets.", color: "from-blue-50 to-slate-50 dark:from-blue-900/20 dark:to-slate-900", border: "border-blue-100 dark:border-blue-800/30" },
-                        { icon: "⚡", title: "Power Tools", desc: "Drilling machines, angle grinders, and bench grinders for material shaping.", color: "from-yellow-50 to-slate-50 dark:from-yellow-900/20 dark:to-slate-900", border: "border-yellow-100 dark:border-yellow-800/30" },
-                        { icon: "🏗️", title: "Structural Assembly", desc: "Aluminium extrusion systems, fasteners, and frame construction kits.", color: "from-emerald-50 to-slate-50 dark:from-emerald-900/20 dark:to-slate-900", border: "border-emerald-100 dark:border-emerald-800/30" },
-                        { icon: "⚙️", title: "Gear & Drive Systems", desc: "Gears, pulleys, belts, and chain drives for understanding mechanical advantage.", color: "from-purple-50 to-slate-50 dark:from-purple-900/20 dark:to-slate-900", border: "border-purple-100 dark:border-purple-800/30" },
-                        { icon: "🛡️", title: "Safety Training", desc: "PPE, machine guarding, safe operating procedures, and lab safety protocols.", color: "from-red-50 to-slate-50 dark:from-red-900/20 dark:to-slate-900", border: "border-red-100 dark:border-red-800/30" },
-                        ].map((item, i) => (
-                            <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.07 }}
-                                className={`bg-gradient-to-br ${item.color} rounded-2xl border ${item.border} p-6 hover:-translate-y-1 hover:shadow-lg transition-all`}>
-                                <div className="text-4xl mb-4">{item.icon}</div>
-                                <h4 className="font-bold text-slate-800 dark:text-white text-lg mb-2">{item.title}</h4>
-                                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{item.desc}</p>
-                            </motion.div>
-                        ))}
-                    </div>
-
-                    {/* Interactive 3D Drill & Wrench Visual on the Right */}
-                    <div className="relative flex items-center justify-center h-[450px] cursor-grab active:cursor-grabbing order-1 lg:order-2">
-
-                        <div className="absolute inset-0 mobile-safe-canvas">
-                            <Canvas 
-                                shadows
-                                gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.0 }}
-                                camera={{ position: isMobile ? [10, 8, 20] : [8, 6, 15], fov: isMobile ? 45 : 35 }}
-                                frameloop={isMobile ? "demand" : "always"}
-                                dpr={isMobile ? [1, 1.5] : [1, 2]}
-                            >
-                                <ambientLight intensity={0.4} />
-                                <spotLight position={[10, 10, 10]} intensity={1.5} angle={0.2} castShadow />
-                                <directionalLight position={[10, 10, 5]} intensity={1.2} />
-                                <directionalLight position={[-10, -10, -5]} intensity={0.4} />
-                                <Environment preset="warehouse" />
-                                <Suspense fallback={null}>
-                                    <group position={[-2, 0, 0]}>
-                                        <WrenchModel />
-                                    </group>
-                                    <group position={[2, 0, 0]}>
-                                        <DrillModel />
-                                    </group>
-                                </Suspense>
-                                <ContactShadows position={[0, -2, 0]} opacity={0.4} scale={10} blur={2} far={4} />
-                                {!isMobile && <OrbitControls makeDefault autoRotate autoRotateSpeed={1.5} enableZoom={false} minPolarAngle={Math.PI / 4} maxPolarAngle={Math.PI / 2} />}
-                            </Canvas>
-                        </div>
-
-                        {/* Interactive label */}
-                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none hidden md:block">
-                            <span className="bg-blue-500/90 backdrop-blur text-white text-xs font-black px-4 py-1.5 rounded-full flex items-center gap-2 shadow-lg">
-                                👆 Drag to rotate
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <MechanicalLabSection />
 
             {/* ===== HUMANOID ROBOT LAB ===== */}
             <section className="mb-8">
