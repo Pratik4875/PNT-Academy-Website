@@ -98,8 +98,8 @@ export default async function Home() {
               </div>
             </div>
 
-            {/* 3D Canvas Area — DESKTOP ONLY. Hidden on mobile to avoid model overflow. */}
-            <div className="hidden md:block h-[60vh] md:h-full relative pointer-events-none md:pointer-events-auto">
+            {/* 3D Canvas Area & AR Button */}
+            <div className="absolute inset-0 md:relative md:inset-auto h-full w-full pointer-events-none md:pointer-events-auto md:col-start-2 z-50 md:z-auto">
               <HeroSection />
             </div>
 
