@@ -63,11 +63,12 @@ function CourseCard({
             transition={{ duration: 0.5, ease: "easeOut" }}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            style={{ perspective: 800, transformStyle: "preserve-3d" }}
+            style={{ perspective: 1000 }}
+            className="group block relative"
         >
             <motion.div
-                style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-                className="relative flex flex-col rounded-3xl overflow-hidden h-full"
+                style={{ rotateX, rotateY }}
+                className="relative flex flex-col rounded-3xl overflow-hidden h-full z-10"
             >
                 {/* --- Gradient border glow (always visible, intensifies on hover) --- */}
                 <div
@@ -165,14 +166,16 @@ function CourseCard({
                         )}
 
                         {/* CTA */}
-                        <Link
-                            href="/contact"
-                            className="group/btn inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-black text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 pointer-events-auto"
-                            style={{ background: `linear-gradient(135deg, ${gradFrom}, ${gradTo})` }}
-                        >
-                            {ctaLabel}
-                            <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover/btn:translate-x-1" />
-                        </Link>
+                        <div className="relative z-50 mt-auto">
+                            <Link
+                                href="/contact"
+                                className="group/btn inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-black text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 pointer-events-auto"
+                                style={{ background: `linear-gradient(135deg, ${gradFrom}, ${gradTo})` }}
+                            >
+                                {ctaLabel}
+                                <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover/btn:translate-x-1" />
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </motion.div>
