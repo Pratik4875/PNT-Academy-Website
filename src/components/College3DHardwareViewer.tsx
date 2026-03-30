@@ -8,7 +8,10 @@ import { ChevronLeft, ChevronRight, Box, RotateCcw } from "lucide-react";
 
 // Known built-in models — admin can add more via the DB
 export const BUILTIN_MODELS = [
-    { id: "agv", name: "Autonomous Guided Vehicle", modelPath: "/model.glb", description: "Self-navigating vehicle used in advanced robotics labs." },
+    { id: "robotic-arm", name: "5-DOF Robotic Arm", modelPath: "/images/robotics-lab/robotic-arm.jpeg", description: "Precision multi-joint industrial robotic arm for assembly and pick-and-place operations." },
+    { id: "agv", name: "Autonomous Guided Vehicle (AGV)", modelPath: "/images/robotics-lab/agv.jpeg", description: "Self-navigating vehicle used in advanced robotics material transport." },
+    { id: "amr", name: "Industrial AMR", modelPath: "/images/robotics-lab/amr.jpeg", description: "Intelligent industrial mobile robot for complex dynamic environments." },
+    { id: "agv-3d", name: "AGV Base (3D Render)", modelPath: "/model.glb", description: "Interactive 3D structural model of the Autonomous Guided Vehicle base." },
 ];
 
 // A stable, glitch-free model renderer using primitives directly
@@ -118,30 +121,43 @@ export default function College3DHardwareViewer({ extraModels = [] }: College3DH
                 </div>
             )}
 
-            {/* WebGL Canvas — isolated from page scroll */}
-            <div className="h-[320px] sm:h-[400px] md:h-[520px] w-full cursor-grab active:cursor-grabbing" style={{ display: "block" }}>
-                <Canvas
-                    key={key}
-                    camera={{ position: [0, 1.2, 5], fov: 42 }}
-                    gl={{ antialias: true, alpha: true }}
-                    style={{ display: "block", width: "100%", height: "100%" }}
-                    frameloop="always"
-                >
-                    <Suspense fallback={null}>
-                        <Lighting />
-                        <StableModelScene modelPath={active.modelPath} />
-                        <OrbitControls
-                            enableZoom={true}
-                            maxDistance={9}
-                            minDistance={2.5}
-                            enablePan={false}
-                            minPolarAngle={Math.PI / 8}
-                            maxPolarAngle={Math.PI / 2}
-                            // Don't auto rotate — StableModelScene handles it so no conflicts
-                            autoRotate={false}
-                        />
-                    </Suspense>
-                </Canvas>
+            {/* Viewer Area: Handles both 3D GLB/GLTF models and static 2D images smoothly */}
+            <div className="h-[320px] sm:h-[400px] md:h-[520px] w-full cursor-grab active:cursor-grabbing relative" style={{ display: "block" }}>
+                {active.modelPath.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
+                    <div className="w-full h-full p-8 md:p-16 flex items-center justify-center">
+                        <div className="relative w-full h-full drop-shadow-2xl hover:scale-105 transition-transform duration-500 ease-out">
+                            {/* Standard image rendering imported from next/image via direct tag to avoid import conflict if not imported */}
+                            <img 
+                                src={active.modelPath} 
+                                alt={active.name} 
+                                className="w-full h-full object-contain pointer-events-none"
+                            />
+                        </div>
+                    </div>
+                ) : (
+                    <Canvas
+                        key={key}
+                        camera={{ position: [0, 1.2, 5], fov: 42 }}
+                        gl={{ antialias: true, alpha: true }}
+                        style={{ display: "block", width: "100%", height: "100%" }}
+                        frameloop="always"
+                    >
+                        <Suspense fallback={null}>
+                            <Lighting />
+                            <StableModelScene modelPath={active.modelPath} />
+                            <OrbitControls
+                                enableZoom={true}
+                                maxDistance={9}
+                                minDistance={2.5}
+                                enablePan={false}
+                                minPolarAngle={Math.PI / 8}
+                                maxPolarAngle={Math.PI / 2}
+                                // Don't auto rotate — StableModelScene handles it so no conflicts
+                                autoRotate={false}
+                            />
+                        </Suspense>
+                    </Canvas>
+                )}
             </div>
 
             {/* Navigation dots/arrows — only shown when there are multiple models */}
