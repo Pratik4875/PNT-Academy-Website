@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 export default async function IndividualChampionshipPage() {
     await connectMongo();
     const settings = await AdminSettings.findOne({});
-    const formLink = settings?.individualChampionshipLink || "mailto:Contact@pntacademy.com";
+    const formLink = settings?.individualChampionshipLink || settings?.roboticsChampionshipLink || "mailto:Contact@pntacademy.com";
 
     return (
         <main className="min-h-screen text-slate-900 dark:text-slate-50 overflow-x-hidden bg-white dark:bg-[#020617] selection:bg-blue-600 selection:text-white transition-colors duration-500">
