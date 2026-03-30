@@ -1,7 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SchoolsTrainingContent from "@/components/SchoolsTrainingContent";
-import { getAdminSettings } from "@/lib/actions/db";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -17,15 +16,12 @@ export const metadata: Metadata = {
 export const revalidate = 60;
 
 export default async function SchoolsProgramsPage() {
-    const settings = await getAdminSettings();
-    const championshipLink = settings?.roboticsChampionshipLink || "https://forms.gle/";
-
     return (
         <main className="min-h-screen text-slate-900 dark:text-slate-50 overflow-x-hidden transition-colors duration-500 bg-transparent selection:bg-blue-600 selection:text-white">
             <Navbar />
             
             {/* The Cinematic Hero & content logic is encapsulated here */}
-            <SchoolsTrainingContent championshipLink={championshipLink} />
+            <SchoolsTrainingContent />
             
             <Footer />
         </main>

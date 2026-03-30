@@ -433,9 +433,7 @@ export default function SchoolsTrainingContent({ championshipLink = "/championsh
                         className="mb-10"
                     >
                         <Link 
-                            href={championshipLink} 
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            href="/championship"
                             className="group inline-flex items-center gap-4 px-7 py-4 rounded-2xl backdrop-blur-xl border border-blue-300/60 dark:border-blue-500/50 shadow-[0_0_40px_rgba(37,99,235,0.3)] hover:shadow-[0_0_60px_rgba(99,102,241,0.5)] hover:scale-105 transition-all duration-300 cursor-pointer relative overflow-hidden"
                             style={{ background: 'linear-gradient(135deg, rgba(29,78,216,0.92) 0%, rgba(79,70,229,0.92) 60%, rgba(124,58,237,0.92) 100%)' }}
                         >
