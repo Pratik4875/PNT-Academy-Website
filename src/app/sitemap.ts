@@ -6,22 +6,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Major routes defining the core of PNT Academy
   const routes = [
     '',
-    '/schools/robotics-lab',
-    '/schools/composite-skill-lab',
+    '/championship',
+    '/championship/individual',
+    '/contact',
     '/courses/offline-bootcamps',
     '/courses/online',
     '/curriculum/cbse-icse-ib',
     '/curriculum/nep-aligned',
-    '/programs/schools',
+    '/kit',
+    '/lms',
+    '/payments',
+    '/programs/army-navy-internship',
     '/programs/colleges',
     '/programs/courses-for-kids',
-    '/programs/army-navy-internship',
+    '/programs/schools',
     '/programs/summer-camp',
+    '/schools/composite-skill-lab',
+    '/schools/robotics-lab',
     '/workshop',
-    '/kit',
-    '/championship',
-    '/lms',
-    '/contact',
   ];
 
   return routes.map((route) => ({

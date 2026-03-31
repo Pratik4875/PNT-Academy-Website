@@ -1,4 +1,11 @@
+import { Metadata } from 'next';
 import Navbar from "@/components/Navbar";
+
+export const metadata: Metadata = {
+    title: "Defense R&D Internship",
+    description: "Join the elite PNT Academy Defense R&D Internship. Work on real-world military-grade robotics, drone technology, and defense automation.",
+};
+
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 

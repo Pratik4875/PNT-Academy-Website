@@ -1,4 +1,11 @@
+import { Metadata } from 'next';
 import Navbar from "@/components/Navbar";
+
+export const metadata: Metadata = {
+    title: "Engineering Colleges & Industrial Robotics Training",
+    description: "Advanced Robotics, IoT, and Next-Gen Automation labs designed specifically for Engineering Colleges. Real-world projects & internships.",
+};
+
 import Footer from "@/components/Footer";
 import NetworkBackground from "@/components/NetworkBackground";
 import ClientOnly from "@/components/ClientOnly";

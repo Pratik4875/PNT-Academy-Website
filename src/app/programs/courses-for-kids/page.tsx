@@ -1,4 +1,11 @@
+import { Metadata } from 'next';
 import Navbar from "@/components/Navbar";
+
+export const metadata: Metadata = {
+    title: "Robotics & Coding for Kids",
+    description: "Junior Innovator training program. Teach your kids hands-on robotics, drone building, Python coding, and logic design from a young age.",
+};
+
 import Footer from "@/components/Footer";
 import CoursesForKidsHero from "@/components/CoursesForKidsHero";
 import CoursesForKidsContent from "@/components/CoursesForKidsContent";

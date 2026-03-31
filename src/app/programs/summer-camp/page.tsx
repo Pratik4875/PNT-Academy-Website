@@ -1,4 +1,11 @@
+import { Metadata } from 'next';
 import Navbar from "@/components/Navbar";
+
+export const metadata: Metadata = {
+    title: "Innovation Summer Camp",
+    description: "Enroll in the PNT Academy Summer Camp. A high-energy learning experience building robots, programming AI, and creating smart IoT devices.",
+};
+
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 
