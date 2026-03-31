@@ -16,7 +16,7 @@ export default function OfflineBootcampsPage() {
         <main className="min-h-screen text-slate-900 dark:text-slate-50 overflow-x-hidden transition-colors duration-500 bg-slate-50 dark:bg-slate-950">
             <Navbar />
             <PageHeader
-                title="Offline Bootcamps"
+                title="Bootcamps"
                 subtitle="INTENSIVE HANDS-ON LEARNING"
                 description="Engage in immersive, multi-day coding and robotics bootcamps where students build physical prototypes alongside industry experts."
                 colorFrom="from-orange-400"
@@ -33,7 +33,7 @@ export default function OfflineBootcampsPage() {
                     <div className="order-1 md:order-2">
                         <h2 className="text-3xl font-bold mb-6">Real Hardware, Real Code</h2>
                         <p className="text-lg text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
-                            Our Offline Bootcamps bring the PNT Industrial Robotics experience directly to the students. Over a series of immersive sessions, attendees assemble microcontrollers, wire sensors, and write the Python logic to make their autonomous projects come to life.
+                            Our Bootcamps bring the PNT Industrial Robotics experience directly to the students. Over a series of immersive sessions, attendees assemble microcontrollers, wire sensors, and write the Python logic to make their autonomous projects come to life.
                         </p>
                         <ul className="space-y-3 font-medium text-slate-700 dark:text-slate-300">
                             <li>🔥 Take-away hardware kits</li>
