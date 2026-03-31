@@ -50,49 +50,47 @@ export default async function Home() {
 
         {/* Hero Section */}
         <section id="hero" className="relative h-screen flex items-center pt-20">
-          <div className="container mx-auto px-4 sm:px-6 z-10 grid lg:grid-cols-2 gap-8 items-center h-full">
+        <div className="container mx-auto px-4 sm:px-6 z-10 grid lg:grid-cols-2 gap-6 items-center h-full">
             {/* Text Content */}
             <div className="flex flex-col gap-6" style={{ pointerEvents: 'none' }}>
               
               {/* Robotics Championship Promotional Ribbon */}
-              <div className="pointer-events-auto w-fit">
+              <div className="pointer-events-auto w-full max-w-full">
                 <Link
                   href="/championship/individual"
-                  className="inline-flex items-center gap-3 px-5 py-2.5 sm:px-6 sm:py-3 rounded-full font-bold text-sm md:text-base text-white border border-blue-400/40 shadow-[0_0_20px_rgba(37,99,235,0.35)] hover:shadow-[0_0_35px_rgba(99,102,241,0.55)] transition-all duration-300 hover:scale-105 relative overflow-hidden group"
+                  className="inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm md:text-base text-white border border-blue-400/40 shadow-[0_0_20px_rgba(37,99,235,0.35)] hover:shadow-[0_0_35px_rgba(99,102,241,0.55)] transition-all duration-300 hover:scale-105 relative overflow-hidden group max-w-full"
                   style={{ background: 'linear-gradient(135deg, #1d4ed8 0%, #4f46e5 60%, #7c3aed 100%)' }}
                 >
                   {/* Shimmer sweep */}
                   <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
-                  {/* Pulsing star */}
-                  <span className="relative flex h-3 w-3 shrink-0">
+                  {/* Pulsing dot */}
+                  <span className="relative flex h-2.5 w-2.5 shrink-0">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-300 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-yellow-300" />
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-300" />
                   </span>
-                  <span className="text-lg leading-none">🏆</span>
-                  <span className="font-black tracking-wide">Robotics Championship {currentYear}-{nextYear} — Register Now!</span>
-                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-white/20 border border-white/30 text-xs group-hover:translate-x-1 transition-transform shrink-0">
+                  <span className="text-base leading-none">🏆</span>
+                  <span className="font-black tracking-wide truncate">Robotics Championship {currentYear}-{nextYear} — Register!</span>
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-white/20 border border-white/30 text-xs group-hover:translate-x-1 transition-transform shrink-0">
                     →
                   </span>
                 </Link>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight text-slate-900 dark:text-white drop-shadow-sm dark:drop-shadow-lg transition-colors duration-500">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-slate-900 dark:text-white drop-shadow-sm dark:drop-shadow-lg transition-colors duration-500">
                 Position your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-500">School</span>
               </h1>
               <div className="flex items-center flex-wrap gap-2 md:gap-4">
-                <span className="px-3 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-black text-sm md:text-base rounded-full shadow-lg transform -rotate-2">
-                  #1
+                <span className="px-3 py-1 bg-gradient-to-r from-orange-400 to-red-500 text-white font-black text-sm md:text-base rounded-full shadow-lg transform -rotate-2">
+                  #1 With PNT Academy
                 </span>
-                <h2 className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-300 drop-shadow-sm dark:drop-shadow-md transition-colors duration-500">
-                  #PNT Academy
-                </h2>
+
               </div>
-              <div className="pl-4 border-l-4 border-purple-500">
-                <p className="text-xl text-slate-800 dark:text-slate-200 max-w-lg leading-relaxed drop-shadow-none dark:drop-shadow italic transition-colors duration-500">
+              <div className="pl-3 border-l-4 border-purple-500">
+                <p className="text-base sm:text-lg text-slate-800 dark:text-slate-200 max-w-lg leading-relaxed drop-shadow-none dark:drop-shadow italic transition-colors duration-500">
                   "Through real-world projects and internships with the Indian Army and Navy."
                 </p>
               </div>
-              <p className="text-lg text-slate-800 dark:text-slate-300 max-w-lg leading-relaxed drop-shadow-none dark:drop-shadow mt-2 transition-colors duration-500">
+              <p className="text-sm sm:text-base lg:text-lg text-slate-800 dark:text-slate-300 max-w-lg leading-relaxed drop-shadow-none dark:drop-shadow mt-1 transition-colors duration-500">
                 Empowering the next generation of innovators with hands-on training in AI, Robotics, and automation.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-4 pointer-events-auto">
@@ -110,17 +108,17 @@ export default async function Home() {
               <HeroSection />
             </div>
 
-            {/* Mobile & Tablet stat badges & AR Button — shown instead of the 3D canvas */}
-            <div className="flex flex-col gap-4 lg:hidden mt-2 pointer-events-auto">
-              <div className="grid grid-cols-2 gap-3">
+            {/* Mobile & Tablet stat badges — shown instead of the 3D canvas */}
+            <div className="flex flex-col gap-3 lg:hidden mt-1 pointer-events-auto">
+              <div className="grid grid-cols-2 gap-2">
                 {[
                   { label: "10,000+", sub: "Students" },
                   { label: "Since 2016", sub: "Founded" },
                   { label: "Shark Tank", sub: "Funded" },
                   { label: "PM Award", sub: "Received" },
                 ].map((s) => (
-                  <div key={s.label} className="rounded-2xl p-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur border border-white/40 dark:border-slate-700/50 shadow-sm text-center">
-                    <div className="font-black text-blue-600 dark:text-blue-400 text-base">{s.label}</div>
+                  <div key={s.label} className="rounded-xl p-3 bg-white/60 dark:bg-slate-800/60 backdrop-blur border border-white/40 dark:border-slate-700/50 shadow-sm text-center">
+                    <div className="font-black text-blue-600 dark:text-blue-400 text-sm">{s.label}</div>
                     <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{s.sub}</div>
                   </div>
                 ))}
@@ -168,9 +166,9 @@ export default async function Home() {
                 {/* Stat pills */}
                 <div className="flex flex-wrap gap-3 pt-4">
                   {[
-                    { label: "Founded", value: "2016" },
-                    { label: "Shark Tank", value: "Funded" },
-                    { label: "PM Appreciation", value: "Received" },
+                    { label: "Founded In", value: "2016" },
+                    { label: "Funded By", value: "Shark Tank India" },
+                    { label: "Appreciated By", value: "PM Modi" },
                     { label: "Students", value: "10,000+" },
                   ].map((s) => (
                     <div key={s.label} className="px-4 py-2 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 text-center">

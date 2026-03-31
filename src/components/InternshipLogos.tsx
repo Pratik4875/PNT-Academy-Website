@@ -25,7 +25,7 @@ export default function InternshipLogos() {
                 </div>
 
                 {/* Fallback Static Logic so the layout doesn't look empty when developing */}
-                <div className="flex flex-wrap justify-center gap-x-16 gap-y-12 opacity-80 dark:opacity-60 grayscale hover:grayscale-0 transition-all duration-700 mt-12 mb-8 pointer-events-none">
+                <div className="flex flex-wrap justify-center gap-x-16 gap-y-12 opacity-90 dark:opacity-80 transition-all duration-700 mt-12 mb-8 pointer-events-none">
                     <div className="text-2xl font-bold tracking-widest text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors cursor-pointer">INDIAN ARMY</div>
                     <div className="text-2xl font-bold tracking-widest text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors cursor-pointer">INDIAN NAVY</div>
                     <div className="text-2xl font-bold tracking-widest text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors cursor-pointer">DRDO</div>
@@ -35,7 +35,7 @@ export default function InternshipLogos() {
     }
 
     return (
-        <div className="flex flex-wrap items-center justify-center gap-x-16 gap-y-12 opacity-80 dark:opacity-60 grayscale hover:grayscale-0 transition-all duration-700 mt-10">
+        <div className="flex flex-wrap items-center justify-center gap-x-16 gap-y-12 opacity-90 dark:opacity-80 transition-all duration-700 mt-10">
             {logos.map((logo, index) => (
                 <div key={index} className="relative h-16 w-32 md:h-24 md:w-48 transition-transform hover:scale-110 flex items-center justify-center filter drop-shadow-sm">
                     <Image
