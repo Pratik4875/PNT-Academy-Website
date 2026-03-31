@@ -42,7 +42,7 @@ export default function ClientLogos() {
         <div className="w-full flex justify-center mt-10 px-4">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 md:gap-12 w-full max-w-7xl items-center justify-items-center opacity-80 dark:opacity-60 transition-all duration-700">
                 {logos.map((logo, index) => (
-                    <div key={index} className="relative h-20 w-32 md:h-28 md:w-48 transition-transform hover:scale-110 flex items-center justify-center filter drop-shadow-sm group grayscale hover:grayscale-0">
+                    <div key={index} className="relative h-20 w-32 md:h-28 md:w-48 transition-transform hover:scale-110 flex items-center justify-center filter drop-shadow-sm group">
                         <Image
                             src={logo.imageUrl}
                             alt={`School Logo ${index}`}
