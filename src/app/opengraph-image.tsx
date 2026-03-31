@@ -3,7 +3,8 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 export const runtime = 'nodejs';
-export const alt = 'PNT Academy';
+
+export const alt = 'PNT Academy - Shape the Future of Robotics';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -15,32 +16,24 @@ export default function Image() {
         (
             <div
                 style={{
-                    background: 'linear-gradient(to bottom right, #020617, #0f172a, #1e1b4b)',
+                    background: 'white',
                     width: '100%',
                     height: '100%',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    borderTop: '20px solid #2563eb', // Cool blue accent
                 }}
             >
-                <img src={logoBase64} height={160} style={{ marginBottom: 40 }} />
-                <div style={{ fontSize: 60, fontWeight: 700, color: 'white', letterSpacing: '-0.02em', marginBottom: 16 }}>
-                    Shape the Future of Robotics
+                <div style={{ display: 'flex', marginBottom: '50px' }}>
+                    <img src={logoBase64} height={180} />
                 </div>
-                <div style={{
-                    marginTop: 24,
-                    background: '#2563eb',
-                    color: 'white',
-                    padding: '16px 40px',
-                    borderRadius: '100px',
-                    fontSize: 32,
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                }}>
-                    Visit pntacademy.com →
+                <div style={{ color: '#0f172a', fontSize: 60, fontWeight: 900, fontFamily: 'sans-serif', textAlign: 'center' }}>
+                    Shape the Future of Robotics.
+                </div>
+                <div style={{ color: '#64748b', fontSize: 32, marginTop: '20px', fontWeight: 500, fontFamily: 'sans-serif', textAlign: 'center' }}>
+                    Internships & Real-World Tech Projects for Innovators
                 </div>
             </div>
         ),
