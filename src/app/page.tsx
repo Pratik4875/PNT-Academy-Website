@@ -154,32 +154,29 @@ export default async function Home() {
               {/* Text */}
               <div className="space-y-5 text-base md:text-lg leading-relaxed text-slate-600 dark:text-slate-300">
                 <p>
-                  Founded in 2016, PNT Academy has earned national recognition for its impactful work in robotics education and hands-on training. While our primary focus is on student-centric, project-based learning, our sister company, <strong className="text-slate-900 dark:text-white">PNT Robotics</strong>, has been appreciated by Hon&apos;ble Prime Minister Shri Narendra Modi and featured on Shark Tank India, where it secured investment from Peyush Bansal.
+                  Founded in <strong className="text-slate-900 dark:text-white">2016</strong>, PNT Academy has established itself as a nationally recognized leader in robotics education. Our student-centric, project-based approach bridges the gap between classroom learning and real industry demands.
                 </p>
                 <p>
-                  We specialize in delivering engaging, practical learning experiences, and have partnered with prestigious institutions such as the <strong className="text-slate-900 dark:text-white">Indian Navy, DRDO, and TATA Power</strong>. These collaborations enable us to offer students real-world exposure through internships, workshops, and industrial training programs.
+                  Our sister company <strong className="text-slate-900 dark:text-white">PNT Robotics</strong> has been appreciated by Hon&apos;ble Prime Minister Shri Narendra Modi and secured investment on <strong className="text-slate-900 dark:text-white">Shark Tank India</strong>. We have built strategic partnerships with the <strong className="text-slate-900 dark:text-white">Indian Navy, DRDO, and TATA Power</strong> — enabling us to deliver real-world internship and industrial training programs unlike any other.
                 </p>
                 <p>
-                  At PNT Academy, our mission is to bridge the gap between classroom learning and real-world industry demands—empowering students with the future-ready skills needed to <strong className="text-slate-900 dark:text-white">innovate, build, and lead</strong> in tomorrow&apos;s world.
+                  Our mission: empower students with future-ready skills to <strong className="text-slate-900 dark:text-white">innovate, build, and lead</strong> in tomorrow&apos;s world.
                 </p>
 
-              {/* Achievement Cards */}
-              <div className="grid grid-cols-2 gap-3 pt-4">
-                {[
-                  { icon: "🏫", stat: "2016", label: "Est. Year", accent: "from-blue-500 to-cyan-400" },
-                  { icon: "🦈", stat: "Funded", label: "Shark Tank India", accent: "from-indigo-500 to-blue-400" },
-                  { icon: "🏛️", stat: "PM Modi", label: "Appreciation Award", accent: "from-orange-500 to-amber-400" },
-                  { icon: "🎓", stat: "10,000+", label: "Students Trained", accent: "from-purple-500 to-pink-400" },
-                ].map((card) => (
-                  <div key={card.label} className="group relative rounded-2xl p-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur border border-white dark:border-slate-700 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 overflow-hidden">
-                    {/* Gradient accent bar */}
-                    <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${card.accent}`} />
-                    <div className="text-2xl mb-1">{card.icon}</div>
-                    <div className={`text-base font-black bg-gradient-to-r ${card.accent} bg-clip-text text-transparent`}>{card.stat}</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-tight mt-0.5">{card.label}</div>
-                  </div>
-                ))}
-              </div>
+                {/* Clean Achievement Bar */}
+                <div className="flex flex-wrap gap-6 pt-2 border-t border-slate-200 dark:border-slate-700/50 mt-4">
+                  {[
+                    { stat: "2016", label: "Founded" },
+                    { stat: "10,000+", label: "Students" },
+                    { stat: "Shark Tank", label: "Funded" },
+                    { stat: "PM Award", label: "Recognized" },
+                  ].map((item, i) => (
+                    <div key={item.label} className="text-center">
+                      <div className="text-xl font-black text-blue-600 dark:text-blue-400">{item.stat}</div>
+                      <div className="text-xs text-slate-400 dark:text-slate-500 uppercase tracking-wider font-medium mt-0.5">{item.label}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Big slider */}
