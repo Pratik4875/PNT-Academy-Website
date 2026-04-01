@@ -25,8 +25,8 @@ interface EnquiryPayload {
 
 export async function sendEnquiryEmail(data: EnquiryPayload): Promise<void> {
     const apiKey = process.env.RESEND_API_KEY;
-    // Always deliver to pnt-trainings inbox; env var can override if needed
-    const toEmail = process.env.ADMIN_NOTIFY_EMAIL || "pnt-trainings@pntacademy.com";
+    // Hardcoded recipient — env var at project level was overriding team-level setting
+    const toEmail = "pnt-trainings@pntacademy.com";
     const fromEmail = process.env.RESEND_FROM_EMAIL || "notifications@pntacademy.com";
 
     // Silently skip if Resend API key not set — never break the form submission
