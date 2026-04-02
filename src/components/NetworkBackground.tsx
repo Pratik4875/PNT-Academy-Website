@@ -58,6 +58,9 @@ export default function NetworkBackground() {
         let particlesArray: Particle[] = [];
         let animationFrameId: number;
 
+        // Detect mobile once — on mobile we skip all mouse tracking
+        const isMobile = window.matchMedia("(max-width: 1024px)").matches;
+
         const mouse = {
             x: -1000,
             y: -1000,
@@ -74,8 +77,11 @@ export default function NetworkBackground() {
             mouse.y = -1000;
         };
 
-        window.addEventListener("mousemove", handleMouseMove);
-        window.addEventListener("mouseout", handleMouseLeave);
+        // Only add mouse listeners on desktop
+        if (!isMobile) {
+            window.addEventListener("mousemove", handleMouseMove);
+            window.addEventListener("mouseout", handleMouseLeave);
+        }
 
         const resize = () => {
             canvas.width = window.innerWidth;
@@ -85,7 +91,6 @@ export default function NetworkBackground() {
 
         window.addEventListener("resize", resize);
 
-        // Determine current theme
         const currentTheme = theme === "system" ? systemTheme : theme;
         const isDark = currentTheme === "dark";
 
@@ -95,14 +100,16 @@ export default function NetworkBackground() {
 
             for (let a = 0; a < particlesArray.length; a++) {
                 for (let b = a; b < particlesArray.length; b++) {
-                    const distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) +
-                        ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                    const distance =
+                        (particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x) +
+                        (particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y);
 
-                    // Reduce connection distance to optimize performance and reduce clutter
                     if (distance < (canvas!.width / 15) * (canvas!.height / 15)) {
-                        opacityValue = 1 - (distance / 20000);
+                        opacityValue = 1 - distance / 20000;
                         if (opacityValue > 0) {
-                            ctx.strokeStyle = isDark ? `rgba(100, 116, 139, ${opacityValue * 0.2})` : `rgba(148, 163, 184, ${opacityValue * 0.4})`;
+                            ctx.strokeStyle = isDark
+                                ? `rgba(100, 116, 139, ${opacityValue * 0.2})`
+                                : `rgba(148, 163, 184, ${opacityValue * 0.4})`;
                             ctx.lineWidth = 1;
                             ctx.beginPath();
                             ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
@@ -113,37 +120,43 @@ export default function NetworkBackground() {
                 }
             }
 
-            for (let a = 0; a < particlesArray.length; a++) {
-                const distanceToMouse = ((particlesArray[a].x - mouse.x) * (particlesArray[a].x - mouse.x)) +
-                    ((particlesArray[a].y - mouse.y) * (particlesArray[a].y - mouse.y));
+            // Mouse-proximity lines — desktop only
+            if (!isMobile) {
+                for (let a = 0; a < particlesArray.length; a++) {
+                    const distanceToMouse =
+                        (particlesArray[a].x - mouse.x) * (particlesArray[a].x - mouse.x) +
+                        (particlesArray[a].y - mouse.y) * (particlesArray[a].y - mouse.y);
 
-                if (distanceToMouse < mouse.radius * mouse.radius) {
-                    opacityValue = 1 - (distanceToMouse / (mouse.radius * mouse.radius));
-                    ctx.strokeStyle = isDark ? `rgba(56, 189, 248, ${opacityValue})` : `rgba(2, 132, 199, ${opacityValue})`;
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
-                    ctx.lineTo(mouse.x, mouse.y);
-                    ctx.stroke();
+                    if (distanceToMouse < mouse.radius * mouse.radius) {
+                        opacityValue = 1 - distanceToMouse / (mouse.radius * mouse.radius);
+                        ctx.strokeStyle = isDark
+                            ? `rgba(56, 189, 248, ${opacityValue})`
+                            : `rgba(2, 132, 199, ${opacityValue})`;
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(mouse.x, mouse.y);
+                        ctx.stroke();
+                    }
                 }
             }
         };
 
         const init = () => {
             particlesArray = [];
-            // Cut particle count by half for performance optimization
-            let numberOfParticles = (canvas!.height * canvas!.width) / 25000;
+            const numberOfParticles = (canvas!.height * canvas!.width) / 25000;
             for (let i = 0; i < numberOfParticles; i++) {
-                const size = (Math.random() * 2) + 1;
-                const x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
-                const y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
+                const size = Math.random() * 2 + 1;
+                const x = Math.random() * (innerWidth - size * 4) + size * 2;
+                const y = Math.random() * (innerHeight - size * 4) + size * 2;
                 const directionX = (Math.random() * 1.5) - 0.75;
                 const directionY = (Math.random() * 1.5) - 0.75;
 
                 const isPurple = Math.random() > 0.5;
-                const color = isDark ?
-                    (isPurple ? 'rgba(139, 92, 246, 0.8)' : 'rgba(56, 189, 248, 0.8)') :
-                    (isPurple ? 'rgba(124, 58, 237, 0.8)' : 'rgba(2, 132, 199, 0.8)'); // Darker for light mode
+                const color = isDark
+                    ? isPurple ? "rgba(139, 92, 246, 0.8)" : "rgba(56, 189, 248, 0.8)"
+                    : isPurple ? "rgba(124, 58, 237, 0.8)" : "rgba(2, 132, 199, 0.8)";
+
                 particlesArray.push(new Particle(x, y, directionX, directionY, size, color, ctx, canvas));
             }
         };
@@ -152,7 +165,6 @@ export default function NetworkBackground() {
             animationFrameId = requestAnimationFrame(animate);
             if (!ctx) return;
             ctx.clearRect(0, 0, innerWidth, innerHeight);
-
             ctx.fillStyle = isDark ? "#020617" : "#f8fafc";
             ctx.fillRect(0, 0, innerWidth, innerHeight);
 
@@ -162,18 +174,18 @@ export default function NetworkBackground() {
             connect();
         };
 
-
-
         resize();
         animate();
 
         return () => {
             window.removeEventListener("resize", resize);
-            window.removeEventListener("mousemove", handleMouseMove);
-            window.removeEventListener("mouseout", handleMouseLeave);
+            if (!isMobile) {
+                window.removeEventListener("mousemove", handleMouseMove);
+                window.removeEventListener("mouseout", handleMouseLeave);
+            }
             cancelAnimationFrame(animationFrameId);
         };
-    }, [theme, systemTheme]); // Re-run effect when theme changes
+    }, [theme, systemTheme]);
 
     return (
         <canvas
