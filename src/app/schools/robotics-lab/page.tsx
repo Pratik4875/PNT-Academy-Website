@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import RoboticsLabContent from "@/components/RoboticsLabContent";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "School Robotics Lab Setup | PNT Academy",
@@ -15,7 +16,9 @@ export default function RoboticsLabPage() {
     return (
         <main className="min-h-screen text-slate-900 dark:text-slate-50 overflow-x-hidden transition-colors duration-500">
             <Navbar />
-            <RoboticsLabContent />
+            <Suspense fallback={null}>
+                <RoboticsLabContent />
+            </Suspense>
             <Footer />
         </main>
     );

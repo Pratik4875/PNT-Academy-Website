@@ -1,27 +1,44 @@
 "use client";
-import { useState, useRef, useEffect, Suspense, useMemo } from "react";
+import React, { useState, useRef, useEffect, Suspense, useMemo, Component, ErrorInfo, ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, Microchip, Radar, MonitorPlay, Cog, School, University, Star, Quote } from "lucide-react";
 import Image from "next/image";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, Float, ContactShadows, Environment, useGLTF } from "@react-three/drei";
+import { OrbitControls, Float, ContactShadows, Environment, useGLTF, useAnimations } from "@react-three/drei";
 import * as THREE from "three";
 import { getLiveGallery } from "@/lib/actions/db";
+import Script from "next/script";
+import { useSearchParams, useRouter } from "next/navigation";
 
 // Hook to detect mobile
 function useIsMobile() {
+    const [isMounted, setIsMounted] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     useEffect(() => {
+        setIsMounted(true);
         const check = () => setIsMobile(window.matchMedia("(max-width: 1024px)").matches);
         check();
         window.addEventListener("resize", check);
         return () => window.removeEventListener("resize", check);
     }, []);
-    return isMobile;
+    return isMounted ? isMobile : false;
 }
 
 export default function RoboticsLabContent() {
-    const [activeTab, setActiveTab] = useState<"schools" | "colleges">("schools");
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const tabFromUrl = searchParams.get("tab");
+    const [activeTab, setActiveTab] = useState<"schools" | "colleges">(
+        tabFromUrl === "colleges" ? "colleges" : "schools"
+    );
+
+    const handleTabChange = (tab: "schools" | "colleges") => {
+        setActiveTab(tab);
+        // Persist in URL so reload restores the correct tab
+        const params = new URLSearchParams(Array.from(searchParams.entries()));
+        params.set("tab", tab);
+        router.replace(`?${params.toString()}`, { scroll: false });
+    };
 
     // Define tabs data for the new structure
     const tabs = [
@@ -31,6 +48,9 @@ export default function RoboticsLabContent() {
 
     return (
         <>
+            {/* Load model-viewer script unconditionally at the top to prevent Hydration mismatches */}
+            <Script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js" strategy="lazyOnload" />
+            
             {/* --- Hero Section --- */}
             <div className="relative flex flex-col items-center justify-center text-center min-h-[420px] pt-32 pb-16 overflow-hidden bg-black">
                 {/* Full lab photo */}
@@ -75,7 +95,7 @@ export default function RoboticsLabContent() {
                                 return (
                                     <button
                                         key={tab.id}
-                                        onClick={() => setActiveTab(tab.id as "schools" | "colleges")}
+                                        onClick={() => handleTabChange(tab.id as "schools" | "colleges")}
                                         className={`relative z-10 px-8 py-3 text-base font-bold rounded-full transition-all duration-300 ${
                                             isActive
                                                 ? "text-blue-800"
@@ -136,10 +156,24 @@ export default function RoboticsLabContent() {
 // Interactive 3D Hardware Model Component — uses real GLB files
 // -------------------------------------------------------------
 
+class ModelErrorBoundary extends Component<{ children: ReactNode, fallback: ReactNode }, { hasError: boolean }> {
+    constructor(props: any) { super(props); this.state = { hasError: false }; }
+    static getDerivedStateFromError() { return { hasError: true }; }
+    componentDidCatch(error: Error, errorInfo: ErrorInfo) { console.error("3D Model Error:", error, errorInfo); }
+    render() { if (this.state.hasError) return this.props.fallback; return this.props.children; }
+}
+
 // Auto-normalizing GLB model: synchronously centers and scales to fill the viewport
 function GlbModel({ path, targetSize = 5 }: { path: string; targetSize?: number }) {
-    const { scene } = useGLTF(path);
+    const { scene, animations } = useGLTF(path);
     const groupRef = useRef<THREE.Group>(null);
+    const { actions } = useAnimations(animations, groupRef);
+
+    useEffect(() => {
+        if (actions) {
+            Object.values(actions).forEach(action => action?.play());
+        }
+    }, [actions]);
 
     // Clone, scale, and center the scene ONCE before it ever renders
     const clonedScene = useMemo(() => {
@@ -178,16 +212,96 @@ function GlbModel({ path, targetSize = 5 }: { path: string; targetSize?: number 
         return cloned;
     }, [scene, targetSize]);
 
-    useFrame((_, delta) => {
-        if (groupRef.current) groupRef.current.rotation.y += delta * 0.35;
+    const isDrone = path.toLowerCase().includes("tello");
+
+    // Smooth physics refs for drone
+    const vel = useRef({ x: 0, y: 0, z: 0 });
+    const targetPos = useRef({ x: 0, y: 0, z: 0 });
+    const targetRot = useRef({ x: 0, y: 0, z: 0 });
+    const propSpeed = useRef(0);  // 0 = stopped, 1 = full
+
+    useFrame((state, delta) => {
+        if (groupRef.current && !isDrone) {
+            // Ground robots gently rotate on turntable
+            groupRef.current.rotation.y += delta * 0.35;
+        } else if (groupRef.current && isDrone) {
+            const cycleDuration = 9.0;
+            const t = state.clock.elapsedTime % cycleDuration;
+            
+            // --- Determine desired state & target values ---
+            let desiredPropSpeed = 0;
+
+            if (t < 2.0) {
+                // LANDED — engines off
+                targetPos.current = { x: 0, y: -0.1, z: 0 };
+                targetRot.current = { x: 0, y: groupRef.current.rotation.y, z: 0 };
+                desiredPropSpeed = 0;
+            } else if (t < 2.8) {
+                // SPOOL UP — idle hover before lifting
+                desiredPropSpeed = Math.min(1, (t - 2.0) / 0.8);
+                targetPos.current = { x: 0, y: 0, z: 0 };
+                targetRot.current = { x: 0, y: 0, z: 0 };
+            } else if (t < 7.4) {
+                // ACTIVE FLIGHT — big figure-8
+                const flightTime = t - 2.8;
+                const flightDur = 4.6;
+                const flightProgress = flightTime / flightDur; // 0→1
+                const angle = flightProgress * Math.PI * 2;
+                const envelope = Math.sin(flightProgress * Math.PI); // peak in middle
+
+                targetPos.current = {
+                    x: Math.sin(angle) * 3.0,
+                    y: 0.6 + Math.sin(angle * 3) * 0.25,
+                    z: Math.sin(angle * 2) * 2.0,
+                };
+                targetRot.current = {
+                    x: Math.cos(angle * 2) * -0.25 * envelope,
+                    y: 0,
+                    z: Math.cos(angle) * -0.5 * envelope,
+                };
+                desiredPropSpeed = 1;
+            } else if (t < 8.2) {
+                // RETURN CENTER
+                desiredPropSpeed = 1.0 - (t - 7.4) / 0.8 * 0.3; // slowly reduce
+                targetPos.current = { x: 0, y: 0.3, z: 0 };
+                targetRot.current = { x: 0, y: 0, z: 0 };
+            } else {
+                // LANDING (8.2s → 9s)
+                const lp = (t - 8.2) / 0.8; // 0→1
+                desiredPropSpeed = Math.max(0, 1 - lp * 1.5);
+                targetPos.current = { x: 0, y: Math.max(-0.1, 0.3 * (1 - lp)), z: 0 };
+                targetRot.current = { x: 0, y: 0, z: 0 };
+            }
+
+            // Smooth propeller speed
+            propSpeed.current += (desiredPropSpeed - propSpeed.current) * Math.min(1, delta * 4);
+
+            // Drive prop animations by mutating playback rate
+            if (actions) {
+                Object.values(actions).forEach(action => {
+                    if (action) action.timeScale = propSpeed.current * 3.0;
+                });
+            }
+
+            // LERP position — fast response when flying, sluggish when landing
+            const posLerp = Math.min(1, delta * 3.5);
+            groupRef.current.position.x += (targetPos.current.x - groupRef.current.position.x) * posLerp;
+            groupRef.current.position.y += (targetPos.current.y - groupRef.current.position.y) * posLerp;
+            groupRef.current.position.z += (targetPos.current.z - groupRef.current.position.z) * posLerp;
+
+            // LERP rotation for smooth banking
+            const rotLerp = Math.min(1, delta * 5);
+            groupRef.current.rotation.x += (targetRot.current.x - groupRef.current.rotation.x) * rotLerp;
+            groupRef.current.rotation.z += (targetRot.current.z - groupRef.current.rotation.z) * rotLerp;
+        }
     });
 
+    const content = <primitive object={clonedScene} />;
+
     return (
-        <Float speed={1.2} rotationIntensity={0.15} floatIntensity={0.4}>
-            <group ref={groupRef}>
-                <primitive object={clonedScene} />
-            </group>
-        </Float>
+        <group ref={groupRef}>
+            {content}
+        </group>
     );
 }
 
@@ -656,47 +770,405 @@ function SchoolsContent() {
 // -------------------------------------------------------------
 
 // Product data for the solution grid & detail sections
+// glbPath: set to a real /models/*.glb path once model files are ready
 const PRODUCTS = [
     {
-        icon: "🦾", name: "Educational Robotic Arm", specs: "4 DOF | 3D Printed | Customizable Components",
+        icon: "",
+        name: "PNT Mini Robotic ARM",
+        specs: "4 DOF | 3D Printed | Customizable Components",
         tagline: "Unlike plug-and-play labs, our robots are fully open — enabling circuit-level customization, DOF expansion, and multi-robot integration.",
         features: ["Demonstration of pick and place automation", "Demonstration of gesture-controlled robotic arm", "Sensor Feedback Integration with robot arm", "Path Planning and Motion Control", "Object Detection using OpenCV", "Object Sorting by Colour & by Size", "Programming for Industrial Applications", "Integration with IoT for Remote Control", "AI integration with robot arm"],
         image: "/images/robotics-lab/robotic-arm.jpeg",
+        glbPath: null as string | null,
+        color: "from-blue-500 to-cyan-500",
+        accentColor: "#38bdf8",
     },
     {
-        name: "Industrial Robotic Arm", specs: "4–6 Axis Articulated | Payload: 1–2 kg | Repeatability: ±0.1 mm",
-        tagline: "Industrial-grade precision for real-world manufacturing simulation.",
-        features: ["Forward & inverse kinematics programming", "Pick-and-place task execution", "Tool path planning for repetitive tasks", "Payload testing and accuracy calibration"],
-        image: "/images/robotics-lab/robotic-arm.jpeg",
+        icon: "",
+        name: "PNT Industrial Robotic ARM",
+        specs: "4–6 Axis Articulated | Payload: 1–2 kg | Repeatability: ±0.1 mm",
+        tagline: "Industrial-grade precision for real-world manufacturing simulation and research.",
+        features: ["Forward & inverse kinematics programming", "Pick-and-place task execution", "Tool path planning for repetitive tasks", "Payload testing and accuracy calibration", "Integration with vision systems", "Multi-axis coordination"],
+        image: "/images/robotics-lab/industrial-arm.png",
+        glbPath: null as string | null,
+        color: "from-indigo-500 to-purple-500",
+        accentColor: "#818cf8",
     },
     {
-        name: "Industrial AGV", specs: "Industrial-grade | Custom-design capabilities | Smart factory integration",
-        tagline: "Automated guided vehicles for smart warehouse and factory floor applications.",
-        features: ["Line following AGV demonstration", "Obstacle avoidance demonstration", "RFID-based navigation system", "Automated goods transportation", "Speed and acceleration control", "Wireless & IoT-based Control", "Path planning via custom algorithms", "Battery and Power Optimization", "Integration of external sensors"],
-        image: "/images/robotics-lab/agv.jpeg",
-    },
-    {
-        name: "Robotic Hand", specs: "Multi-finger | Customizable Parts | Gesture-Controlled Interface",
+        icon: "",
+        name: "PNT Robotic Hand",
+        specs: "Multi-finger | Customizable Parts | Gesture-Controlled Interface",
         tagline: "Advanced dexterous manipulation and prosthetic hand research platform.",
         features: ["Finger movement coordination", "Feedback mechanism demonstration", "EMG-based hand control", "Gesture-based hand control", "Prosthetic Hand Demonstration", "Haptic Feedback System", "AI-Based control of hand", "AI-based gesture control", "Integration with Wearable Tech", "Remote-controlled hand movement"],
-        image: "/images/robotics-lab/11.jpeg",
+        image: "/images/robotics-lab/robotic_hand.png",
+        glbPath: null as string | null,
+        color: "from-violet-500 to-pink-500",
+        accentColor: "#c084fc",
     },
     {
-        name: "Industrial Drone", specs: "Programmable | Custom Control Options | AI-Integrated",
-        tagline: "Programmable aerial platforms for surveillance, delivery, and inspection.",
-        features: ["API usage and calibration", "Sensor data collection and usage", "Takeoff and landing automation", "Obstacle avoidance using object detection", "Warehouse automation using barcodes/QR codes", "Aerial Photography and Surveillance", "Face tracking with drone flight", "AI-based object detection from aerial view", "AI Surveillance drone with intruder detection", "PC application development to control drone"],
+        icon: "",
+        name: "PNT Mini Drone",
+        specs: "Custom PNT Software | Autonomous Flight | AI-Integrated | Camera-Ready",
+        tagline: "A PNT-customized aerial platform — we build our own software stack on top of the hardware, turning it into a fully programmable AI drone lab tool unique to every deployment.",
+        features: [
+            "PNT custom software layer for autonomous mission control",
+            "SDK programming via PNT APIs — Python, Scratch & ROS bridges",
+            "Autonomous takeoff, precision landing, and waypoint navigation",
+            "Mission-pad based positioning with custom PNT coordinate logic",
+            "AI-based object detection from aerial view (PNT Vision SDK)",
+            "Face tracking and subject-following with PNT AI modules",
+            "Obstacle avoidance using PNT-tuned vision pipeline",
+            "Warehouse automation using custom QR/barcode logic",
+            "Aerial Photography, Surveillance, and inspection missions",
+            "PC dashboard application developed by PNT for fleet control",
+        ],
         image: "/images/robotics-lab/12.jpeg",
+        glbPath: "/models/dji_tello.glb",
+        color: "from-sky-500 to-cyan-400",
+        accentColor: "#22d3ee",
+        extraSpecs: [
+            "Hardware platform: compact quadrotor airframe",
+            "Flight time: approx. 13 min | Max Speed: 28.8 km/h",
+            "Camera: 720p HD stabilized video stream",
+            "PNT custom firmware — fully configured for lab use",
+        ],
     },
     {
-        name: "Industrial AMR", specs: "Differential / Mecanum wheel drive | ROS-based | LiDAR optional",
+        icon: "",
+        name: "PNT Advance AMR",
+        specs: "Mecanum / Differential Drive | ROS2 | LiDAR + Vision",
+        tagline: "Next-generation Autonomous Mobile Robot for complex indoor and outdoor navigation.",
+        features: ["Hardware interfacing and integration of sensors and actuators with ROS", "Odometry sensor data and teleoperation control", "Mapping indoor environments using LiDAR sensors", "Autonomous navigation with parameter tuning", "SLAM-based real-time mapping", "Multi-floor navigation capability"],
+        image: "/images/robotics-lab/amr.jpeg",
+        glbPath: "/models/Advance AMR_compressed.glb",
+        color: "from-emerald-500 to-teal-500",
+        accentColor: "#34d399",
+        extraSpecs: ["Li-ion battery: 3–4 hours operational time", "Sensors: Ultrasonic, IR, IMU, LiDAR, Depth Camera", "ROS2 based open-source software", "Remote monitoring via web dashboard"],
+    },
+    {
+        icon: "",
+        name: "PNT Standard AMR",
+        specs: "Differential / Mecanum wheel drive | ROS-based | LiDAR optional",
         tagline: "Addressing real-world challenges in logistics and defense deployment scenarios.",
         features: ["Hardware interfacing and integration of sensors and actuators with ROS", "Odometry sensor data and teleoperation control for AMRs", "Mapping indoor environments using LiDAR sensors", "Autonomous navigation with parameter tuning"],
         image: "/images/robotics-lab/amr.jpeg",
+        glbPath: "/models/Basic AMR.glb",
+        color: "from-orange-500 to-amber-500",
+        accentColor: "#fb923c",
         extraSpecs: ["Onboard microcontroller / SBC (Raspberry Pi / equivalent)", "Li-ion battery: 2–3 hours operational time", "Sensors: Ultrasonic, IR, IMU, optional LiDAR", "Supports ROS-based & block-based programming"],
+    },
+    {
+        icon: "",
+        name: "PNT Industrial AGV",
+        specs: "Industrial-grade | Custom-design capabilities | Smart factory integration",
+        tagline: "Automated guided vehicles for smart warehouse and factory floor automation.",
+        features: ["Line following AGV demonstration", "Obstacle avoidance demonstration", "RFID-based navigation system", "Automated goods transportation", "Speed and acceleration control", "Wireless & IoT-based Control", "Path planning via custom algorithms", "Battery and Power Optimization", "Integration of external sensors"],
+        image: "/images/robotics-lab/agv.jpeg",
+        glbPath: "/model.glb",
+        color: "from-red-500 to-rose-500",
+        accentColor: "#f87171",
     },
 ];
 
 // HIRING_COMPANIES array removed as it is now fetched dynamically
+
+// ---------------------------------------------------------------
+// ProductMiniModel — small rotating 3D shape for the grid cards
+// ---------------------------------------------------------------
+function ProductMiniPlaceholder({ color, icon }: { color: string; icon: string }) {
+    const meshRef = useRef<THREE.Mesh>(null);
+
+    useFrame((_, delta) => {
+        if (meshRef.current) meshRef.current.rotation.y += delta * 0.8;
+    });
+
+    // Parse the first color from a Tailwind gradient string (e.g. "from-blue-500 to-cyan-500")
+    const colorMap: Record<string, string> = {
+        "#38bdf8": "#38bdf8",
+        "#818cf8": "#818cf8",
+        "#c084fc": "#c084fc",
+        "#22d3ee": "#22d3ee",
+        "#34d399": "#34d399",
+        "#fb923c": "#fb923c",
+        "#f87171": "#f87171",
+    };
+
+    // Just use the accentColor passed via the `color` prop
+    const hex = colorMap[color] ?? "#38bdf8";
+
+    return (
+        <Float speed={2} rotationIntensity={0.3} floatIntensity={0.5}>
+            <mesh ref={meshRef} castShadow>
+                <octahedronGeometry args={[1.1, 0]} />
+                <meshStandardMaterial
+                    color={hex}
+                    roughness={0.2}
+                    metalness={0.7}
+                    wireframe={false}
+                />
+            </mesh>
+            {/* Inner core glow */}
+            <mesh scale={0.65}>
+                <sphereGeometry args={[1, 16, 16]} />
+                <meshStandardMaterial color={hex} emissive={hex} emissiveIntensity={0.6} roughness={0.1} metalness={0.9} />
+            </mesh>
+        </Float>
+    );
+}
+
+function ProductMiniModelScene({ accentColor, glbPath }: { accentColor: string; glbPath: string | null }) {
+    const groupRef = useRef<THREE.Group>(null);
+    useFrame((_, delta) => {
+        if (groupRef.current) groupRef.current.rotation.y += delta * 0.6;
+    });
+    if (glbPath) {
+        return (
+            <group ref={groupRef}>
+                <ModelErrorBoundary fallback={<mesh><boxGeometry args={[1.5, 1.5, 1.5]} /><meshStandardMaterial color={accentColor} wireframe /></mesh>}>
+                    <Suspense fallback={<ProductMiniPlaceholder color={accentColor} icon="" />}>
+                        <GlbModel path={glbPath} targetSize={2.5} />
+                    </Suspense>
+                </ModelErrorBoundary>
+            </group>
+        );
+    }
+    return <ProductMiniPlaceholder color={accentColor} icon="" />;
+}
+
+function ProductMiniModel({ accentColor, glbPath, image }: { accentColor: string; glbPath: string | null; image: string }) {
+    if (!glbPath) {
+        return (
+            <div className="w-full h-full flex items-center justify-center p-3 relative bg-white/40 dark:bg-slate-900/40 rounded-xl overflow-hidden backdrop-blur-sm">
+                {/* Glow dot */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+                    <div className="w-24 h-24 rounded-full blur-3xl opacity-30" style={{ background: accentColor }} />
+                </div>
+                <img src={image} alt="Product" className="w-[80%] h-[80%] object-contain drop-shadow-2xl mix-blend-multiply dark:mix-blend-normal z-10 hover:scale-105 transition-transform duration-500" />
+            </div>
+        );
+    }
+
+    return (
+        <div className="w-full h-full relative">
+            <Canvas
+                camera={{ position: [4, 3, 4], fov: 40 }}
+                gl={{ antialias: true, alpha: true }}
+                frameloop="always"
+                dpr={[1, 1.5]}
+            >
+                <ambientLight intensity={0.5} />
+                <directionalLight position={[3, 5, 3]} intensity={1.5} color={accentColor} />
+                <directionalLight position={[-3, -2, -3]} intensity={0.3} />
+                <Suspense fallback={null}>
+                    <ProductMiniModelScene accentColor={accentColor} glbPath={glbPath} />
+                </Suspense>
+            </Canvas>
+        </div>
+    );
+}
+
+// ----------------------------------------------------------------
+// ProductDetailModel3D — large isometric view in the detail cards
+// Locked circular rotation, no user controls.
+// On mobile: show a "Open Desktop Mode" message instead.
+// ----------------------------------------------------------------
+function IsometricRotatingModel({ accentColor }: { accentColor: string }) {
+    const groupRef = useRef<THREE.Group>(null);
+
+    useFrame((_, delta) => {
+        if (groupRef.current) {
+            groupRef.current.rotation.y += delta * 0.4;
+        }
+    });
+
+    return (
+        <group ref={groupRef}>
+            {/* Base platform */}
+            <mesh position={[0, -1.3, 0]} receiveShadow>
+                <cylinderGeometry args={[1.8, 2, 0.15, 64]} />
+                <meshStandardMaterial color={accentColor} roughness={0.5} metalness={0.5} opacity={0.3} transparent />
+            </mesh>
+
+            {/* Main body */}
+            <Float speed={1} rotationIntensity={0} floatIntensity={0.3}>
+                <mesh position={[0, 0, 0]} castShadow>
+                    <icosahedronGeometry args={[1.2, 1]} />
+                    <meshStandardMaterial color={accentColor} roughness={0.15} metalness={0.8} />
+                </mesh>
+                {/* Inner glow sphere */}
+                <mesh scale={0.55}>
+                    <sphereGeometry args={[1, 32, 32]} />
+                    <meshStandardMaterial color={accentColor} emissive={accentColor} emissiveIntensity={1.2} roughness={0} metalness={1} />
+                </mesh>
+                {/* Orbiting ring */}
+                <mesh rotation={[Math.PI / 4, 0, Math.PI / 6]}>
+                    <torusGeometry args={[1.9, 0.04, 16, 80]} />
+                    <meshStandardMaterial color={accentColor} emissive={accentColor} emissiveIntensity={0.5} roughness={0.2} metalness={0.9} />
+                </mesh>
+                {/* Second ring */}
+                <mesh rotation={[-Math.PI / 5, Math.PI / 4, 0]}>
+                    <torusGeometry args={[2.2, 0.03, 16, 80]} />
+                    <meshStandardMaterial color="#ffffff" emissive={accentColor} emissiveIntensity={0.3} roughness={0.4} metalness={0.7} opacity={0.5} transparent />
+                </mesh>
+                {/* Corner cubes */}
+                {[0, 1, 2, 3].map(i => (
+                    <mesh
+                        key={i}
+                        position={[
+                            Math.cos((i / 4) * Math.PI * 2) * 1.6,
+                            Math.sin((i / 4) * Math.PI * 2) * 0.3,
+                            Math.sin((i / 4) * Math.PI * 2) * 1.6,
+                        ]}
+                        castShadow
+                    >
+                        <boxGeometry args={[0.22, 0.22, 0.22]} />
+                        <meshStandardMaterial color={accentColor} roughness={0.1} metalness={0.9} emissive={accentColor} emissiveIntensity={0.3} />
+                    </mesh>
+                ))}
+            </Float>
+        </group>
+    );
+}
+
+function ProductDetailModel3D({ accentColor, glbPath, image }: { accentColor: string; glbPath: string | null; image: string }) {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        if (!containerRef.current) return;
+        
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                // Initialize canvas only when on screen (with a slight 200px buffer)
+                setIsVisible(entry.isIntersecting);
+            },
+            { rootMargin: "200px" }
+        );
+        
+        observer.observe(containerRef.current);
+        return () => observer.disconnect();
+    }, []);
+
+    if (!glbPath) {
+        return (
+            <div className="w-full h-full flex flex-col items-center justify-center p-8 bg-slate-50/50 dark:bg-slate-900/50 rounded-3xl relative overflow-hidden group">
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20 group-hover:opacity-40 transition-opacity duration-500">
+                    <div className="w-[300px] h-[300px] rounded-full blur-[100px]" style={{ background: accentColor }} />
+                </div>
+                {/* Notice object-contain here ensures transparent PNG backgrounds look perfect and floating */}
+                <img src={image} alt="Product Detail" className="w-full h-full object-contain drop-shadow-2xl z-10 transition-transform duration-700 group-hover:scale-105" />
+            </div>
+        );
+    }
+
+    const isMobile = useIsMobile();
+
+    if (isMobile) {
+        return (
+            <div className="w-full h-full flex flex-col items-center justify-center gap-4 p-8 text-center">
+                <div className="w-20 h-20 rounded-2xl flex items-center justify-center"
+                    style={{ background: `${accentColor}22`, border: `1px solid ${accentColor}44` }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-9 h-9" style={{ color: accentColor }}>
+                        <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+                    </svg>
+                </div>
+                <h4 className="text-lg font-black text-slate-900 dark:text-white">3D Model Available on Desktop</h4>
+                <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs">Switch to desktop mode in your browser to explore the interactive 3D model of this product.</p>
+
+                {glbPath && (
+                    <>
+                        {/* Hidden model-viewer for iOS Quick Look conversion */}
+                        {/* @ts-ignore */}
+                        <model-viewer
+                            id={`ar-viewer-${glbPath.replace(/[^a-zA-Z0-9]/g, '-')}`}
+                            src={glbPath}
+                            ar
+                            ar-modes="scene-viewer quick-look"
+                            reveal="manual"
+                            style={{ display: "none" }}
+                        />
+
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                
+                                if (/android/i.test(navigator.userAgent)) {
+                                    const modelUrl = new URL(glbPath, window.location.origin).toString();
+                                    window.location.href = `intent://arvr.google.com/scene-viewer/1.0?file=${modelUrl}&mode=ar_only#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`;
+                                    return;
+                                }
+
+                                const viewer = document.getElementById(`ar-viewer-${glbPath.replace(/[^a-zA-Z0-9]/g, '-')}`) as any;
+                                if (viewer && typeof viewer.activateAR === "function") {
+                                    viewer.activateAR();
+                                }
+                            }}
+                            className="mt-4 w-full sm:w-auto flex items-center justify-center gap-3 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full font-bold shadow-[0_0_20px_rgba(79,70,229,0.4)] transition-all hover:scale-105 active:scale-95 group border border-white/10"
+                        >
+                            <svg className="w-5 h-5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                            <span>Open in AR</span>
+                        </button>
+                    </>
+                )}
+
+                <button
+                    onClick={() => {
+                        const url = new URL(window.location.href);
+                        window.location.href = url.href;
+                    }}
+                    className="mt-2 px-6 py-2.5 rounded-full text-sm font-bold text-white shadow-lg transition-all hover:scale-105 text-opacity-90 hover:text-opacity-100"
+                    style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColor}aa)` }}
+                >
+                    Open Desktop Mode
+                </button>
+            </div>
+        );
+    }
+
+    return (
+        <div ref={containerRef} className="w-full h-full relative pointer-events-none">
+            {/* 
+              The Canvas is positioned absolute, expanded 50% in all directions so the drone can fly outside.
+              Lazy loaded via isVisible to prevent WebGL context limits.
+            */}
+            {isVisible && (
+                <div
+                    className="absolute pointer-events-none"
+                    style={{ inset: '-50%', zIndex: 10 }}
+                >
+                    <Canvas
+                        shadows
+                        camera={{
+                            position: [5, 5, 5],
+                            fov: 40,
+                        }}
+                        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.8 }}
+                        frameloop="always"
+                        dpr={[1, 2]}
+                        style={{ background: 'transparent', width: '100%', height: '100%' }}
+                    >
+                        <ambientLight intensity={0.25} />
+                        <directionalLight position={[8, 12, 8]} intensity={1.0} castShadow color={accentColor} />
+                        <directionalLight position={[-5, 5, -5]} intensity={0.4} />
+                        <pointLight position={[0, 3, 0]} intensity={0.6} color={accentColor} />
+                        <Environment preset="studio" />
+                        <ModelErrorBoundary fallback={
+                            <mesh position={[0,0,0]}>
+                                <boxGeometry args={[2, 2, 2]} />
+                                <meshStandardMaterial color={accentColor} wireframe />
+                            </mesh>
+                        }>
+                            <Suspense fallback={null}>
+                                {glbPath && <GlbModel path={glbPath} targetSize={glbPath.toLowerCase().includes('tello') ? 2.2 : 3.5} />}
+                            </Suspense>
+                        </ModelErrorBoundary>
+                        <ContactShadows position={[0, -2.2, 0]} opacity={0.3} scale={20} blur={4} far={5} />
+                    </Canvas>
+                </div>
+            )}
+        </div>
+    );
+}
 
 function CollegesContent() {
     const [liveTestimonials, setLiveTestimonials] = useState<any[] | null>(null);
@@ -825,15 +1297,29 @@ function CollegesContent() {
                         <p className="text-slate-600 dark:text-slate-400 text-lg">That&apos;s where we come in — with an industry-aligned Robotics & Autonomous Systems Lab within the institution.</p>
                     </motion.div>
 
-                    <div className="flex overflow-x-auto pb-4 -mx-4 px-4 md:px-0 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:pb-0 scrollbar-hide">
+                    <div className="flex overflow-x-auto pb-4 -mx-4 px-4 md:px-0 snap-x snap-mandatory md:grid md:grid-cols-3 lg:grid-cols-4 md:gap-5 md:overflow-visible md:pb-0 scrollbar-hide">
                         {PRODUCTS.map((p, i) => (
-                            <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.5 }}
-                                className="min-w-[80vw] md:min-w-0 snap-center shrink-0 mr-4 md:mr-0 last:mr-0 bg-white dark:bg-slate-900/60 backdrop-blur-xl shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-200/60 dark:border-slate-800 rounded-2xl p-6 text-center group hover:border-blue-500/40 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300 cursor-pointer flex flex-col items-center">
-                                <div className="relative w-20 h-20 mb-4 rounded-xl overflow-hidden shadow-md">
-                                    <Image src={p.image} alt={p.name} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: i * 0.08, duration: 0.5 }}
+                                className="min-w-[72vw] md:min-w-0 snap-center shrink-0 mr-4 md:mr-0 last:mr-0 bg-white dark:bg-slate-900/60 backdrop-blur-xl shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-200/60 dark:border-slate-800 rounded-2xl p-5 text-center group hover:shadow-lg transition-all duration-300 cursor-pointer flex flex-col items-center overflow-visible"
+                                style={{ borderColor: 'transparent' }}
+                                onMouseEnter={e => (e.currentTarget.style.borderColor = p.accentColor + '55')}
+                                onMouseLeave={e => (e.currentTarget.style.borderColor = 'transparent')}
+                            >
+                                {/* 3D Model viewer — uniform square, same size across all */}
+                                <div className="w-full aspect-square max-h-[140px] mb-4 relative bg-transparent">
+                                    {/* Glow dot */}
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                        <div className="w-16 h-16 rounded-full blur-2xl opacity-40" style={{ background: p.accentColor }} />
+                                    </div>
+                                    <ProductMiniModel accentColor={p.accentColor} glbPath={p.glbPath} image={p.image} />
                                 </div>
-                                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{p.name}</h3>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">{p.specs}</p>
+                                <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1.5 leading-tight">{p.name}</h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">{p.specs}</p>
                             </motion.div>
                         ))}
                     </div>
@@ -955,35 +1441,71 @@ function CollegesContent() {
 
 
             {/* ===== SECTIONS 8-13: PRODUCT DETAIL CARDS ===== */}
-            <section className="py-24 px-4">
-                <div className="container mx-auto max-w-6xl space-y-24">
+            <section className="py-24 px-4 overflow-visible">
+                <div className="container mx-auto max-w-6xl space-y-28 overflow-visible">
                     {PRODUCTS.map((p, i) => (
-                        <motion.div key={i} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}
-                            className={`flex flex-col ${i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} gap-8 md:gap-12 items-center`}>
-                            {/* Image */}
-                            <div className="w-full md:w-1/2 aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl shadow-blue-900/10 dark:shadow-none bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 border border-slate-200 dark:border-slate-800 relative">
-                                <img src={p.image} alt={p.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                                {/* Gradient placeholder in case image doesn't load */}
-                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                    <span className="text-7xl opacity-20">{p.icon}</span>
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, y: 50 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, margin: "-100px" }}
+                            transition={{ duration: 0.7 }}
+                            className={`flex flex-col ${i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} gap-8 md:gap-14 items-center overflow-visible`}
+                        >
+                            {/* 3D Model Viewer — replaces the old image */}
+                            <div
+                                className="w-full md:w-1/2 aspect-[1/1] md:aspect-[4/3] relative bg-transparent overflow-visible"
+                            >
+                                {/* Subtle glow orb behind */}
+                                <div
+                                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full blur-3xl pointer-events-none"
+                                    style={{ background: p.accentColor, opacity: 0.12 }}
+                                />
+                                {/* Corner label */}
+                                <div className="absolute top-4 left-4 z-10 pointer-events-none">
+                                    <span
+                                        className="text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full"
+                                        style={{ background: `${p.accentColor}22`, color: p.accentColor, border: `1px solid ${p.accentColor}44` }}
+                                    >
+                                        3D Model
+                                    </span>
+                                </div>
+                                {/* 3D Model — the inner canvas is expanded 50% in all directions; overflow must be visible all the way up */}
+                                <div className="absolute inset-0 z-0 pointer-events-none overflow-visible">
+                                    <ProductDetailModel3D accentColor={p.accentColor} glbPath={p.glbPath} image={p.image} />
                                 </div>
                             </div>
+
                             {/* Content */}
-                             <div className="w-full md:w-1/2">
-                                <div className="relative w-24 h-24 mb-6 rounded-2xl overflow-hidden shadow-lg border-2 border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 mx-auto md:mx-0">
-                                    <Image src={p.image} alt={p.name} fill className="object-cover" />
-                                </div>
+                            <div className="w-full md:w-1/2">
+                                {/* Accent line */}
+                                <div className="w-10 h-1 rounded-full mb-6 mx-auto md:mx-0" style={{ background: `linear-gradient(90deg, ${p.accentColor}, ${p.accentColor}44)` }} />
                                 <h3 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-3">{p.name}</h3>
-                                <span className="inline-block bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-300 text-xs font-bold px-4 py-1.5 rounded-full mb-4">{p.specs}</span>
+                                <span
+                                    className="inline-block text-xs font-bold px-4 py-1.5 rounded-full mb-4"
+                                    style={{ background: `${p.accentColor}20`, color: p.accentColor }}
+                                >
+                                    {p.specs}
+                                </span>
                                 <p className="text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">{p.tagline}</p>
-                                {p.extraSpecs && (
+                                {(p as any).extraSpecs && (
                                     <div className="bg-slate-50/80 dark:bg-slate-900/50 shadow-inner rounded-xl p-4 mb-6 border border-slate-200/60 dark:border-slate-800">
-                                        {p.extraSpecs.map((s, j) => <p key={j} className="text-xs text-slate-500 dark:text-slate-400 flex items-start gap-2 mb-1"><span className="text-cyan-400">•</span>{s}</p>)}
+                                        {(p as any).extraSpecs.map((s: string, j: number) => (
+                                            <p key={j} className="text-xs text-slate-500 dark:text-slate-400 flex items-start gap-2 mb-1">
+                                                <span style={{ color: p.accentColor }}>•</span>{s}
+                                            </p>
+                                        ))}
                                     </div>
                                 )}
+                                {/* Coming soon info placeholder */}
+                                <div className="p-4 rounded-xl border mb-5" style={{ borderColor: `${p.accentColor}33`, background: `${p.accentColor}08` }}>
+                                    <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold">Product details coming soon — check back for full specifications, pricing, and documentation.</p>
+                                </div>
                                 <ul className="space-y-2">
                                     {p.features.map((f, j) => (
-                                        <li key={j} className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300"><CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />{f}</li>
+                                        <li key={j} className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300">
+                                            <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" style={{ color: p.accentColor }} />{f}
+                                        </li>
                                     ))}
                                 </ul>
                             </div>
@@ -1056,39 +1578,44 @@ function CollegesContent() {
                 </div>
             </section>
 
-            {/* ===== SECTION 16: OUR CLIENTS ===== */}
-            <section className="py-24 px-4 bg-slate-50 dark:bg-slate-800/40">
-                <div className="container mx-auto max-w-5xl text-center">
+            {/* ===== SECTION 16: INSTITUTE LAB ASSOCIATION ===== */}
+            <section className="py-24 px-4 bg-slate-50 dark:bg-slate-800/40 overflow-hidden">
+                <div className="container mx-auto max-w-6xl text-center">
                     <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-                        <h2 className="text-4xl md:text-5xl font-black mb-12">Our Clients</h2>
-                        <div className="flex overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory md:grid md:grid-cols-4 md:gap-6 md:overflow-visible md:pb-0 md:px-0 scrollbar-hide">
-                            {(labPartners.filter(p => p.category === 'client').length > 0
-                                ? labPartners.filter(p => p.category === 'client')
-                                : [{name:'Client 1', imageUrl:''},{name:'Client 2', imageUrl:''},{name:'Client 3', imageUrl:''},{name:'Client 4', imageUrl:''}]
-                            ).map((c: any, i: number) => (
-                                <motion.div key={c._id || i} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.08, duration: 0.4 }}
-                                    className="min-w-[60vw] md:min-w-0 snap-center shrink-0 mr-4 md:mr-0 last:mr-0 bg-white dark:bg-slate-900/60 backdrop-blur-xl shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-200/60 dark:border-slate-800 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-blue-500/40 transition-all">
-                                    {c.imageUrl ? (
-                                        <img src={c.imageUrl} alt={c.name} className="h-16 w-auto object-contain" />
-                                    ) : (
-                                        <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center text-2xl">🏢</div>
-                                    )}
-                                    <span className="text-sm font-semibold text-slate-600 dark:text-slate-300">{c.name}</span>
-                                </motion.div>
-                            ))}
+                        <h2 className="text-4xl md:text-5xl font-black mb-12">Institute Lab Association</h2>
+                        <div className="relative overflow-hidden py-4">
+                            <div className="flex gap-10 animate-[marquee_25s_linear_infinite]" style={{ width: 'max-content' }}>
+                                {(() => {
+                                    const clients = labPartners.filter(p => p.category === 'client');
+                                    const displayPartners = clients.length > 0 
+                                        ? [...clients, ...clients, ...clients, ...clients] // Quadruplicate for smooth infinite scroll
+                                        : Array(8).fill({ name: "Partner Institute", imageUrl: "" });
+
+                                    return displayPartners.map((c: any, i: number) => (
+                                        <div key={i} className="w-56 bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800 rounded-2xl p-6 flex flex-col items-center justify-center gap-4 shrink-0 hover:border-blue-500/40 transition-all shadow-md dark:shadow-none">
+                                            {c.imageUrl ? (
+                                                <img src={c.imageUrl} alt={c.name} className="h-16 w-auto object-contain" />
+                                            ) : (
+                                                <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center text-2xl">🏢</div>
+                                            )}
+                                            <span className="text-sm font-semibold text-slate-600 dark:text-slate-300 text-center">{c.name}</span>
+                                        </div>
+                                    ));
+                                })()}
+                            </div>
                         </div>
-                        <p className="text-slate-500 text-sm mt-6">Trusted by leading institutions across India</p>
+                        <p className="text-slate-500 text-sm mt-8">Trusted by leading technical institutions across India</p>
                     </motion.div>
                 </div>
             </section>
 
             {/* ===== SECTION 17: COMPANIES HIRING — MARQUEE ===== */}
+            {/* 
             <section className="py-24 px-4 overflow-hidden">
                 <div className="container mx-auto max-w-6xl text-center">
                     <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
                         <h2 className="text-4xl md:text-5xl font-black mb-12">Companies Hiring for AGV & Robotic Arm</h2>
                     </motion.div>
-                    {/* Infinite marquee */}
                     <div className="relative overflow-hidden py-4">
                         <div className="flex gap-6 animate-[marquee_30s_linear_infinite]" style={{ width: 'max-content' }}>
                             {(() => {
@@ -1112,6 +1639,7 @@ function CollegesContent() {
                     </div>
                 </div>
             </section>
+            */}
 
             {/* ===== SECTION 18: TOP INDUSTRY ASSOCIATIONS ===== */}
             <section className="py-24 px-4 bg-slate-50 dark:bg-slate-800/40">
