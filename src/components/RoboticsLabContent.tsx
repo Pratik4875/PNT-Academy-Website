@@ -1609,34 +1609,51 @@ function CollegesContent() {
             </section>
 
             {/* ===== SECTION 16: INSTITUTE LAB ASSOCIATION ===== */}
-            <section className="py-24 px-4 bg-slate-50 dark:bg-slate-800/40 overflow-hidden">
-                <div className="container mx-auto max-w-6xl text-center">
+            <section className="py-24 bg-slate-50 dark:bg-slate-800/40 overflow-hidden relative">
+                <div className="container mx-auto max-w-6xl text-center px-4">
                     <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
                         <h2 className="text-4xl md:text-5xl font-black mb-12">Institute Lab Association</h2>
-                        <div className="relative overflow-hidden py-4">
-                            <div className="flex gap-10 animate-[marquee_25s_linear_infinite]" style={{ width: 'max-content' }}>
-                                {(() => {
-                                    const clients = labPartners.filter(p => p.category === 'client');
-                                    const displayPartners = clients.length > 0 
-                                        ? [...clients, ...clients, ...clients, ...clients] // Quadruplicate for smooth infinite scroll
-                                        : Array(8).fill({ name: "Partner Institute", imageUrl: "" });
-
-                                    return displayPartners.map((c: any, i: number) => (
-                                        <div key={i} className="w-56 bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800 rounded-2xl p-6 flex flex-col items-center justify-center gap-4 shrink-0 hover:border-blue-500/40 transition-all shadow-md dark:shadow-none">
-                                            {c.imageUrl ? (
-                                                <img src={c.imageUrl} alt={c.name} className="h-16 w-auto object-contain" />
-                                            ) : (
-                                                <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center text-2xl">🏢</div>
-                                            )}
-                                            <span className="text-sm font-semibold text-slate-600 dark:text-slate-300 text-center">{c.name}</span>
-                                        </div>
-                                    ));
-                                })()}
-                            </div>
-                        </div>
-                        <p className="text-slate-500 text-sm mt-8">Trusted by leading technical institutions across India</p>
                     </motion.div>
                 </div>
+
+                {/* Edge-to-Edge Marquee */}
+                <div className="relative w-full overflow-hidden py-4">
+                    {/* Optional edge fades */}
+                    <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-16 md:w-32 z-10 bg-gradient-to-r from-slate-50 dark:from-[rgba(30,41,59,0.4)] to-transparent" />
+                    <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 md:w-32 z-10 bg-gradient-to-l from-slate-50 dark:from-[rgba(30,41,59,0.4)] to-transparent" />
+
+                    <div className="flex gap-10 w-max" style={{ animation: 'instituteMarquee 40s linear infinite' }}>
+                        {(() => {
+                            const clients = labPartners.filter(p => p.category === 'client');
+                            // Quadruplicate to ensure seamless infinite scroll across ultra-wide monitors
+                            const displayPartners = clients.length > 0 
+                                ? [...clients, ...clients, ...clients, ...clients] 
+                                : Array(16).fill({ name: "Partner Institute", imageUrl: "" });
+
+                            return displayPartners.map((c: any, i: number) => (
+                                <div key={i} className="w-56 bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800 rounded-2xl p-6 flex flex-col items-center justify-center gap-4 shrink-0 hover:border-blue-500/40 transition-all shadow-md dark:shadow-none group">
+                                    {c.imageUrl ? (
+                                        <img src={c.imageUrl} alt={c.name} className="h-16 w-auto object-contain transition-transform duration-300 group-hover:scale-110" />
+                                    ) : (
+                                        <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center text-2xl">🏢</div>
+                                    )}
+                                    <span className="text-sm font-semibold text-slate-600 dark:text-slate-300 text-center">{c.name}</span>
+                                </div>
+                            ));
+                        })()}
+                    </div>
+                </div>
+
+                <div className="container mx-auto max-w-6xl text-center px-4 mt-8">
+                    <p className="text-slate-500 text-sm">Trusted by leading technical institutions across India</p>
+                </div>
+
+                <style>{`
+                    @keyframes instituteMarquee {
+                        0%   { transform: translateX(0); }
+                        100% { transform: translateX(-25%); }
+                    }
+                `}</style>
             </section>
 
             {/* ===== SECTION 17: COMPANIES HIRING — MARQUEE ===== */}
