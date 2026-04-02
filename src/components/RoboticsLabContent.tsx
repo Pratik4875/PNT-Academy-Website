@@ -1122,9 +1122,10 @@ function ProductDetailModel3D({ accentColor, glbPath, image }: { accentColor: st
                                 e.preventDefault();
                                 
                                 if (/android/i.test(navigator.userAgent)) {
+                                    // new URL automatically handles encoding spaces in the path (e.g. 'Advance AMR.glb' -> 'Advance%20AMR.glb')
+                                    // DO NOT use encodeURIComponent on the entire URL or the Intent parser will fail to identify the 'https' scheme
                                     const modelUrl = new URL(glbPath, window.location.origin).toString();
-                                    const encodedUrl = encodeURIComponent(modelUrl);
-                                    window.location.href = `intent://arvr.google.com/scene-viewer/1.0?file=${encodedUrl}&mode=ar_only#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`;
+                                    window.location.href = `intent://arvr.google.com/scene-viewer/1.0?file=${modelUrl}&mode=ar_only#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`;
                                     return;
                                 }
 
