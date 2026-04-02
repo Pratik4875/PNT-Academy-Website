@@ -1094,7 +1094,7 @@ function ProductDetailModel3D({ accentColor, glbPath, image }: { accentColor: st
 
     if (isMobile) {
         return (
-            <div className="w-full h-full flex flex-col items-center justify-center gap-4 p-8 text-center">
+            <div className="w-full h-full flex flex-col items-center justify-center gap-4 p-8 text-center pointer-events-auto">
                 <div className="w-20 h-20 rounded-2xl flex items-center justify-center"
                     style={{ background: `${accentColor}22`, border: `1px solid ${accentColor}44` }}>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-9 h-9" style={{ color: accentColor }}>
