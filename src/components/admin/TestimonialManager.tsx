@@ -224,14 +224,14 @@ export default function TestimonialManager({ onSuccess }: { onSuccess?: () => vo
 
             {/* Render Cropper Modal if a file needs cropping */}
             {fileToCrop && (
-                <ImageCropper 
-                    file={fileToCrop} 
+                <ImageCropper
+                    file={fileToCrop}
                     aspectRatio={1} // Square crop for testimonials
-                    onCropComplete={handleCropComplete} 
+                    onCropComplete={handleCropComplete}
                     onCancel={() => {
                         setFileToCrop(null);
                         if (fileInputRef.current) fileInputRef.current.value = "";
-                    }} 
+                    }}
                 />
             )}
         </div>

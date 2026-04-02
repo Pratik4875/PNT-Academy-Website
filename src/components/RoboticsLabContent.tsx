@@ -78,7 +78,7 @@ export default function RoboticsLabContent() {
         <>
             {/* Load model-viewer script unconditionally at the top to prevent Hydration mismatches */}
             <Script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js" strategy="lazyOnload" />
-            
+
             {/* --- Hero Section --- */}
             <div className="relative flex flex-col items-center justify-center text-center min-h-[420px] pt-32 pb-16 overflow-hidden bg-black">
                 {/* Full lab photo */}
@@ -124,11 +124,10 @@ export default function RoboticsLabContent() {
                                     <button
                                         key={tab.id}
                                         onClick={() => handleTabChange(tab.id as "schools" | "colleges")}
-                                        className={`relative z-10 px-8 py-3 text-base font-bold rounded-full transition-all duration-300 ${
-                                            isActive
+                                        className={`relative z-10 px-8 py-3 text-base font-bold rounded-full transition-all duration-300 ${isActive
                                                 ? "text-blue-800"
                                                 : "text-white/80 hover:text-white"
-                                        }`}
+                                            }`}
                                     >
                                         {tab.label}
                                     </button>
@@ -174,7 +173,7 @@ export default function RoboticsLabContent() {
                     )}
                 </AnimatePresence>
             </div>
-            
+
             <LabGallerySection />
         </>
     );
@@ -255,7 +254,7 @@ function GlbModel({ path, targetSize = 5 }: { path: string; targetSize?: number 
         } else if (groupRef.current && isDrone) {
             const cycleDuration = 9.0;
             const t = state.clock.elapsedTime % cycleDuration;
-            
+
             // --- Determine desired state & target values ---
             let desiredPropSpeed = 0;
 
@@ -373,8 +372,8 @@ function HumanoidModel() {
 // Mechanical Lab models — the new ones the user added
 const MECH_MODELS = [
     { path: "/models/angle_grinder.glb", label: "Angle Grinder", targetSize: 5.0 },
-    { path: "/models/spanner.glb",       label: "Spanner",        targetSize: 5.0 },
-    { path: "/models/verniercaliper.glb",label: "Vernier Caliper",targetSize: 5.0 },
+    { path: "/models/spanner.glb", label: "Spanner", targetSize: 5.0 },
+    { path: "/models/verniercaliper.glb", label: "Vernier Caliper", targetSize: 5.0 },
     { path: "/models/wrench_size_24_tools.glb", label: "Wrench Set", targetSize: 5.0 },
 ];
 
@@ -483,8 +482,8 @@ function PrinterLabSection() {
                     <div className="relative flex items-center justify-center h-[500px] cursor-grab active:cursor-grabbing">
 
                         <LazyCanvas className="absolute inset-0 mobile-safe-canvas">
-                            <Canvas 
-                                shadows 
+                            <Canvas
+                                shadows
                                 gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.0, powerPreference: "high-performance" }}
                                 camera={{ position: isMobile ? [15, 6, 15] : [10, 4, 10], fov: isMobile ? 50 : 40 }}
                                 frameloop={isMobile ? "demand" : "always"}
@@ -647,11 +646,10 @@ function SchoolsContent() {
                                 key={i}
                                 onClick={() => setActiveCat(i)}
                                 onMouseEnter={() => setActiveCat(i)}
-                                className={`text-left p-6 rounded-3xl border-2 transition-all duration-300 flex items-center gap-6 ${
-                                    activeCat === i
+                                className={`text-left p-6 rounded-3xl border-2 transition-all duration-300 flex items-center gap-6 ${activeCat === i
                                         ? `bg-white dark:bg-slate-900 ${item.border} shadow-xl scale-105 z-10 relative`
                                         : "bg-slate-50 dark:bg-slate-800/40 border-transparent hover:bg-white dark:hover:bg-slate-800 hover:shadow-md hover:scale-[1.02]"
-                                }`}
+                                    }`}
                             >
                                 <div className={`w-16 h-16 shrink-0 rounded-2xl flex items-center justify-center ${item.iconBg} ${item.iconColor}`}>
                                     <item.icon className="w-8 h-8" />
@@ -668,11 +666,11 @@ function SchoolsContent() {
                     <div className="h-[400px] lg:h-[600px] w-full relative flex items-center justify-center mobile-safe-canvas">
                         {/* Decorative background circle */}
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-blue-500/10 dark:bg-blue-400/5 rounded-full blur-[60px] pointer-events-none" />
-                        
+
                         {currentModel ? (
                             <>
                                 <LazyCanvas className="absolute inset-0">
-                                    <Canvas 
+                                    <Canvas
                                         camera={{ position: isMobile ? [7, 5, 7] : [5, 4, 5], fov: isMobile ? 50 : 40 }}
                                         gl={{ antialias: true, powerPreference: "high-performance" }}
                                         frameloop={isMobile ? "demand" : "always"}
@@ -738,7 +736,7 @@ function SchoolsContent() {
                     <div className="relative flex items-center justify-center h-[500px] cursor-grab active:cursor-grabbing lg:order-2">
 
                         <LazyCanvas className="absolute inset-0 mobile-safe-canvas">
-                            <Canvas 
+                            <Canvas
                                 shadows
                                 gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.0, powerPreference: "high-performance" }}
                                 camera={{ position: isMobile ? [0, 6, 30] : [0, 4, 22], fov: isMobile ? 45 : 35 }}
@@ -1065,7 +1063,7 @@ function ProductDetailModel3D({ accentColor, glbPath, image }: { accentColor: st
 
     useEffect(() => {
         if (!containerRef.current) return;
-        
+
         const observer = new IntersectionObserver(
             ([entry]) => {
                 // Initialize canvas only when on screen (with a slight 200px buffer)
@@ -1073,7 +1071,7 @@ function ProductDetailModel3D({ accentColor, glbPath, image }: { accentColor: st
             },
             { rootMargin: "200px" }
         );
-        
+
         observer.observe(containerRef.current);
         return () => observer.disconnect();
     }, []);
@@ -1098,7 +1096,7 @@ function ProductDetailModel3D({ accentColor, glbPath, image }: { accentColor: st
                 <div className="w-20 h-20 rounded-2xl flex items-center justify-center"
                     style={{ background: `${accentColor}22`, border: `1px solid ${accentColor}44` }}>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-9 h-9" style={{ color: accentColor }}>
-                        <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+                        <rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" />
                     </svg>
                 </div>
                 <h4 className="text-lg font-black text-slate-900 dark:text-white">View in AR</h4>
@@ -1168,7 +1166,7 @@ function ProductDetailModel3D({ accentColor, glbPath, image }: { accentColor: st
                         <pointLight position={[0, 3, 0]} intensity={0.6} color={accentColor} />
                         <Environment preset="studio" />
                         <ModelErrorBoundary fallback={
-                            <mesh position={[0,0,0]}>
+                            <mesh position={[0, 0, 0]}>
                                 <boxGeometry args={[2, 2, 2]} />
                                 <meshStandardMaterial color={accentColor} wireframe />
                             </mesh>
@@ -1611,8 +1609,8 @@ function CollegesContent() {
                         {(() => {
                             const clients = labPartners.filter(p => p.category === 'client');
                             // Quadruplicate to ensure seamless infinite scroll across ultra-wide monitors
-                            const displayPartners = clients.length > 0 
-                                ? [...clients, ...clients, ...clients, ...clients] 
+                            const displayPartners = clients.length > 0
+                                ? [...clients, ...clients, ...clients, ...clients]
                                 : Array(16).fill({ name: "Partner Institute", imageUrl: "" });
 
                             return displayPartners.map((c: any, i: number) => (
@@ -1682,7 +1680,7 @@ function CollegesContent() {
                     <div className="flex overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory md:grid md:grid-cols-4 md:gap-6 md:overflow-visible md:pb-0 md:px-0 scrollbar-hide">
                         {(labPartners.filter(p => p.category === 'industry').length > 0
                             ? labPartners.filter(p => p.category === 'industry')
-                            : [{name:'Indian Army', imageUrl:''},{name:'TATA Power', imageUrl:''},{name:'Wockhardt', imageUrl:''},{name:'Unilever UK', imageUrl:''}]
+                            : [{ name: 'Indian Army', imageUrl: '' }, { name: 'TATA Power', imageUrl: '' }, { name: 'Wockhardt', imageUrl: '' }, { name: 'Unilever UK', imageUrl: '' }]
                         ).map((a: any, i: number) => (
                             <motion.div key={a._id || i} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.4 }}
                                 className="min-w-[65vw] md:min-w-0 snap-center shrink-0 mr-4 md:mr-0 last:mr-0 bg-white dark:bg-slate-900/60 backdrop-blur-xl shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-200/60 dark:border-slate-800 rounded-2xl p-8 text-center hover:border-blue-500/40 hover:shadow-lg hover:shadow-blue-500/5 transition-all">
@@ -1774,15 +1772,15 @@ function LabGallerySection() {
         fetch("/api/admin/gallery")
             .then(r => r.json())
             .then((data: any[]) => {
-            // Filter to show primarily "Lab Setup" photos
-            const labPhotos = data.filter((item: any) => item.category === "Lab Setup" || item.category === "Projects");
-            if (labPhotos.length > 0) {
-                setImages(labPhotos);
-            } else {
-                // Fallback to recent 8 images if no specific lab setup category exists yet
-                setImages(data.slice(0, 8));
-            }
-        }).catch(console.error);
+                // Filter to show primarily "Lab Setup" photos
+                const labPhotos = data.filter((item: any) => item.category === "Lab Setup" || item.category === "Projects");
+                if (labPhotos.length > 0) {
+                    setImages(labPhotos);
+                } else {
+                    // Fallback to recent 8 images if no specific lab setup category exists yet
+                    setImages(data.slice(0, 8));
+                }
+            }).catch(console.error);
     }, []);
 
     if (!images || images.length === 0) return null;
@@ -1816,12 +1814,12 @@ function LabGallerySection() {
                             key={`${img._id || i}-${i}`}
                             className="relative w-[260px] h-[260px] md:w-[320px] md:h-[320px] flex-shrink-0 rounded-full overflow-hidden border-4 border-white dark:border-slate-800 shadow-xl group/card cursor-pointer"
                         >
-                            <Image 
-                                src={img.imageUrl} 
-                                alt={img.title || "Lab Photo"} 
-                                fill 
-                                className="object-cover transition-transform duration-700 group-hover/card:scale-110" 
-                                sizes="(max-width: 768px) 260px, 320px" 
+                            <Image
+                                src={img.imageUrl}
+                                alt={img.title || "Lab Photo"}
+                                fill
+                                className="object-cover transition-transform duration-700 group-hover/card:scale-110"
+                                sizes="(max-width: 768px) 260px, 320px"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 p-6 flex flex-col justify-end text-center rounded-full">
                                 <span className="text-cyan-400 font-bold text-[10px] uppercase tracking-wider mb-1">{img.category}</span>

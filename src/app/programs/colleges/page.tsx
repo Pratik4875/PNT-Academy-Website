@@ -14,6 +14,7 @@ import HeroRotatingFrames from "@/components/HeroRotatingFrames";
 import dbConnect from "@/lib/mongodb";
 import Testimonial from "@/lib/models/Testimonial";
 import HardwareModel from "@/lib/models/HardwareModel";
+import LabPartner from "@/lib/models/LabPartner";
 
 export const revalidate = 60; // Revalidate every minute for fresh data
 
@@ -27,6 +28,10 @@ export default async function CollegesProgramsPage() {
     // Fetch extra 3D hardware models from DB (AGV is always built-in in the viewer)
     const extraModelsRaw = await HardwareModel.find({ active: true }).sort({ sortOrder: 1, createdAt: 1 });
     const extraModels = JSON.parse(JSON.stringify(extraModelsRaw));
+
+    // Fetch lab partners for the rolling logo section
+    const labPartnersRaw = await LabPartner.find({ active: true }).sort({ sortOrder: 1, createdAt: 1 });
+    const labPartners = JSON.parse(JSON.stringify(labPartnersRaw));
 
     return (
         <main className="min-h-screen text-slate-900 dark:text-slate-50 overflow-x-hidden transition-colors duration-500 bg-slate-50 dark:bg-slate-950">
@@ -71,7 +76,7 @@ export default async function CollegesProgramsPage() {
                 </div>
             </section>
 
-            <CollegesTrainingContent testimonials={testimonials} extraModels={extraModels} />
+            <CollegesTrainingContent testimonials={testimonials} extraModels={extraModels} labPartners={labPartners} />
             <Footer />
         </main>
     );

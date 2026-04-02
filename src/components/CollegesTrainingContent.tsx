@@ -14,6 +14,7 @@ import {
     ArrowRight, Star, Quote, Microchip
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 type ProgramDay = {
     day: string;
@@ -621,7 +622,7 @@ const PROGRAMS: Program[] = [
     }
 ];
 
-export default function CollegesTrainingContent({ testimonials = [], extraModels = [] }: { testimonials?: any[]; extraModels?: any[] }) {
+export default function CollegesTrainingContent({ testimonials = [], extraModels = [], labPartners = [] }: { testimonials?: any[]; extraModels?: any[]; labPartners?: any[] }) {
     const [selectedProgram, setSelectedProgram] = useState<Program>(PROGRAMS[0]);
     const [expandedDays, setExpandedDays] = useState<string[]>([]);
 
@@ -899,6 +900,7 @@ export default function CollegesTrainingContent({ testimonials = [], extraModels
                 </div>
 
                 <SectionBPNTEdge />
+                <LabPartnersSection labPartners={labPartners} />
                 <SectionCAlumni testimonials={testimonials} />
 
             </div>
@@ -1084,3 +1086,47 @@ function HardwareSpecsGrid({ programId }: { programId: string }) {
     );
 }
 
+// --- Lab Partners Section --- //
+
+function LabPartnersSection({ labPartners = [] }: { labPartners?: any[] }) {
+    const clients = labPartners.filter(p => p.category === 'client');
+    if (clients.length === 0) return null;
+
+    // Duplicate clients array to ensure infinite scrolling looks seamless
+    let displayPartners = [...clients, ...clients];
+    if (displayPartners.length < 8) {
+        displayPartners = [...displayPartners, ...displayPartners, ...displayPartners, ...displayPartners];
+    }
+
+    return (
+        <div className="py-16 md:py-24 border-t border-slate-200 dark:border-slate-800">
+            <div className="text-center mb-12">
+                <span className="inline-block bg-indigo-100 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold tracking-widest uppercase text-xs px-4 py-2 rounded-full mb-3 border border-indigo-200 dark:border-indigo-500/30">Industry Connect</span>
+                <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-4">Our Hiring Partners</h2>
+                <p className="text-slate-500 dark:text-slate-400">PNT Academy works closely with top industries to provide placement assistance to our students.</p>
+            </div>
+
+            <div className="relative overflow-hidden group">
+                <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-slate-50 dark:from-slate-950 to-transparent z-10 pointer-events-none"></div>
+                <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-slate-50 dark:from-slate-950 to-transparent z-10 pointer-events-none"></div>
+
+                <motion.div
+                    className="flex gap-8 items-center"
+                    animate={{ x: ["0%", "-50%"] }}
+                    transition={{ ease: "linear", duration: 25, repeat: Infinity }}
+                    style={{ width: "max-content" }}
+                >
+                    {displayPartners.map((c: any, i: number) => (
+                        <div key={`${c._id || i}-${i}`} className="w-48 h-24 shrink-0 bg-white dark:bg-slate-900/60 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-sm flex items-center justify-center p-4">
+                            {c.imageUrl ? (
+                                <Image src={c.imageUrl} alt={c.name} width={120} height={60} className="object-contain max-h-16 opacity-70 hover:opacity-100 transition-opacity grayscale hover:grayscale-0" />
+                            ) : (
+                                <span className="font-bold text-slate-400 dark:text-slate-600 truncate px-2">{c.name}</span>
+                            )}
+                        </div>
+                    ))}
+                </motion.div>
+            </div>
+        </div>
+    );
+}
