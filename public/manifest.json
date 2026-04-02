@@ -8,7 +8,7 @@
   "background_color": "#0f172a",
   "icons": [
     {
-      "src": "/apple-icon.png",
+      "src": "/icon",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
