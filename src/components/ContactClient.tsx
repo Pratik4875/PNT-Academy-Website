@@ -435,64 +435,76 @@ export default function ContactClient({ faqs, settings }: { faqs: Faq[]; setting
                                 )}
                             </div>
 
-                            {/* FAQs */}
-                            {faqs.length > 0 && (
-                                <AnimatedSection delay={0.2}>
-                                    <div className="bg-white/70 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 rounded-3xl p-6 sm:p-8 md:p-10 shadow-xl dark:shadow-2xl dark:shadow-purple-500/5">
-                                        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mb-6 flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
-                                                <MessageCircle className="w-5 h-5 text-white" />
-                                            </div>
-                                            Frequently Asked
-                                        </h2>
-                                        <motion.div className="space-y-3" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }}>
-                                            {faqs.map((faq, i) => (
-                                                <motion.div
-                                                    key={faq._id}
-                                                    variants={fadeUp}
-                                                    custom={i}
-                                                    className={`border rounded-2xl overflow-hidden transition-all duration-300 ${
-                                                        openFaq === faq._id
-                                                            ? "border-blue-500/30 dark:border-blue-400/30 bg-blue-50/50 dark:bg-blue-500/5 shadow-lg shadow-blue-500/5"
-                                                            : "border-slate-200/60 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] hover:border-slate-300 dark:hover:border-white/20"
-                                                    }`}
-                                                >
-                                                    <button
-                                                        onClick={() => setOpenFaq(openFaq === faq._id ? null : faq._id)}
-                                                        className="w-full flex items-center justify-between p-5 text-left transition-colors"
-                                                    >
-                                                        <span className="font-bold text-slate-800 dark:text-white pr-4">{faq.question}</span>
-                                                        <motion.div
-                                                            animate={{ rotate: openFaq === faq._id ? 180 : 0 }}
-                                                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                                                        >
-                                                            <ChevronDown className={`w-5 h-5 shrink-0 transition-colors ${openFaq === faq._id ? "text-blue-500" : "text-slate-400"}`} />
-                                                        </motion.div>
-                                                    </button>
-                                                    <AnimatePresence>
-                                                        {openFaq === faq._id && (
-                                                            <motion.div
-                                                                initial={{ height: 0, opacity: 0 }}
-                                                                animate={{ height: "auto", opacity: 1 }}
-                                                                exit={{ height: 0, opacity: 0 }}
-                                                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                                                className="overflow-hidden"
-                                                            >
-                                                                <div className="px-5 pb-5 text-slate-600 dark:text-slate-400 text-sm leading-relaxed whitespace-pre-wrap border-t border-slate-200/60 dark:border-white/10 pt-4">
-                                                                    {faq.answer}
-                                                                </div>
-                                                            </motion.div>
-                                                        )}
-                                                    </AnimatePresence>
-                                                </motion.div>
-                                            ))}
-                                        </motion.div>
-                                    </div>
-                                </AnimatedSection>
-                            )}
                         </AnimatedSection>
                     </div>
                 </section>
+
+                {/* ═══════ FAQ SECTION ═══════ */}
+                {faqs.length > 0 && (
+                    <section className="pb-16 sm:pb-24 container mx-auto px-4 max-w-6xl relative z-20">
+                        <AnimatedSection delay={0.2}>
+                            <div className="bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 rounded-[2.5rem] p-6 sm:p-10 shadow-xl dark:shadow-2xl dark:shadow-purple-500/5 relative overflow-hidden">
+                                {/* Decorative elements inside FAQ */}
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none -mt-32 -mr-32" />
+                                <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none -mb-32 -ml-32" />
+
+                                <div className="text-center mb-10 relative z-10">
+                                    <div className="w-16 h-16 mx-auto rounded-3xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg mb-6 shadow-purple-500/30">
+                                        <MessageCircle className="w-8 h-8 text-white" />
+                                    </div>
+                                    <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mb-4">
+                                        Frequently Asked Questions
+                                    </h2>
+                                    <p className="text-slate-500 dark:text-slate-400">Everything you need to know before contacting us.</p>
+                                </div>
+
+                                <motion.div className="grid md:grid-cols-2 gap-4 relative z-10 items-start" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+                                    {faqs.map((faq, i) => (
+                                        <motion.div
+                                            key={faq._id}
+                                            variants={fadeUp}
+                                            custom={i}
+                                            className={`border rounded-2xl overflow-hidden transition-all duration-300 ${
+                                                openFaq === faq._id
+                                                    ? "border-blue-500/30 dark:border-blue-400/30 bg-white dark:bg-slate-800 shadow-lg shadow-blue-500/5"
+                                                    : "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 hover:border-slate-300 dark:hover:border-slate-600"
+                                            }`}
+                                        >
+                                            <button
+                                                onClick={() => setOpenFaq(openFaq === faq._id ? null : faq._id)}
+                                                className="w-full flex items-center justify-between p-5 text-left transition-colors focus:outline-none"
+                                            >
+                                                <span className={`font-bold pr-4 ${openFaq === faq._id ? "text-blue-600 dark:text-blue-400" : "text-slate-800 dark:text-slate-200"}`}>{faq.question}</span>
+                                                <motion.div
+                                                    animate={{ rotate: openFaq === faq._id ? 180 : 0 }}
+                                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                                    className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center border transition-colors ${openFaq === faq._id ? "border-blue-200 bg-blue-100 text-blue-600 dark:border-blue-900 dark:bg-blue-900/50 dark:text-blue-400" : "border-slate-200 bg-white text-slate-400 dark:border-slate-700 dark:bg-slate-900"}`}
+                                                >
+                                                    <ChevronDown className="w-5 h-5" />
+                                                </motion.div>
+                                            </button>
+                                            <AnimatePresence>
+                                                {openFaq === faq._id && (
+                                                    <motion.div
+                                                        initial={{ height: 0, opacity: 0 }}
+                                                        animate={{ height: "auto", opacity: 1 }}
+                                                        exit={{ height: 0, opacity: 0 }}
+                                                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                                        className="overflow-hidden"
+                                                    >
+                                                        <div className="px-5 pb-5 text-slate-600 dark:text-slate-400 text-sm leading-relaxed whitespace-pre-wrap border-t border-slate-200 dark:border-slate-700 pt-4 mt-1">
+                                                            {faq.answer}
+                                                        </div>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                        </motion.div>
+                                    ))}
+                                </motion.div>
+                            </div>
+                        </AnimatedSection>
+                    </section>
+                )}
             </main>
         </div>
     );
