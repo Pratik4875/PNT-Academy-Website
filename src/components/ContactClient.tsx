@@ -272,58 +272,7 @@ export default function ContactClient({ faqs, settings }: { faqs: Faq[]; setting
                                 ))}
                             </motion.div>
 
-                            {/* Response time + Social */}
-                            <AnimatedSection delay={0.2}>
-                                <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 rounded-3xl p-6 text-white shadow-2xl shadow-blue-500/20">
-                                    {/* Decorative circles */}
-                                    <div className="absolute -top-12 -right-12 w-40 h-40 bg-white/10 rounded-full blur-xl" />
-                                    <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-white/5 rounded-full blur-lg" />
 
-                                    <div className="relative z-10">
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <Clock className="w-4 h-4 opacity-60" />
-                                            <p className="text-xs font-bold uppercase tracking-widest opacity-60">Average Response</p>
-                                        </div>
-                                        <p className="text-5xl font-black">&lt; 24h</p>
-                                        <p className="text-sm opacity-70 mt-2 mb-6">That&apos;s our average reply time. Every enquiry matters to us — no auto-replies, just real people.</p>
-
-                                        <div className="pt-4 border-t border-white/20">
-                                            <p className="text-xs font-bold uppercase tracking-widest opacity-60 mb-3">Follow Us</p>
-                                            <div className="flex items-center gap-2.5">
-                                                <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-xl bg-white/10 hover:bg-gradient-to-tr hover:from-amber-400 hover:via-pink-500 hover:to-purple-600 transition-all duration-300 hover:scale-110 hover:shadow-lg"><Instagram className="w-4 h-4 text-white" /></a>
-                                                <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-xl bg-white/10 hover:bg-[#0A66C2] transition-all duration-300 hover:scale-110 hover:shadow-lg"><Linkedin className="w-4 h-4 text-white" /></a>
-                                                <a href={socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-xl bg-white/10 hover:bg-black transition-all duration-300 hover:scale-110 hover:shadow-lg"><Twitter className="w-4 h-4 text-white" /></a>
-                                                <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-xl bg-white/10 hover:bg-[#FF0000] transition-all duration-300 hover:scale-110 hover:shadow-lg"><Youtube className="w-4 h-4 text-white" /></a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </AnimatedSection>
-
-                            {/* Careers */}
-                            <AnimatedSection delay={0.3}>
-                                <motion.div
-                                    className="bg-white/70 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 rounded-3xl p-6 shadow-sm group hover:border-blue-500/30 dark:hover:border-blue-400/30 transition-all duration-300"
-                                    variants={cardHover}
-                                    initial="rest"
-                                    whileHover="hover"
-                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                                >
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                                            <Briefcase className="w-5 h-5" />
-                                        </div>
-                                        <h3 className="font-black text-lg text-slate-800 dark:text-white">Careers & Openings</h3>
-                                    </div>
-                                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
-                                        Love robotics and teaching? We&apos;re growing fast and hiring passionate educators, hardware engineers, and business development rockstars across India.
-                                    </p>
-                                    <a href={careersLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors group/link">
-                                        Apply Now
-                                        <ExternalLink className="w-3.5 h-3.5 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
-                                    </a>
-                                </motion.div>
-                            </AnimatedSection>
                         </AnimatedSection>
 
                         {/* ── RIGHT COLUMN (3/5) ── */}
@@ -505,6 +454,64 @@ export default function ContactClient({ faqs, settings }: { faqs: Faq[]; setting
                         </AnimatedSection>
                     </section>
                 )}
+
+                {/* ═══════ BOTTOM CARDS (24h & Careers) ═══════ */}
+                <section className="pb-16 sm:pb-24 container mx-auto px-4 max-w-6xl relative z-20">
+                    <div className="grid md:grid-cols-2 gap-8 items-stretch">
+                        {/* Response time + Social */}
+                        <AnimatedSection delay={0.3} className="h-full">
+                            <div className="h-full relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 rounded-3xl p-8 sm:p-10 text-white shadow-2xl shadow-blue-500/20">
+                                {/* Decorative circles */}
+                                <div className="absolute -top-12 -right-12 w-40 h-40 bg-white/10 rounded-full blur-xl" />
+                                <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-white/5 rounded-full blur-lg" />
+
+                                <div className="relative z-10 flex flex-col h-full">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <Clock className="w-5 h-5 opacity-60" />
+                                        <p className="text-sm font-bold uppercase tracking-widest opacity-60">Average Response</p>
+                                    </div>
+                                    <p className="text-6xl font-black">&lt; 24h</p>
+                                    <p className="text-base opacity-80 mt-4 mb-8">That&apos;s our average reply time. Every enquiry matters to us — no auto-replies, just real people.</p>
+
+                                    <div className="pt-6 border-t border-white/20 mt-auto">
+                                        <p className="text-xs font-bold uppercase tracking-widest opacity-60 mb-4">Follow Us</p>
+                                        <div className="flex items-center gap-3">
+                                            <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-white/10 hover:bg-gradient-to-tr hover:from-amber-400 hover:via-pink-500 hover:to-purple-600 transition-all duration-300 hover:scale-110 hover:shadow-lg"><Instagram className="w-5 h-5 text-white" /></a>
+                                            <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-white/10 hover:bg-[#0A66C2] transition-all duration-300 hover:scale-110 hover:shadow-lg"><Linkedin className="w-5 h-5 text-white" /></a>
+                                            <a href={socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-white/10 hover:bg-black transition-all duration-300 hover:scale-110 hover:shadow-lg"><Twitter className="w-5 h-5 text-white" /></a>
+                                            <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-white/10 hover:bg-[#FF0000] transition-all duration-300 hover:scale-110 hover:shadow-lg"><Youtube className="w-5 h-5 text-white" /></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </AnimatedSection>
+
+                        {/* Careers */}
+                        <AnimatedSection delay={0.4} className="h-full">
+                            <motion.div
+                                className="h-full bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 rounded-3xl p-8 sm:p-10 shadow-xl dark:shadow-2xl dark:shadow-purple-500/5 group hover:border-blue-500/30 dark:hover:border-blue-400/30 transition-all duration-300 flex flex-col justify-center"
+                                variants={cardHover}
+                                initial="rest"
+                                whileHover="hover"
+                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                            >
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-amber-500/20">
+                                        <Briefcase className="w-8 h-8" />
+                                    </div>
+                                    <h3 className="font-black text-2xl text-slate-800 dark:text-white">Careers & Openings</h3>
+                                </div>
+                                <p className="text-base text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
+                                    Love robotics and teaching? We're growing fast and hiring passionate educators, hardware engineers, and business development rockstars across India.
+                                </p>
+                                <a href={careersLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-base font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors group/link mt-auto w-fit px-6 py-3 rounded-full bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20">
+                                    Apply Now
+                                    <ExternalLink className="w-4 h-4 group-hover/link:translate-x-1 group-hover/link:-translate-y-1 transition-transform" />
+                                </a>
+                            </motion.div>
+                        </AnimatedSection>
+                    </div>
+                </section>
             </main>
         </div>
     );
