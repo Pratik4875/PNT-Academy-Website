@@ -52,18 +52,22 @@ function useIsMobile() {
     return isMounted ? isMobile : false;
 }
 
-export default function RoboticsLabContent() {
-    const searchParams = useSearchParams();
+export default function RoboticsLabContent({ initialTab = "schools" }: { initialTab?: "schools" | "colleges" }) {
     const router = useRouter();
-    const tabFromUrl = searchParams.get("tab");
     const [activeTab, setActiveTab] = useState<"schools" | "colleges">(
-        tabFromUrl === "colleges" ? "colleges" : "schools"
+        initialTab === "colleges" ? "colleges" : "schools"
     );
+
+    useEffect(() => {
+        if (initialTab === "colleges" || initialTab === "schools") {
+            setActiveTab(initialTab);
+        }
+    }, [initialTab]);
 
     const handleTabChange = (tab: "schools" | "colleges") => {
         setActiveTab(tab);
         // Persist in URL so reload restores the correct tab
-        const params = new URLSearchParams(Array.from(searchParams.entries()));
+        const params = new URLSearchParams(window.location.search);
         params.set("tab", tab);
         router.replace(`?${params.toString()}`, { scroll: false });
     };
