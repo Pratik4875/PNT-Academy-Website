@@ -1102,8 +1102,8 @@ export function LabPartnersSection({ labPartners = [] }: { labPartners?: any[] }
         <div className="py-16 md:py-24 border-t border-slate-200 dark:border-slate-800">
             <div className="text-center mb-12">
                 <span className="inline-block bg-indigo-100 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold tracking-widest uppercase text-xs px-4 py-2 rounded-full mb-3 border border-indigo-200 dark:border-indigo-500/30">Industry Connect</span>
-                <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-4">Our Hiring Partners</h2>
-                <p className="text-slate-500 dark:text-slate-400">PNT Academy works closely with top industries to provide placement assistance to our students.</p>
+                <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-4">Institute Lab Association</h2>
+                <p className="text-slate-500 dark:text-slate-400">Trusted by leading technical institutions across India.</p>
             </div>
 
             <div className="relative overflow-hidden group">
@@ -1117,9 +1117,9 @@ export function LabPartnersSection({ labPartners = [] }: { labPartners?: any[] }
                     style={{ width: "max-content" }}
                 >
                     {displayPartners.map((c: any, i: number) => (
-                        <div key={`${c._id || i}-${i}`} className="w-48 h-24 shrink-0 bg-white dark:bg-slate-900/60 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-sm flex items-center justify-center p-4">
+                        <div key={`${c._id || i}-${i}`} className="w-56 h-32 shrink-0 bg-white dark:bg-slate-900/60 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-sm flex items-center justify-center p-4 hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-700/50 transition-all group">
                             {c.imageUrl ? (
-                                <Image src={c.imageUrl} alt={c.name} width={120} height={60} className="object-contain max-h-16 opacity-70 hover:opacity-100 transition-opacity grayscale hover:grayscale-0" />
+                                <Image src={c.imageUrl} alt={c.name} width={160} height={90} className="object-contain max-h-20 transition-transform duration-300 group-hover:scale-110" />
                             ) : (
                                 <span className="font-bold text-slate-400 dark:text-slate-600 truncate px-2">{c.name}</span>
                             )}
