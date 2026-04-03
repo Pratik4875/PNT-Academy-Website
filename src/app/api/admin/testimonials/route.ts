@@ -31,7 +31,8 @@ export async function POST(req: Request) {
             role: body.role,
             quote: body.quote,
             imageUrl: body.imageUrl || "",
-            page: body.page || "home",
+            logoUrl: body.logoUrl || "",
+            page: body.page || "employee",
         });
         return NextResponse.json({ success: true, data: newTestimonial }, { status: 201 });
     } catch (error: any) {

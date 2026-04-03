@@ -9,6 +9,7 @@ import Link from "next/link";
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import RoboticsCurriculum from "./RoboticsCurriculum";
 import AIPythonCurriculum from "./AIPythonCurriculum";
+import TestimonialsSlider from "./TestimonialsSlider";
 
 // ─── Colour Configs ───────────────────────────────────────────────────────────
 interface CourseCardProps {
@@ -95,7 +96,7 @@ function CourseCard({
 
                     {/* ── Coloured gradient header ── */}
                     <div
-                        className="relative px-7 pt-8 pb-12"
+                        className="relative px-7 pt-8 pb-8"
                         style={{ background: `linear-gradient(135deg, ${gradFrom}, ${gradTo})` }}
                     >
                         {/* Glossy sheen */}
@@ -118,11 +119,11 @@ function CourseCard({
                         <h3 className="text-xl font-black text-white leading-snug drop-shadow-sm">{title}</h3>
                     </div>
 
-                    {/* ── Pull-up body ── */}
-                    <div className="relative flex flex-col flex-grow px-7 pt-0 pb-7 -mt-5">
+                    {/* ── Card body ── */}
+                    <div className="relative flex flex-col flex-grow px-7 pt-6 pb-7 bg-white dark:bg-slate-900/40">
                         {/* Audience pill */}
                         <span
-                            className="inline-flex items-center gap-2 self-start px-3.5 py-1.5 rounded-xl text-xs font-bold mb-5 mt-2 border"
+                            className="inline-flex items-center gap-2 self-start px-3.5 py-1.5 rounded-xl text-xs font-bold mb-5 border"
                             style={{
                                 color: levelColor,
                                 background: `${levelColor}14`,
@@ -354,6 +355,11 @@ export default function CoursesForKidsContent() {
 
             {/* ── Summer / Winter Camp Toggle ── */}
             <CampSeasonToggle />
+
+            {/* ── Kids Testimonials ── */}
+            <div className="mt-20">
+                <TestimonialsSlider category="kids" />
+            </div>
 
             {/* ── Bottom CTA ── */}
             <motion.div

@@ -20,12 +20,24 @@ export default function TestimonialCard2D({ testimonial }: { testimonial: any })
                         priority
                     />
                 ) : (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 text-slate-400 dark:text-slate-500">
-                        <div className="w-24 h-24 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-4xl font-bold text-blue-500 mb-4 shadow-inner">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 text-slate-400 dark:text-slate-500 overflow-hidden">
+                        {/* Abstract shapes for kids without photos */}
+                        <div className="absolute -top-10 -left-10 w-32 h-32 bg-blue-200 dark:bg-blue-900/40 rounded-full blur-2xl" />
+                        <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-purple-200 dark:bg-purple-900/40 rounded-full blur-2xl" />
+                        
+                        <div className="w-24 h-24 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-4xl font-bold text-blue-500 mb-4 border border-slate-100 dark:border-slate-700 relative z-10">
                             {testimonial.name.charAt(0)}
                         </div>
                     </div>
                 )}
+
+                {/* Optional School / Org Logo overlaid on top right of the image/avatar */}
+                {testimonial.logoUrl && (
+                    <div className="absolute top-4 right-4 w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center border border-slate-100 dark:border-slate-800 overflow-hidden p-2">
+                        <img src={testimonial.logoUrl} alt="Logo" className="object-contain w-full h-full" />
+                    </div>
+                )}
+                
                 <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-black/5 rounded-[2.5rem]" />
             </div>
 

@@ -44,18 +44,31 @@ function TestimonialCard({ item, index, onDelete }: { item: any; index: number; 
             </div>
 
             <div className="relative z-10 flex items-center gap-4 mb-6">
-                <div className="w-14 h-14 relative rounded-full overflow-hidden shrink-0 border-2 border-slate-100 dark:border-slate-700 shadow-sm">
-                    {item.imageUrl ? (
-                        <img src={item.imageUrl} alt={item.name} className="object-cover w-full h-full" />
-                    ) : (
-                        <div className="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
-                            {item.name.charAt(0)}
+                <div className="relative">
+                    <div className="w-14 h-14 relative rounded-full overflow-hidden shrink-0 border-2 border-slate-100 dark:border-slate-700 shadow-sm">
+                        {item.imageUrl ? (
+                            <img src={item.imageUrl} alt={item.name} className="object-cover w-full h-full" />
+                        ) : (
+                            <div className="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+                                {item.name.charAt(0)}
+                            </div>
+                        )}
+                    </div>
+                    {item.logoUrl && (
+                        <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full border-2 border-white dark:border-slate-900 bg-white shadow-sm overflow-hidden flex items-center justify-center">
+                            <img src={item.logoUrl} alt="Logo" className="w-full h-full object-contain p-0.5" />
                         </div>
                     )}
                 </div>
                 <div>
-                    <h4 className="text-slate-900 dark:text-white font-bold text-base tracking-wide flex items-center gap-2">
+                    <h4 className="text-slate-900 dark:text-white font-bold text-base tracking-wide flex items-center gap-2 flex-wrap">
                         {item.name}
+                        {item.page === "employee" && (
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 font-bold uppercase tracking-wider">Employee</span>
+                        )}
+                        {item.page === "kids" && (
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 font-bold uppercase tracking-wider">Kids</span>
+                        )}
                         {item.page === "lab" && (
                             <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 font-bold uppercase tracking-wider">Lab</span>
                         )}

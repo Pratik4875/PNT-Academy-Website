@@ -3,15 +3,36 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const images = [
-    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=2670&auto=format&fit=crop", // Robotics arm
-    "https://images.unsplash.com/photo-1563206767-5b18f218e8de?q=80&w=2669&auto=format&fit=crop", // Automation setup
-    "https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=2670&auto=format&fit=crop", // Hardware prototyping
-    "https://images.unsplash.com/photo-1581092162384-8987c1d64718?q=80&w=2670&auto=format&fit=crop"  // Industrial engineering
+// ─────────────────────────────────────────────────────────────────
+// ADD YOUR PHOTOS to:  public/colleges-hero/
+// Name them:  1.jpg  2.jpg  3.jpg  4.jpg  (or .png / .webp)
+// They will automatically appear in the hero slider above.
+// ─────────────────────────────────────────────────────────────────
+
+const LOCAL_IMAGES = [
+    "/colleges-hero/PNT_labwork.jpeg",
+    "/colleges-hero/PNT_labwork2.jpeg",
+    "/colleges-hero/PNT_Labwork3.jpeg",
+    "/colleges-hero/PNT_labwork4.jpeg",
+];
+
+// Fallback Unsplash images used until local photos are uploaded
+const FALLBACK_IMAGES = [
+    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=2670&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1563206767-5b18f218e8de?q=80&w=2669&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=2670&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1581092162384-8987c1d64718?q=80&w=2670&auto=format&fit=crop",
 ];
 
 export default function HeroRotatingFrames() {
     const [currentIndex, setCurrentIndex] = useState(0);
+    // Track which local images failed to load so we can swap to fallback
+    const [failedLocal, setFailedLocal] = useState<Record<number, boolean>>({});
+
+    // Build the active images list: use local if it loaded OK, else fallback
+    const images = LOCAL_IMAGES.map((src, i) =>
+        failedLocal[i] ? (FALLBACK_IMAGES[i] ?? FALLBACK_IMAGES[i % FALLBACK_IMAGES.length]) : src
+    );
 
     // Auto rotate every 4 seconds
     useEffect(() => {
@@ -19,7 +40,7 @@ export default function HeroRotatingFrames() {
             setCurrentIndex((prev) => (prev + 1) % images.length);
         }, 4000);
         return () => clearInterval(interval);
-    }, []);
+    }, [images.length]);
 
     return (
         <div className="relative w-full aspect-square md:aspect-video lg:aspect-[4/3] perspective-1000 flex items-center justify-center">
@@ -29,11 +50,9 @@ export default function HeroRotatingFrames() {
             <div className="relative w-full max-w-[500px] h-[350px] md:h-[450px] perspective-1000">
                 <AnimatePresence mode="popLayout">
                     {images.map((img, index) => {
-                        // Calculate relative position to current index
                         let offset = index - currentIndex;
                         if (offset < 0) offset += images.length;
-                        
-                        // We only show the active frame and the next two frames to create a stacked 3D effect
+
                         const isActive = offset === 0;
                         const isNext = offset === 1;
                         const isThird = offset === 2;
@@ -59,13 +78,14 @@ export default function HeroRotatingFrames() {
                             >
                                 <img
                                     src={img}
-                                    alt={`Robotics Hardware Frame ${index + 1}`}
+                                    alt={`College Training Photo ${index + 1}`}
                                     className="w-full h-full object-cover"
+                                    onError={() => setFailedLocal(prev => ({ ...prev, [index]: true }))}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-80" />
-                                
+
                                 {isActive && (
-                                    <motion.div 
+                                    <motion.div
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: 0.3 }}

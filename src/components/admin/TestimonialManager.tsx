@@ -9,7 +9,8 @@ export default function TestimonialManager({ onSuccess }: { onSuccess?: () => vo
     const [name, setName] = useState("");
     const [college, setCollege] = useState("");
     const [quote, setQuote] = useState("");
-    const [page, setPage] = useState<"home" | "lab" | "college">("home");
+    const [page, setPage] = useState<"employee" | "lab" | "college" | "kids">("employee");
+    const [logoUrl, setLogoUrl] = useState("");
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [fileToCrop, setFileToCrop] = useState<File | null>(null);
@@ -91,7 +92,7 @@ export default function TestimonialManager({ onSuccess }: { onSuccess?: () => vo
             const dbRes = await fetch("/api/admin/testimonials", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, role: college, quote, imageUrl: secureUrl, page }),
+                body: JSON.stringify({ name, role: college, quote, imageUrl: secureUrl, logoUrl, page }),
             });
             if (!dbRes.ok) {
                 const err = await dbRes.json();
@@ -99,7 +100,7 @@ export default function TestimonialManager({ onSuccess }: { onSuccess?: () => vo
             }
 
             setStatus({ type: "success", msg: "Testimonial added successfully!" });
-            setName(""); setCollege(""); setQuote(""); setPage("home"); clearImage();
+            setName(""); setCollege(""); setQuote(""); setPage("employee"); setLogoUrl(""); clearImage();
             onSuccess?.();
         } catch (error: any) {
             setStatus({ type: "error", msg: error.message });
@@ -111,7 +112,7 @@ export default function TestimonialManager({ onSuccess }: { onSuccess?: () => vo
     return (
         <div className="w-full bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 md:p-8">
             <h2 className="text-2xl font-bold mb-1 text-slate-900 dark:text-white">Add New Testimonial</h2>
-            <p className="text-slate-500 dark:text-slate-400 mb-6 text-sm">Upload a student photo (JPG, PNG, WEBP, or GIF) and fill in their info.</p>
+            <p className="text-slate-500 dark:text-slate-400 mb-6 text-sm">Fill in the info and upload a photo or school logo.</p>
 
             {status && (
                 <div className={`mb-6 p-4 rounded-2xl flex items-center gap-3 text-sm font-medium ${status.type === "success" ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400" : "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400"}`}>
@@ -124,24 +125,25 @@ export default function TestimonialManager({ onSuccess }: { onSuccess?: () => vo
                 {/* Page Selector */}
                 <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Show on Page</label>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         {([
-                            { id: "home", label: "Home Page", icon: Home, desc: "Appears in the homepage slider" },
-                            { id: "lab", label: "Robotics Lab", icon: FlaskConical, desc: "Appears in the College Lab tab" },
-                            { id: "college", label: "College Trainings", icon: School, desc: "Appears in College Programs" },
+                            { id: "employee", label: "Employee", icon: Home, desc: "Team Testimonials" },
+                            { id: "lab", label: "Robotics Lab", icon: FlaskConical, desc: "College Lab setup page" },
+                            { id: "college", label: "College Trainings", icon: School, desc: "College programs" },
+                            { id: "kids", label: "Courses for Kids", icon: CheckCircle2, desc: "1-to-1 kids course page" },
                         ] as const).map((opt) => (
                             <button
                                 key={opt.id}
                                 type="button"
-                                onClick={() => setPage(opt.id)}
-                                className={`flex items-center gap-3 p-4 rounded-2xl border-2 text-left transition-all ${page === opt.id ? "border-blue-500 bg-blue-50 dark:bg-blue-500/10" : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"}`}
+                                onClick={() => setPage(opt.id as any)}
+                                className={`flex flex-col gap-2 p-3 rounded-2xl border-2 text-left transition-all ${page === opt.id ? "border-blue-500 bg-blue-50 dark:bg-blue-500/10" : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"}`}
                             >
-                                <div className={`p-2 rounded-xl ${page === opt.id ? "bg-blue-500 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-500"}`}>
+                                <div className={`p-1.5 w-max rounded-xl ${page === opt.id ? "bg-blue-500 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-500"}`}>
                                     <opt.icon className="w-4 h-4" />
                                 </div>
                                 <div>
-                                    <p className={`text-sm font-bold ${page === opt.id ? "text-blue-700 dark:text-blue-400" : "text-slate-700 dark:text-slate-300"}`}>{opt.label}</p>
-                                    <p className="text-xs text-slate-400">{opt.desc}</p>
+                                    <p className={`text-[13px] font-bold leading-tight ${page === opt.id ? "text-blue-700 dark:text-blue-400" : "text-slate-700 dark:text-slate-300"}`}>{opt.label}</p>
+                                    <p className="text-[10px] text-slate-400 mt-0.5">{opt.desc}</p>
                                 </div>
                             </button>
                         ))}
@@ -152,28 +154,41 @@ export default function TestimonialManager({ onSuccess }: { onSuccess?: () => vo
                     {/* Left: Form fields */}
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Student Name</label>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Name</label>
                             <input type="text" required value={name} onChange={e => setName(e.target.value)}
                                 className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm font-medium"
                                 placeholder="e.g. Aman Sharma" />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">College / Role</label>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">College / School / Role</label>
                             <input type="text" required value={college} onChange={e => setCollege(e.target.value)}
                                 className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm font-medium"
-                                placeholder="e.g. St. Xavier's College / Intern" />
+                                placeholder="e.g. DPS School / Student" />
                         </div>
                         <div>
                             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Testimonial Quote</label>
                             <textarea required rows={5} value={quote} onChange={e => setQuote(e.target.value)}
                                 className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm font-medium resize-none"
-                                placeholder="What did the student have to say?" />
+                                placeholder="What did they have to say?" />
+                        </div>
+                        
+                        {/* URL Logo Input Alternative */}
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                                School / Organization Logo URL (Optional)
+                            </label>
+                            <input type="url" value={logoUrl} onChange={e => setLogoUrl(e.target.value)}
+                                className="w-full px-4 py-2.5 rounded-xl bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/50 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all text-sm font-medium"
+                                placeholder="Paste logo image link here..." />
+                            <p className="text-[10px] text-slate-400 mt-1">
+                                For kids' privacy, you can just paste their school logo URL here and leave the main photo blank!
+                            </p>
                         </div>
                     </div>
 
                     {/* Right: Image upload */}
                     <div className="flex flex-col">
-                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Student Photo / GIF</label>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Main Photo / GIF (Optional)</label>
                         <div
                             onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}
                             onClick={() => !imagePreview && fileInputRef.current?.click()}
@@ -208,7 +223,7 @@ export default function TestimonialManager({ onSuccess }: { onSuccess?: () => vo
                                         <Upload className="w-7 h-7" />
                                     </div>
                                     <p className="font-bold text-sm text-slate-700 dark:text-slate-300 mb-1">Drag & drop or click to upload</p>
-                                    <p className="text-xs text-slate-400 uppercase tracking-widest font-semibold mt-2">JPG · PNG · WEBP · GIF</p>
+                                    <p className="text-xs text-slate-400 uppercase tracking-widest font-semibold mt-2">Leave blank to just show Logo</p>
                                 </>
                             )}
                         </div>

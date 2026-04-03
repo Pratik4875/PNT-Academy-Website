@@ -5,7 +5,8 @@ export interface ITestimonial extends Document {
     role: string;
     quote: string;
     imageUrl: string;
-    page: "home" | "lab" | "college"; // which page this testimonial appears on
+    logoUrl?: string; // Optional field for school/company logo
+    page: "employee" | "lab" | "college" | "kids"; // which page this testimonial appears on
     createdAt: Date;
 }
 
@@ -13,8 +14,9 @@ const TestimonialSchema: Schema = new Schema({
     name: { type: String, required: true },
     role: { type: String, required: true },
     quote: { type: String, required: true },
-    imageUrl: { type: String, required: true },
-    page: { type: String, enum: ["home", "lab", "college"], default: "home" },
+    imageUrl: { type: String }, // Made optional so kids don't require faces
+    logoUrl: { type: String },
+    page: { type: String, enum: ["employee", "lab", "college", "kids"], default: "employee" },
     createdAt: { type: Date, default: Date.now },
 });
 

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import TestimonialCard2D from "./TestimonialCard2D";
 
-export default function TestimonialsSlider({ staticData }: { staticData?: any[] }) {
+export default function TestimonialsSlider({ staticData, category = "employee" }: { staticData?: any[], category?: "employee" | "lab" | "college" | "kids" }) {
     const [testimonials, setTestimonials] = useState<any[]>(staticData || []);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isAutoPlaying, setIsAutoPlaying] = useState(true);
@@ -13,11 +13,11 @@ export default function TestimonialsSlider({ staticData }: { staticData?: any[] 
     useEffect(() => {
         if (staticData && staticData.length > 0) return;
         
-        fetch("/api/admin/testimonials?page=home")
+        fetch(`/api/admin/testimonials?page=${category}`)
             .then(r => r.json())
             .then(data => { if (Array.isArray(data) && data.length > 0) setTestimonials(data); })
             .catch(console.error);
-    }, [staticData]);
+    }, [staticData, category]);
 
 
     const next = () => setCurrentIndex((prev) => (prev + 1) % testimonials.length);

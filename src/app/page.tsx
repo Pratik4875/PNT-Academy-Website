@@ -80,7 +80,7 @@ export default async function Home() {
                 Position your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-500">School</span>
               </h1>
               <div className="flex items-center flex-wrap gap-2 md:gap-4">
-                <span className="px-3 py-1 bg-gradient-to-r from-orange-400 to-red-500 text-white font-black text-sm md:text-base rounded-full shadow-lg transform -rotate-2">
+                <span className="px-3 py-1 bg-gradient-to-r from-orange-400 to-red-500 text-white font-black text-sm md:text-base rounded-full shadow-lg transform -rotate-0">
                   #1 With PNT Academy
                 </span>
 
@@ -163,7 +163,7 @@ export default async function Home() {
                   Our mission: empower students with future-ready skills to <strong className="text-slate-900 dark:text-white">innovate, build, and lead</strong> in tomorrow&apos;s world.
                 </p>
 
-                {/* Clean Achievement Bar */}
+                {/* Clean Achievement Bar — currently hidden
                 <div className="flex flex-wrap gap-6 pt-2 border-t border-slate-200 dark:border-slate-700/50 mt-4">
                   {[
                     { stat: "2016", label: "Founded" },
@@ -177,8 +177,8 @@ export default async function Home() {
                     </div>
                   ))}
                 </div>
+                */}
               </div>
-
               {/* Big slider */}
               <div className="w-full">
                 <AboutSlider />
@@ -206,7 +206,7 @@ export default async function Home() {
         <Gallery />
 
         {/* Testimonials Slider */}
-        <TestimonialsSlider />
+        <TestimonialsSlider category="employee" />
 
         {/* Internships Section */}
         <section id="internships" className="py-24 relative border-t border-slate-900/10 dark:border-white/5 transition-colors duration-500">
