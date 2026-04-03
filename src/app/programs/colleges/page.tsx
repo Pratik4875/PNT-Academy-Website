@@ -30,7 +30,7 @@ export default async function CollegesProgramsPage() {
     const extraModels = JSON.parse(JSON.stringify(extraModelsRaw));
 
     // Fetch lab partners for the rolling logo section
-    const labPartnersRaw = await LabPartner.find({ active: true }).sort({ sortOrder: 1, createdAt: 1 });
+    const labPartnersRaw = await LabPartner.find({}).sort({ sortOrder: 1, createdAt: 1 });
     const labPartners = JSON.parse(JSON.stringify(labPartnersRaw));
 
     return (
