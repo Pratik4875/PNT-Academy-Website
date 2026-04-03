@@ -914,7 +914,6 @@ export default function CollegesTrainingContent({ testimonials = [], extraModels
 
                 <SectionBPNTEdge />
                 <InternshipInstituteSection labPartners={labPartners} />
-                <LabPartnersSection labPartners={labPartners} />
                 <SectionCAlumni testimonials={testimonials} />
 
             </div>
