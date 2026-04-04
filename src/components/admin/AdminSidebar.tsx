@@ -100,11 +100,19 @@ function SidebarContent({ onLinkClick }: { onLinkClick?: () => void }) {
             <div className="relative px-5 pt-6 pb-5 border-b border-slate-100 dark:border-white/[0.06]">
                 <Link href="/admin" onClick={onLinkClick} className="flex flex-col items-center gap-1 hover:opacity-80 transition-opacity">
                     <div className="relative w-28 h-8 mx-auto">
+                        {/* Color logo: visible in light mode only */}
                         <Image
-                            src="/logo.png"
+                            src="/logo-color.svg"
                             alt="PNT Academy"
                             fill
-                            className="object-contain invert dark:invert-0 drop-shadow-sm transition-all duration-500"
+                            className="object-contain dark:hidden drop-shadow-sm transition-all duration-500"
+                        />
+                        {/* White logo: visible in dark mode only */}
+                        <Image
+                            src="/logo-white.svg"
+                            alt="PNT Academy"
+                            fill
+                            className="object-contain hidden dark:block drop-shadow-sm transition-all duration-500"
                         />
                     </div>
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500 dark:text-indigo-400 mt-1">

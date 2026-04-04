@@ -100,14 +100,23 @@ export default function Navbar() {
     return (
         <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-black/10 dark:border-white/10 transition-colors duration-500">
             <div className="container mx-auto px-4 h-16 sm:h-20 flex items-center justify-between">
-                {/* Logo */}
+                {/* Logo — color in light mode, white in dark mode */}
                 <Link href="/" className="flex items-center gap-2 relative z-10 hover:opacity-80 transition-opacity">
                     <div className="relative w-28 sm:w-32 h-10 sm:h-12">
+                        {/* Color logo: visible in light mode only */}
                         <Image
-                            src="/logo.png"
+                            src="/logo-color.svg"
                             alt="PNT Academy Logo"
                             fill
-                            className="object-contain object-left dark:brightness-200 brightness-0 transition-all duration-500"
+                            className="object-contain object-left dark:hidden transition-all duration-500"
+                            priority
+                        />
+                        {/* White logo: visible in dark mode only */}
+                        <Image
+                            src="/logo-white.svg"
+                            alt="PNT Academy Logo"
+                            fill
+                            className="object-contain object-left hidden dark:block transition-all duration-500"
                             priority
                         />
                     </div>
