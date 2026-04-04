@@ -4,7 +4,6 @@ import { Canvas } from "@react-three/fiber";
 import { Environment, OrbitControls } from "@react-three/drei";
 import { Suspense, useState, useEffect } from "react";
 import { AGV } from "./AGV";
-import Script from "next/script";
 
 export default function Hero3D() {
     const [isMobile, setIsMobile] = useState<boolean | null>(null);
@@ -24,15 +23,14 @@ export default function Hero3D() {
 
     return (
         <div className="absolute inset-0 z-0 h-full w-full mobile-safe-canvas">
-            {/* Load Google's Model Viewer for seamless AR cross-platform without downloads */}
-            <Script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js" strategy="lazyOnload" />
+            {/* model-viewer script lives in MobileARButton only — no need to load it on desktop */}
 
             <Canvas
                 shadows
                 camera={{ position: [0, 2, 10], fov: 45 }}
-                gl={{ alpha: true, antialias: true, toneMappingExposure: 0.9 }}
-                frameloop="always"
-                dpr={[1, 2]}
+                gl={{ alpha: true, antialias: false, toneMappingExposure: 0.9 }}
+                frameloop="demand"
+                dpr={[1, 1.5]}
             >
                 <Suspense fallback={null}>
                     <ambientLight intensity={0.4} />

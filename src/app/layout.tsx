@@ -98,6 +98,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Preconnect to CDNs used on every page — browser opens TCP+TLS handshake early */}
+        <link rel="preconnect" href="https://ajax.googleapis.com" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

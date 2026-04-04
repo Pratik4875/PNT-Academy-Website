@@ -175,15 +175,38 @@ export default function NetworkBackground() {
         };
 
         resize();
-        animate();
+
+        // Delay animation start by 1 frame so the browser can paint LCP first
+        let started = false;
+        const startAnimation = () => {
+            if (!started) {
+                started = true;
+                animate();
+            }
+        };
+
+        // Start after a brief yield so critical renders aren't blocked
+        const rAF = requestAnimationFrame(startAnimation);
+
+        // Pause when tab is hidden — saves CPU during background loads
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                cancelAnimationFrame(animationFrameId);
+            } else {
+                animate();
+            }
+        };
+        document.addEventListener("visibilitychange", handleVisibilityChange);
 
         return () => {
+            cancelAnimationFrame(rAF);
+            cancelAnimationFrame(animationFrameId);
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
             window.removeEventListener("resize", resize);
             if (!isMobile) {
                 window.removeEventListener("mousemove", handleMouseMove);
                 window.removeEventListener("mouseout", handleMouseLeave);
             }
-            cancelAnimationFrame(animationFrameId);
         };
     }, [theme, systemTheme]);
 
