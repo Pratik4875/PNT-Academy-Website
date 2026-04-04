@@ -358,7 +358,7 @@ export default function CoursesForKidsContent() {
 
             {/* ── Kids Testimonials ── */}
             <div className="mt-20">
-                <TestimonialsSlider category="kids" />
+                <TestimonialsSlider category="kids" title="Bootcamp Student Testimonials" subtitle="What Parents Say" />
             </div>
 
             {/* ── Bottom CTA ── */}

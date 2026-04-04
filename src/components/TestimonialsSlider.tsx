@@ -5,18 +5,27 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import TestimonialCard2D from "./TestimonialCard2D";
 
-export default function TestimonialsSlider({ staticData, category = "employee" }: { staticData?: any[], category?: "employee" | "lab" | "college" | "kids" }) {
+export default function TestimonialsSlider({ staticData, category = "employee", title = "Teacher Testimonials", subtitle = "What Educators Say" }: { staticData?: any[], category?: "employee" | "lab" | "college" | "kids" | "schools", title?: string, subtitle?: string }) {
     const [testimonials, setTestimonials] = useState<any[]>(staticData || []);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
     useEffect(() => {
-        if (staticData && staticData.length > 0) return;
-        
         fetch(`/api/admin/testimonials?page=${category}`)
             .then(r => r.json())
-            .then(data => { if (Array.isArray(data) && data.length > 0) setTestimonials(data); })
-            .catch(console.error);
+            .then(data => { 
+                if (Array.isArray(data) && data.length > 0) {
+                    setTestimonials(data);
+                } else if (staticData && staticData.length > 0) {
+                    setTestimonials(staticData);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                if (staticData && staticData.length > 0) {
+                    setTestimonials(staticData);
+                }
+            });
     }, [staticData, category]);
 
 
@@ -37,9 +46,9 @@ export default function TestimonialsSlider({ staticData, category = "employee" }
         <section className="py-24 relative border-t border-slate-900/10 dark:border-white/5 bg-slate-50 dark:bg-slate-900/40 transition-colors duration-500 overflow-hidden">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-16">
-                    <p className="text-sm font-bold uppercase tracking-widest text-blue-500 dark:text-blue-400 mb-3">What Educators Say</p>
+                    <p className="text-sm font-bold uppercase tracking-widest text-blue-500 dark:text-blue-400 mb-3">{subtitle}</p>
                     <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white transition-colors duration-500">
-                        Teacher Testimonials
+                        {title}
                     </h2>
                     <div className="w-16 h-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mx-auto mt-6" />
                 </div>

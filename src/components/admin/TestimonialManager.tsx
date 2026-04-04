@@ -9,7 +9,7 @@ export default function TestimonialManager({ onSuccess }: { onSuccess?: () => vo
     const [name, setName] = useState("");
     const [college, setCollege] = useState("");
     const [quote, setQuote] = useState("");
-    const [page, setPage] = useState<"employee" | "lab" | "college" | "kids">("employee");
+    const [page, setPage] = useState<"employee" | "lab" | "college" | "kids" | "schools">("employee");
     const [logoUrl, setLogoUrl] = useState("");
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -131,6 +131,7 @@ export default function TestimonialManager({ onSuccess }: { onSuccess?: () => vo
                             { id: "lab", label: "Robotics Lab", icon: FlaskConical, desc: "College Lab setup page" },
                             { id: "college", label: "College Trainings", icon: School, desc: "College programs" },
                             { id: "kids", label: "Courses for Kids", icon: CheckCircle2, desc: "1-to-1 kids course page" },
+                            { id: "schools", label: "School Trainings", icon: School, desc: "Trainings for Schools page (Teacher Testimonials)" },
                         ] as const).map((opt) => (
                             <button
                                 key={opt.id}

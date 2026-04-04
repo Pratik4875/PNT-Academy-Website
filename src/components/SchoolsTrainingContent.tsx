@@ -932,7 +932,7 @@ export default function SchoolsTrainingContent({ championshipLink = "/championsh
             {/* ═══════════════════════════════════════════════════════════
                 SECTION 9: TESTIMONIALS SLIDER
             ═══════════════════════════════════════════════════════════ */}
-            <TestimonialsSlider staticData={SCHOOL_TESTIMONIALS} />
+            <TestimonialsSlider staticData={SCHOOL_TESTIMONIALS} category="schools" title="Teacher Testimonials" subtitle="What Educators Say" />
 
             {/* ═══════════════════════════════════════════════════════════
                 SECTION 10: FINAL CTA
