@@ -914,9 +914,15 @@ function CredibilityBadge() {
         <div className="py-8 mb-12 border-b border-slate-200 dark:border-slate-800">
             <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12">
                 <p className="text-sm font-bold text-slate-500 uppercase tracking-widest text-center">Recognized & Backed By</p>
-                <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-70 grayscale hover:grayscale-0 transition-all duration-300">
-                    <div className="flex items-center gap-2 font-black text-xl text-slate-800 dark:text-slate-200">
-                        <Star className="w-6 h-6 text-yellow-500 fill-yellow-500" /> Shark Tank India
+                <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
+                    {/* Add your logos here matching these dimensions/aspect ratio */}
+                    <div className="relative h-12 w-32 md:w-40 flex items-center justify-center">
+                        <Image 
+                            src="/images/shark-tank-logo.png" 
+                            alt="Shark Tank India" 
+                            fill
+                            className="object-contain" 
+                        />
                     </div>
                     <div className="flex items-center gap-2 font-black text-xl text-slate-800 dark:text-slate-200">
                         <Award className="w-6 h-6 text-blue-500" /> PM Modi Recognized
@@ -932,28 +938,49 @@ function SectionAIndustryGap() {
         <div className="py-12 mb-16">
             <div className="text-center mb-16">
                 <span className="inline-block bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400 font-bold tracking-widest uppercase text-xs px-4 py-2 rounded-full mb-5 border border-red-200 dark:border-red-500/30">⚠ The Crisis</span>
-                <h2 className="text-4xl md:text-5xl font-black mb-4 text-slate-900 dark:text-white">The Engineering Gap</h2>
+                <h2 className="text-4xl md:text-5xl font-black mb-4 text-slate-900 dark:text-white">The Problem Statement</h2>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6 mb-12">
-                 <div className="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 text-center shadow-lg hover:shadow-xl transition-all">
-                     <span className="text-6xl md:text-7xl font-black text-red-500 dark:text-red-400 block mb-4 leading-none">10%</span>
-                     <p className="text-slate-700 dark:text-slate-300 text-base leading-relaxed mb-5">of Indian engineering graduates are employable in robotics-related fields</p>
-                     <span className="text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 text-red-500 dark:text-red-400">Source: NASSCOM</span>
-                 </div>
-                 <div className="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 text-center shadow-lg hover:shadow-xl transition-all">
-                     <span className="text-6xl md:text-7xl font-black text-orange-500 dark:text-orange-400 block mb-4 leading-none">0%</span>
-                     <p className="text-slate-700 dark:text-slate-300 text-base leading-relaxed mb-5">Theoretical curriculums completely fail to provide hands-on industry-ready skills</p>
-                     <span className="text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 text-orange-500 dark:text-orange-400">Industry Report</span>
-                 </div>
-                 <div className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/40 dark:to-blue-900/40 border border-indigo-200 dark:border-indigo-500/30 rounded-3xl p-8 text-center shadow-lg relative overflow-hidden group hover:shadow-xl transition-all">
-                     <div className="absolute inset-0 opacity-[0.04] mix-blend-overlay pointer-events-none" style={{backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E\")"}} />
-                     <span className="text-4xl md:text-5xl font-black text-indigo-600 dark:text-white block mb-4 leading-none relative z-10">The Solution</span>
-                     <p className="text-slate-700 dark:text-slate-300 text-base leading-relaxed mb-5 relative z-10">PNT Lab Modules — 30-Hour intensive, practical curriculum directly integrated to colleges.</p>
-                     <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full bg-indigo-600 text-white relative z-10 shadow-md">
-                        <CheckCircle2 className="w-4 h-4" /> Scale With Us
-                     </span>
-                 </div>
+            <div className="flex flex-col lg:flex-row gap-8 mb-16">
+                {/* India Problem Statement */}
+                <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}
+                    className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-500/20 rounded-3xl p-8 lg:w-1/2 shadow-lg">
+                    <h3 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-6 flex items-center gap-2">🇮🇳 The Current Landscape</h3>
+                    <ul className="space-y-5 text-slate-700 dark:text-slate-300 leading-relaxed">
+                        <li className="flex items-start gap-4">
+                            <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0 mt-0.5 font-bold">1</div>
+                            <p>A study by NASSCOM reveals <span className="font-bold text-red-600 dark:text-red-400">only 10% of Indian engineering graduates</span> are employable in robotics-related fields.</p>
+                        </li>
+                        <li className="flex items-start gap-4">
+                            <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0 mt-0.5 font-bold">2</div>
+                            <p>Theoretical-heavy curriculum fail to provide hands-on experience and industry-ready skills.</p>
+                        </li>
+                        <li className="flex items-start gap-4">
+                            <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0 mt-0.5 font-bold">3</div>
+                            <p>India highly lags behind countries like China and Japan in the adoption of AMR, AGVs and robotic arms.</p>
+                        </li>
+                    </ul>
+                </motion.div>
+
+                {/* China comparison */}
+                <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}
+                    className="bg-cyan-50 dark:bg-cyan-950/20 border border-cyan-200 dark:border-cyan-500/20 rounded-3xl p-8 lg:w-1/2 shadow-lg">
+                    <h3 className="text-2xl font-bold text-cyan-600 dark:text-cyan-400 mb-6 flex items-center gap-2">🇨🇳 The Global Benchmark</h3>
+                    <ul className="space-y-5 text-slate-700 dark:text-slate-300 leading-relaxed">
+                        <li className="flex items-start gap-4">
+                            <div className="w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0 mt-0.5"><CheckCircle2 className="w-5 h-5" /></div>
+                            <p>China's "Made in China 2025" initiative heavily promotes industrial automation.</p>
+                        </li>
+                        <li className="flex items-start gap-4">
+                            <div className="w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0 mt-0.5"><CheckCircle2 className="w-5 h-5" /></div>
+                            <p>Result: China produces 150,000+ robotics graduates annually, who seamlessly integrate into the workforce.</p>
+                        </li>
+                        <li className="flex items-start gap-4">
+                            <div className="w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0 mt-0.5"><CheckCircle2 className="w-5 h-5" /></div>
+                            <p>Colleges partner with robotics manufacturers to offer students live project experience and internships.</p>
+                        </li>
+                    </ul>
+                </motion.div>
             </div>
             
             <div className="bg-slate-100 dark:bg-slate-900 rounded-3xl p-8 md:p-10 max-w-4xl mx-auto border border-slate-200 dark:border-slate-800 shadow-inner">

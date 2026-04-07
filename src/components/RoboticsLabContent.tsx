@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useRef, useEffect, Suspense, useMemo, Component, ErrorInfo, ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, Microchip, Radar, MonitorPlay, Cog, School, University, Star, Quote, Truck, Hand, Plane } from "lucide-react";
+import { CheckCircle2, Microchip, Radar, MonitorPlay, Cog, School, University, Star, Quote, Truck, Hand, Plane, Award } from "lucide-react";
 import Image from "next/image";
 import { SectionCAlumni, LabPartnersSection } from "./CollegesTrainingContent";
 
@@ -196,7 +196,10 @@ class ModelErrorBoundary extends Component<{ children: ReactNode, fallback: Reac
 }
 
 // Auto-normalizing GLB model: synchronously centers and scales to fill the viewport
-function GlbModel({ path, targetSize = 5 }: { path: string; targetSize?: number }) {
+// flightStyle: "hover" = gentle centered hover (school), "circular" = circular orbit path (college)
+function GlbModel({ path, targetSize = 5, flightStyle = "hover" }: { path: string; targetSize?: number; flightStyle?: "hover" | "circular" }) {
+    // Set Draco decoder path before any useGLTF call so compressed models load correctly
+    useGLTF.setDecoderPath('/draco/');
     const { scene, animations } = useGLTF(path);
     const groupRef = useRef<THREE.Group>(null);
     const { actions } = useAnimations(animations, groupRef);
@@ -246,138 +249,133 @@ function GlbModel({ path, targetSize = 5 }: { path: string; targetSize?: number 
 
     const isDrone = path.toLowerCase().includes("tello");
 
-    // Smooth physics refs for drone
-    // Drone physics state — persists across frames and loop transitions
-    const dronePos  = useRef(new THREE.Vector3(0, -0.15, 0));
-    const droneVel  = useRef(new THREE.Vector3());
-    const droneRot  = useRef(new THREE.Euler());
-    const propSpeed = useRef(0); // 0 = off, 1 = full speed
-    // Track last cycle's end-phase so we know when the loop reset happens
-    const prevT = useRef(0);
+    // Drone physics state
+    const propSpeed = useRef(0); // 0 = stopped, 1 = full
 
     useFrame((state, delta) => {
-        const dt = Math.min(delta, 0.05); // physics cap
-        if (!groupRef.current) return;
-
-        if (!isDrone) {
+        if (groupRef.current && !isDrone) {
             // Ground robots gently rotate on turntable
-            groupRef.current.rotation.y += dt * 0.35;
-            return;
+            groupRef.current.rotation.y += delta * 0.35;
+        } else if (groupRef.current && isDrone) {
+
+            if (flightStyle === "circular") {
+                // ── CIRCULAR FLIGHT (college section) ─────────────────────────
+                const cycleDuration = 12.0;
+                const t = state.clock.elapsedTime % cycleDuration;
+
+                let desiredPropSpeed = 0;
+                let targetX = 0, targetY = 0, targetZ = 0;
+                let targetRotX = 0, targetRotZ = 0;
+
+                if (t < 1.5) {
+                    // LANDED
+                    targetY = -0.1;
+                    desiredPropSpeed = 0;
+                } else if (t < 2.5) {
+                    // SPOOL UP
+                    desiredPropSpeed = Math.min(1, (t - 1.5) / 1.0);
+                    targetY = -0.05 + (t - 1.5) * 0.15;
+                } else if (t < 9.5) {
+                    // CIRCULAR ORBIT
+                    desiredPropSpeed = 1;
+                    const ft = t - 2.5;
+                    const angle = (ft / 7.0) * Math.PI * 2; // full circle
+                    const radius = 0.8;
+                    targetX = Math.sin(angle) * radius;
+                    targetZ = Math.cos(angle) * radius;
+                    targetY = 0.5 + Math.sin(ft * 1.2) * 0.1;
+                    // Bank into the turn
+                    targetRotZ = -Math.cos(angle) * 0.12;
+                    targetRotX = Math.sin(angle) * 0.08;
+                } else if (t < 10.5) {
+                    // RETURN TO CENTER
+                    const p = (t - 9.5) / 1.0;
+                    desiredPropSpeed = 1.0 - p * 0.3;
+                    targetY = 0.3;
+                } else {
+                    // LANDING + SPOOL DOWN
+                    const lp = (t - 10.5) / 1.5;
+                    desiredPropSpeed = Math.max(0, 1 - lp * 1.4);
+                    targetY = Math.max(-0.1, 0.3 * (1 - lp));
+                }
+
+                // Smooth prop speed
+                const isSpinningDown = desiredPropSpeed < propSpeed.current;
+                const propAlpha = isSpinningDown ? Math.min(1, delta * 1.8) : Math.min(1, delta * 5);
+                propSpeed.current += (desiredPropSpeed - propSpeed.current) * propAlpha;
+
+                if (actions) {
+                    Object.values(actions).forEach(action => {
+                        if (action) action.timeScale = propSpeed.current * 1.2;
+                    });
+                }
+
+                const posLerp = Math.min(1, delta * 3.5);
+                groupRef.current.position.x += (targetX - groupRef.current.position.x) * posLerp;
+                groupRef.current.position.y += (targetY - groupRef.current.position.y) * posLerp;
+                groupRef.current.position.z += (targetZ - groupRef.current.position.z) * posLerp;
+
+                const rotLerp = Math.min(1, delta * 5);
+                groupRef.current.rotation.x += (targetRotX - groupRef.current.rotation.x) * rotLerp;
+                groupRef.current.rotation.z += (targetRotZ - groupRef.current.rotation.z) * rotLerp;
+
+            } else {
+                // ── GENTLE HOVER (school section / default) ──────────────────
+                const cycleDuration = 9.0;
+                const t = state.clock.elapsedTime % cycleDuration;
+
+                let desiredPropSpeed = 0;
+                let targetX = 0, targetY = 0, targetZ = 0;
+                let targetRotX = 0, targetRotZ = 0;
+
+                if (t < 2.0) {
+                    targetY = -0.1;
+                    desiredPropSpeed = 0;
+                } else if (t < 2.8) {
+                    desiredPropSpeed = Math.min(1, (t - 2.0) / 0.8);
+                    targetY = 0;
+                } else if (t < 7.4) {
+                    const flightTime = t - 2.8;
+                    targetX = Math.sin(flightTime * 0.8) * 0.15;
+                    targetY = 0.5 + Math.sin(flightTime * 1.5) * 0.08;
+                    targetZ = Math.cos(flightTime * 0.8) * 0.08;
+                    targetRotX = Math.sin(flightTime * 3) * 0.04;
+                    targetRotZ = Math.cos(flightTime * 3) * 0.04;
+                    desiredPropSpeed = 1;
+                } else if (t < 8.2) {
+                    desiredPropSpeed = 1.0 - (t - 7.4) / 0.8 * 0.3;
+                    targetY = 0.3;
+                } else {
+                    const lp = (t - 8.2) / 0.8;
+                    desiredPropSpeed = Math.max(0, 1 - lp * 1.5);
+                    targetY = Math.max(-0.1, 0.3 * (1 - lp));
+                }
+
+                const isSpinningDown = desiredPropSpeed < propSpeed.current;
+                const propAlpha = isSpinningDown ? Math.min(1, delta * 1.8) : Math.min(1, delta * 5);
+                propSpeed.current += (desiredPropSpeed - propSpeed.current) * propAlpha;
+
+                if (actions) {
+                    Object.values(actions).forEach(action => {
+                        if (action) action.timeScale = propSpeed.current * 1.2;
+                    });
+                }
+
+                const posLerp = Math.min(1, delta * 3.5);
+                groupRef.current.position.x += (targetX - groupRef.current.position.x) * posLerp;
+                groupRef.current.position.y += (targetY - groupRef.current.position.y) * posLerp;
+                groupRef.current.position.z += (targetZ - groupRef.current.position.z) * posLerp;
+
+                const rotLerp = Math.min(1, delta * 5);
+                groupRef.current.rotation.x += (targetRotX - groupRef.current.rotation.x) * rotLerp;
+                groupRef.current.rotation.z += (targetRotZ - groupRef.current.rotation.z) * rotLerp;
+            }
         }
-
-        // ── Phase clock ─────────────────────────────────────────────────────
-        // Total cycle: 14 s
-        //  0.0 – 2.0  : LANDED (props off)
-        //  2.0 – 3.2  : SPOOL UP  (props spin up, drone twitches)
-        //  3.2 – 10.5 : ACTIVE FLIGHT (arc path with banking)
-        // 10.5 – 12.0 : APPROACH/DECELERATE back to origin
-        // 12.0 – 14.0 : TOUCH DOWN + SPOOL DOWN
-        const CYCLE = 14.0;
-        const t = state.clock.elapsedTime % CYCLE;
-
-        // Detect loop reset → keep physical state continuous
-        if (prevT.current > 12.0 && t < 1.0) {
-            // Force position & velocity back to landed state smoothly
-            dronePos.current.set(0, -0.15, 0);
-            droneVel.current.set(0, 0, 0);
-        }
-        prevT.current = t;
-
-        // ── Desired prop speed & target force direction ──────────────────────
-        let desiredPropSpeed = 0;
-        const targetPos  = new THREE.Vector3();
-        const targetPitch = { x: 0, z: 0 }; // bank angles
-
-        if (t < 2.0) {
-            // LANDED
-            desiredPropSpeed = 0;
-            targetPos.set(0, -0.15, 0);
-
-        } else if (t < 3.2) {
-            // SPOOL UP — props spin, drone vibrates slightly before liftoff
-            const p = (t - 2.0) / 1.2; // 0→1
-            desiredPropSpeed = p;
-            // tiny pre-liftoff shudder
-            targetPos.set(
-                Math.sin(t * 18) * 0.015 * p,
-                -0.15 + p * 0.05,
-                Math.cos(t * 14) * 0.015 * p
-            );
-
-        } else if (t < 10.5) {
-            // ACTIVE FLIGHT — smooth figure-8 arc, tight and within frame
-            desiredPropSpeed = 1.0;
-            const ft  = t - 3.2;
-            const dur = 7.3;
-            const a   = (ft / dur) * Math.PI * 2; // full loop over flight window
-            // Lemniscate (figure-8) — reduced scale so drone stays within canvas
-            const scale = 0.9;
-            targetPos.set(
-                Math.sin(a) * scale,
-                0.40 + Math.sin(ft * 1.4) * 0.10,  // gentle altitude oscillation
-                Math.sin(a * 2) * scale * 0.4        // Z figure-8 half-amplitude
-            );
-            // Natural banking: lean into direction of travel
-            targetPitch.z = -Math.cos(a) * 0.14;   // roll with horizontal movement
-            targetPitch.x =  Math.sin(a * 2) * 0.08; // pitch with Z movement
-
-        } else if (t < 12.0) {
-            // APPROACH — glide back to origin, reduce throttle slightly
-            const p = (t - 10.5) / 1.5; // 0→1
-            desiredPropSpeed = 1.0 - p * 0.25;
-            // ease back to center
-            targetPos.set(
-                dronePos.current.x * (1 - p),
-                0.40 * (1 - p) + 0.05,
-                dronePos.current.z * (1 - p)
-            );
-
-        } else {
-            // TOUCH DOWN + SPOOL DOWN (12s → 14s)
-            const p = (t - 12.0) / 2.0; // 0→1
-            desiredPropSpeed = Math.max(0, 1 - p * 1.3); // props slow ~1.3x landing speed
-            targetPos.set(0, Math.max(-0.15, 0.05 - p * 0.2), 0);
-        }
-
-        // ── Prop speed: smooth exponential approach ──────────────────────────
-        // Spin-up is faster; spin-down after landing is more gradual (inertia)
-        const isSpinningDown = desiredPropSpeed < propSpeed.current;
-        const propAlpha = isSpinningDown
-            ? Math.min(1, dt * 1.8)   // slow spool-down (rotor inertia)
-            : Math.min(1, dt * 6.0);  // fast spool-up
-        propSpeed.current += (desiredPropSpeed - propSpeed.current) * propAlpha;
-
-        // Drive GLB prop animations
-        if (actions) {
-            Object.values(actions).forEach(action => {
-                if (action) action.timeScale = propSpeed.current * 1.2;
-            });
-        }
-
-        // ── Position physics: spring + drag ─────────────────────────────────
-        const stiffness = 4.5;
-        const drag      = 3.2;
-        const diff      = new THREE.Vector3().subVectors(targetPos, dronePos.current);
-        const force     = diff.multiplyScalar(stiffness);
-        droneVel.current.addScaledVector(droneVel.current, -drag * dt);
-        droneVel.current.addScaledVector(force, dt);
-        dronePos.current.addScaledVector(droneVel.current, dt);
-
-        groupRef.current.position.copy(dronePos.current);
-
-        // ── Rotation: damp toward target bank angles ────────────────────────
-        const rotLerp = Math.min(1, dt * 4.5);
-        droneRot.current.x += (targetPitch.x - droneRot.current.x) * rotLerp;
-        droneRot.current.z += (targetPitch.z - droneRot.current.z) * rotLerp;
-        groupRef.current.rotation.x = droneRot.current.x;
-        groupRef.current.rotation.z = droneRot.current.z;
     });
-
-    const content = <primitive object={clonedScene} />;
 
     return (
         <group ref={groupRef}>
-            {content}
+            <primitive object={clonedScene} />
         </group>
     );
 }
@@ -593,7 +591,8 @@ useGLTF.preload("/models/esp8266.glb");            // 0.3 MB
 useGLTF.preload("/models/pir_sensor.glb");         // 0.1 MB
 useGLTF.preload("/models/MQ2_sensor.glb");         // 1.1 MB
 useGLTF.preload("/models/bo_battery_operated_motor.glb"); // 0.3 MB
-useGLTF.preload("/models/DOFBOT.glb");             // Robotic Arm
+useGLTF.preload("/models/DOFBOT.glb");             // Mini Robotic Arm
+// Advance_AGV.glb (204MB) and Advance_Robotic_Arm.glb (107MB) load on-demand — too large to preload
 
 // All hardware categories — each has its model file paths
 const HARDWARE_ITEMS = [
@@ -643,7 +642,7 @@ const INDUSTRIAL_ROBOTS = [
     {
         title: "Basic AGV",
         subtitle: "Automated guided vehicles for smart warehouse and factory floor automation.",
-        icon: Truck, 
+        icon: Truck,
         models: ["/model.glb"],
         iconBg: "bg-red-500/10",
         iconColor: "text-red-500",
@@ -661,7 +660,7 @@ const INDUSTRIAL_ROBOTS = [
     {
         title: "PNT Mini Drone",
         subtitle: "A PNT-customized aerial platform — fully programmable AI drone.",
-        icon: Plane, 
+        icon: Plane,
         models: ["/models/dji_tello.glb"],
         iconBg: "bg-sky-500/10",
         iconColor: "text-sky-500",
@@ -675,7 +674,7 @@ const INDUSTRIAL_ROBOTS = [
         iconBg: "bg-blue-500/10",
         iconColor: "text-blue-500",
         border: "border-blue-500/50 hover:border-blue-500",
-    }
+    },
 ];
 
 function IndustrialRobotLabSection() {
@@ -936,7 +935,7 @@ const PRODUCTS = [
         tagline: "Advanced research robotic arm equipped with ROS and MoveIt simulation.",
         features: ["Forward & inverse kinematics programming", "Pick-and-place task execution", "MoveIt simulation integration", "Depth camera for complex AI object detection", "Multi-axis coordination under ROS"],
         image: "/images/robotics-lab/industrial-arm.png",
-        glbPath: null as string | null,
+        glbPath: "/models/Advance_Robotic_Arm_compressed.glb",
         color: "from-indigo-500 to-purple-500",
         accentColor: "#818cf8",
         extraSpecs: [
@@ -1058,7 +1057,7 @@ const PRODUCTS = [
         tagline: "Advanced SLAM-based Automated Guided Vehicle for independent dynamic pathfinding.",
         features: ["RFID-based navigation system", "SLAM-based real-time mapping", "Path planning via custom algorithms", "Automated goods transportation", "Integration of external sensors"],
         image: "/images/robotics-lab/agv.jpeg",
-        glbPath: "/model.glb",
+        glbPath: "/models/Advance_AGV_compressed.glb",
         color: "from-rose-500 to-pink-500",
         accentColor: "#fb7185",
         extraSpecs: [
@@ -1348,7 +1347,7 @@ function ProductDetailModel3D({ accentColor, glbPath, image }: { accentColor: st
                             </mesh>
                         }>
                             <Suspense fallback={null}>
-                                {glbPath && <GlbModel path={glbPath} targetSize={glbPath.toLowerCase().includes('tello') ? 2.2 : 3.5} />}
+                                {glbPath && <GlbModel path={glbPath} targetSize={glbPath.toLowerCase().includes('tello') ? 2.2 : 3.5} flightStyle={glbPath.toLowerCase().includes('tello') ? 'circular' : 'hover'} />}
                             </Suspense>
                         </ModelErrorBoundary>
                         <ContactShadows position={[0, -2.2, 0]} opacity={0.3} scale={20} blur={4} far={5} resolution={256} frames={1} />
@@ -1384,6 +1383,29 @@ function CollegesContent() {
 
     return (
         <div className="text-slate-900 dark:text-white">
+
+            {/* ===== CREDIBILITY BADGE ===== */}
+            <div className="py-8 mb-12 border-b border-slate-200 dark:border-slate-800">
+                <div className="container mx-auto px-4">
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12">
+                        <p className="text-sm font-bold text-slate-500 uppercase tracking-widest text-center">Recognized & Backed By</p>
+                        <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
+                            {/* Add your logos here matching these dimensions/aspect ratio */}
+                            <div className="relative h-12 w-32 md:w-40 flex items-center justify-center">
+                                <Image 
+                                    src="/images/shark-tank-logo.png" 
+                                    alt="Shark Tank India" 
+                                    fill
+                                    className="object-contain" 
+                                />
+                            </div>
+                            <div className="flex items-center gap-2 font-black text-xl text-slate-800 dark:text-slate-200">
+                                <Award className="w-6 h-6 text-blue-500" /> PM Modi Recognized
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             {/* ===== SECTION 2: PROBLEM STATEMENT ===== */}
             <section className="py-24 px-4">

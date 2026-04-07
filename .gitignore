@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Large GLB originals (use compressed versions instead)
+public/models/Advance_AGV.glb
+public/models/Advance_Robotic_Arm.glb
+public/models/Basic_AMR.glb
